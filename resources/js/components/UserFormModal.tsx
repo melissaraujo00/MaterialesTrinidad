@@ -84,11 +84,13 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
       data.append("_method", "PUT");
       router.post(`/posts/${user.id}`, data, {
         onSuccess: () => {
+          console.log("Usuario actualizado correctamente.");
           toast.success(successMessage);
           closeModal();
           router.reload();
         },
         onError: (errors) => {
+            console.error("Error al actualizar:", errors);
             toast.success(errorMessage);
           console.error(errors.message || "Failed to submit post.");
         },
@@ -96,11 +98,13 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
     } else {
       router.post("/users", data, {
         onSuccess: () => {
+            console.log("Usuario creado correctamente.");
             toast.success(successMessage);
             closeModal();
             router.reload();
         },
         onError: (errors) => {
+            console.error("Error al crear usuario:", errors);
             toast.success(errorMessage);
             console.error(errors.message || "Failed to submit post.");
         },
@@ -167,6 +171,17 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
             type="date"
             name="birthDate"
             value={formData.birthDate}
+            onChange={handleChange}
+            className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
+            required
+            />
+        </div>
+        <div className="mb-3">
+            <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Telefono</label>
+            <input
+            type="text"
+            name="phoneNumber"
+            value={formData.phoneNumber}
             onChange={handleChange}
             className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
             required
