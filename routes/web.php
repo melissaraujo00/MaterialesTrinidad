@@ -6,7 +6,8 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
-})->name('home');
+})->middleware('guest')->name('home');
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
