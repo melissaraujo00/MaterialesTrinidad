@@ -8,7 +8,7 @@ interface User {
     firstName: string;
     lastName: string;
     email: string;
-    birthDate: string;
+    birthdate: Date;
     phoneNumber: string;
     password: string;
     role_id: number;
@@ -26,32 +26,32 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
         firstName: "",
         lastName: "",
         email: "",
-        birthDate: "",
+        birthdate: new Date(),
         phoneNumber: "",
         password: "",
         role_id: 0
     });
-  
+
 
   useEffect(() => {
     if (user) {
       setFormData(
-        { name: user.name, 
-          firstName: user.firstName, 
+        { name: user.name,
+          firstName: user.firstName,
           lastName: user.lastName,
-          email: user.email, 
-          birthDate: user.birthDate, 
-          phoneNumber: user.phoneNumber, 
+          email: user.email,
+          birthdate: user.birthdate,
+          phoneNumber: user.phoneNumber,
           password:user.password,
           role_id: user.role_id});
     } else {
       setFormData(
-        { name: "", 
-          firstName: "", 
+        { name: "",
+          firstName: "",
           lastName: "",
-          email: "", 
-          birthDate: "", 
-          phoneNumber: "", 
+          email: "",
+          birthdate: new Date(),
+          phoneNumber: "",
           password: "",
           role_id: 0});
     }
@@ -70,12 +70,12 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
     data.append("firstName", formData.firstName);
     data.append("lastName", formData.lastName);
     data.append("email", formData.email);
-    data.append("birthDate", formData.birthDate);
+    data.append("birthdate", formData.birthdate ? formData.birthdate.toISOString().split("T")[0] : "");
     data.append("phoneNumber", formData.phoneNumber);
     data.append("password", formData.password);
     data.append("role_id", String(formData.role_id));
-    
-    
+
+
     const successMessage = user?.id ? "Post Updated Successfully": "Post Created Successfully";
 
     const errorMessage = user?.id ? "Failed to Updated ": "Failed to Created ";
@@ -170,7 +170,7 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
             <input
             type="date"
             name="birthDate"
-            value={formData.birthDate}
+            value={formData.birthdate ? formData.birthdate.toISOString().split("T")[0] : ""}
             onChange={handleChange}
             className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
             required
