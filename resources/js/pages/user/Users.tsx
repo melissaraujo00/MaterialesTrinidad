@@ -5,13 +5,13 @@ import AppLayout from "@/layouts/app-layout";
 import { Toaster, toast } from "sonner";
 
 export default function Users() {
-  const { users } = usePage<{ users: 
-    { id: number; 
-      name: string; 
-      firstName: string; 
-      lastName: string; 
+  const { users } = usePage<{ users:
+    { id: number;
+      name: string;
+      firstName: string;
+      lastName: string;
       email: string;
-      birthDate: string;
+      birthdate: Date;
       phoneNumber: string;
       password: string;
       role_id: number;
@@ -54,7 +54,7 @@ export default function Users() {
                 <td className="p-3">{user.firstName}</td>
                 <td className="p-3">{user.lastName}</td>
                 <td className="p-3">{user.email}</td>
-                <td className="p-3">{user.birthDate}</td>
+                <td className="p-3">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : "N/A"}</td>
                 <td className="p-3">{user.phoneNumber}</td>
                 <td className="p-3">{user.password}</td>
                 <td className="p-3">{user.role_id}</td>
