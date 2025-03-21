@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
-import {  toast } from "sonner";
+import { toast } from "sonner";
 
 interface User {
-    id?: number,
-    name: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    birthdate: Date;
-    phoneNumber: string;
-    password: string;
-    role_id: number;
+  id?: number;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  birthdate: Date;
+  phoneNumber: string;
+  password: string;
+  role_id: number;
 }
 
 interface Props {
@@ -21,7 +21,49 @@ interface Props {
 }
 
 export default function UserFormModal({ isOpen, closeModal, user }: Props) {
-    const [formData, setFormData] = useState<User>({
+  const [formData, setFormData] = useState<User>({
+    name: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    birthdate: new Date(),
+    phoneNumber: "",
+    password: "",
+    role_id: 0,
+  });
+
+  const [roles, setRoles] = useState<{ id: number; name: string }[]>([]); // Estado para roles
+
+  useEffect(() => {
+    // Cargar los roles desde la API
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch("/api/roles"); // Ajusta esta URL según tu API
+        const data = await response.json();
+        setRoles(data); // Guardar los roles en el estado
+      } catch (error) {
+        console.error("Error al obtener los roles:", error);
+        toast.error("Error al cargar los roles.");
+      }
+    };
+
+    fetchRoles();
+  }, []); // Solo se ejecuta una vez cuando se monta el componente
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        birthdate: user.birthdate,
+        phoneNumber: user.phoneNumber,
+        password: user.password,
+        role_id: user.role_id,
+      });
+    } else {
+      setFormData({
         name: "",
         firstName: "",
         lastName: "",
@@ -29,38 +71,14 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
         birthdate: new Date(),
         phoneNumber: "",
         password: "",
-        role_id: 0
-    });
-
-
-  useEffect(() => {
-    if (user) {
-      setFormData(
-        { name: user.name,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          birthdate: user.birthdate,
-          phoneNumber: user.phoneNumber,
-          password:user.password,
-          role_id: user.role_id});
-    } else {
-      setFormData(
-        { name: "",
-          firstName: "",
-          lastName: "",
-          email: "",
-          birthdate: new Date(),
-          phoneNumber: "",
-          password: "",
-          role_id: 0});
+        role_id: 0,
+      });
     }
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,10 +93,8 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
     data.append("password", formData.password);
     data.append("role_id", String(formData.role_id));
 
-
-    const successMessage = user?.id ? "Post Updated Successfully": "Post Created Successfully";
-
-    const errorMessage = user?.id ? "Failed to Updated ": "Failed to Created ";
+    const successMessage = user?.id ? "Post Updated Successfully" : "Post Created Successfully";
+    const errorMessage = user?.id ? "Failed to Updated " : "Failed to Created ";
 
     if (user?.id) {
       data.append("_method", "PUT");
@@ -90,23 +106,23 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
           router.reload();
         },
         onError: (errors) => {
-            console.error("Error al actualizar:", errors);
-            toast.success(errorMessage);
+          console.error("Error al actualizar:", errors);
+          toast.success(errorMessage);
           console.error(errors.message || "Failed to submit post.");
         },
       });
     } else {
       router.post("/users", data, {
         onSuccess: () => {
-            console.log("Usuario creado correctamente.");
-            toast.success(successMessage);
-            closeModal();
-            router.reload();
+          console.log("Usuario creado correctamente.");
+          toast.success(successMessage);
+          closeModal();
+          router.reload();
         },
         onError: (errors) => {
-            console.error("Error al crear usuario:", errors);
-            toast.success(errorMessage);
-            console.error(errors.message || "Failed to submit post.");
+          console.error("Error al crear usuario:", errors);
+          toast.success(errorMessage);
+          console.error(errors.message || "Failed to submit post.");
         },
       });
     }
@@ -200,14 +216,20 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
         </div>
         <div className="mb-3">
             <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Rol</label>
-            <input
-            type="text"
-            name="role_id"
-            value={formData.role_id}
-            onChange={handleChange}
-            className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
-            required
-            />
+            <select
+              name="role_id"
+              value={formData.role_id}
+              onChange={handleChange}
+              className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
+              required
+            >
+              <option value="">Seleccione un rol</option>
+              {roles.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
         </div>
         <div className="flex justify-end gap-2">
             <button
@@ -230,3 +252,5 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
 
   );
 }
+
+
