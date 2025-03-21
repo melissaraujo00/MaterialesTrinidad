@@ -1,27 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
-use Inertia\Inertia;
-use Inertia\Response;
-use App\Models\User;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreUserRequest;
 
+use Illuminate\Http\Request;
 use App\Models\Role;
 
-class UserController extends Controller
+class RoleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        return Inertia::render('user/Users', [
-            'users' => User::all(),
-            'roles' => Role::all(),  // Obtener los roles y pasarlos a la vista
-        ]);
+        $roles = Role::all();
 
+        return response()->json($roles);
     }
 
     /**
@@ -29,18 +22,15 @@ class UserController extends Controller
      */
     public function create()
     {
-
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUserRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-
-        $data = $request->validated();
-        User::create($data);
-        return redirect()->route('users.index')->with('success', 'User created successfully');
+        //
     }
 
     /**
