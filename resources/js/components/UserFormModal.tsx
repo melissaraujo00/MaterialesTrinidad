@@ -31,8 +31,10 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
     password: "",
     role_id: 0,
   });
-
+  const [confirmPassword, setConfirmPassword] = useState(""); // Estado para la confirmación de la contraseña
+  const [passwordMatch, setPasswordMatch] = useState(true);
   const [roles, setRoles] = useState<{ id: number; name: string }[]>([]); // Estado para roles
+
 
   useEffect(() => {
     // Cargar los roles desde la API
@@ -80,9 +82,19 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+    // Validamos si las contraseñas coinciden
+    setPasswordMatch(formData.password === e.target.value);
+  };
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    if (!passwordMatch) {
+      toast.error("Las contraseñas no coinciden.");
+      return;
+    }
     const data = new FormData();
     data.append("name", formData.name);
     data.append("firstName", formData.firstName);
@@ -216,6 +228,18 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
             required
             />
         </div>
+        <div className="mb-3">
+            <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Confirmar Contraseña</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={confirmPassword}
+              onChange={handleConfirmPasswordChange}
+              className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
+              required
+            />
+            {!passwordMatch && <p className="text-red-500 text-xs mt-1">Las contraseñas no coinciden.</p>}
+          </div>
         <div className="mb-3">
             <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Rol</label>
             <select
