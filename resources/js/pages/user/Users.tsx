@@ -21,9 +21,29 @@ export default function Users() {
   }>().props;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<{
+    id: number;
+    name: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    birthdate: Date;
+    phoneNumber: string;
+    password: string;
+    role_id: number;
+  } | null>(null);
 
-  const openModal = (user = null) => {
+  const openModal = (user: {
+    id: number;
+    name: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    birthdate: Date;
+    phoneNumber: string;
+    password: string;
+    role_id: number;
+  } | null = null) => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
@@ -70,7 +90,7 @@ export default function Users() {
                   <td className="p-3">{getRoleName(user.role_id)}</td>
                   <td className="p-3 flex gap-2">
                     <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-                    <button className="bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Edit</button>
+                    <button onClick={() => openModal(user)} className="bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Edit</button>
                   </td>
                 </tr>
               ))

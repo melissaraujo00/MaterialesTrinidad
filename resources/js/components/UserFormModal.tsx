@@ -88,7 +88,9 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
     data.append("firstName", formData.firstName);
     data.append("lastName", formData.lastName);
     data.append("email", formData.email);
-    data.append("birthdate", formData.birthdate ? formData.birthdate.toISOString().split("T")[0] : "");
+    data.append("birthdate", formData.birthdate instanceof Date
+      ? formData.birthdate.toISOString().split("T")[0]
+      : formData.birthdate ? new Date(formData.birthdate).toISOString().split("T")[0] : "");
     data.append("phoneNumber", formData.phoneNumber);
     data.append("password", formData.password);
     data.append("role_id", String(formData.role_id));
@@ -98,7 +100,7 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
 
     if (user?.id) {
       data.append("_method", "PUT");
-      router.post(`/posts/${user.id}`, data, {
+      router.post(`/users/${user.id}`, data, {
         onSuccess: () => {
           console.log("Usuario actualizado correctamente.");
           toast.success(successMessage);
@@ -186,7 +188,7 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
             <input
             type="date"
             name="birthdate"
-            value={formData.birthdate ? formData.birthdate.toISOString().split("T")[0] : ""}
+            defaultValue={formData.birthdate ? new Date(formData.birthdate).toISOString().split("T")[0] : ""}
             onChange={handleChange}
             className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
             required

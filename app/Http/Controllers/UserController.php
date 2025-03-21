@@ -62,9 +62,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreUserRequest $request, User $user)
     {
-        //
+        $data = $request->validated();
+
+        $user->update($data);
+
+        return redirect()->route(route: 'users.index')->with(key: 'success', value: 'User updated successfully');
     }
 
     /**
