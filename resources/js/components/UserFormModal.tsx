@@ -185,7 +185,7 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
             <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Fecha de nacimiento</label>
             <input
             type="date"
-            name="birthDate"
+            name="birthdate"
             value={formData.birthdate ? formData.birthdate.toISOString().split("T")[0] : ""}
             onChange={handleChange}
             className="w-full border rounded p-2 text-gray-950 dark:bg-gray-700 dark:text-white"
@@ -206,7 +206,7 @@ export default function UserFormModal({ isOpen, closeModal, user }: Props) {
         <div className="mb-3">
             <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Contraseña</label>
             <input
-            type="text"
+            type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
