@@ -13,7 +13,7 @@ Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest')->name('home');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('users', UserController::class);
 
     // Ruta para verificar si una categoría ya existe (solo nombre)
@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['exists' => $exists]);
     });
 
-    // Rutas para las categorías (CRUD completo) - Solo una declaración
+    // Rutas para las categorías (CRUD completo)
     Route::resource('categories', CategoryController::class);
 
     // Ruta para el dashboard
