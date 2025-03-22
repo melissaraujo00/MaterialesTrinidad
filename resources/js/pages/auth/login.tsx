@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
-
+import { LoaderCircle, Eye, EyeOff } from 'lucide-react';
+import { FormEventHandler, useState } from 'react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -28,10 +27,21 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         remember: false,
     });
 
+    const [loginAttempts, setLoginAttempts] = useState(0);
+    const [showLockMessage, setShowLockMessage] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+
+        if (loginAttempts >= 5) {
+            setShowLockMessage(true);
+            return;
+        }
+
         post(route('login'), {
             onFinish: () => reset('password'),
+            onSuccess: () => setLoginAttempts(0),
+            onError: () => setLoginAttempts((prev) => prev + 1),
         });
     };
 
@@ -58,20 +68,25 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </div>
 
                     <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Contraseña</Label>
-
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                required
+                                tabIndex={2}
+                                autoComplete="current-password"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                placeholder="Contraseña"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                            >
+                                {showPassword ? <EyeOff /> : <Eye />}
+                            </button>
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Contraseña"
-                        />
                         <InputError message={errors.password} />
                     </div>
 
@@ -86,26 +101,23 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <Label htmlFor="remember">Recordar</Label>
 
                         {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    ¿Has olvidado tu contraseña?
-                                </TextLink>
-                            )}
+                            <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
+                                ¿Has olvidado tu contraseña?
+                            </TextLink>
+                        )}
                     </div>
 
+                    {showLockMessage && (
+                        <div className="text-center text-red-600 mt-4">
+                            Has alcanzado el límite de intentos fallidos. Intenta nuevamente más tarde.
+                        </div>
+                    )}
 
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
+                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing || showLockMessage}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Iniciar sesión
                     </Button>
                 </div>
-
-
-                {/* <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div> */}
             </form>
 
             {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
