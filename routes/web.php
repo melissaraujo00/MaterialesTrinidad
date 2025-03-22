@@ -11,7 +11,7 @@ use App\Models\Category;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
-})->middleware('guest')->name('home');
+})->name('home');
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
