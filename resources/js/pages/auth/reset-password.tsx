@@ -41,20 +41,6 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
 
             <form onSubmit={submit}>
                 <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            name="email"
-                            autoComplete="email"
-                            value={data.email}
-                            className="mt-1 block w-full"
-                            readOnly
-                            onChange={(e) => setData('email', e.target.value)}
-                        />
-                        <InputError message={errors.email} className="mt-2" />
-                    </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="password">Password</Label>
