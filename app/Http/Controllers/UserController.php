@@ -11,12 +11,13 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        return Inertia::render(component: 'user/Users', props: [
+        return Inertia::render('user/users', [
             'users' => User::all(),
         ]);
     }
+    
 
     /**
      * Show the form for creating a new resource.

@@ -11,4 +11,11 @@ class Category extends Model
 
     protected $fillable = ['name', 'description'];
 
+ 
+    public static $rules = [
+        'name' => 'required|string|max:50',
+        'description' => 'required|string|max:100',
+    ];
 }
+
+

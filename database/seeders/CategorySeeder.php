@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;  // Asegúrate de importar el modelo Category
+use App\Models\Category;  
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -24,7 +24,7 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            Category::create($category);  // Usa Category, no Role
+            Category::create($category);  
         }
     }
 }
