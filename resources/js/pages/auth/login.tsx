@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle, Eye, EyeOff } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
-import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,6 +29,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     const [loginAttempts, setLoginAttempts] = useState(0);
     const [showLockMessage, setShowLockMessage] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
@@ -38,10 +39,16 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             return;
         }
 
+
         post(route('login'), {
             onFinish: () => reset('password'),
-            onSuccess: () => setLoginAttempts(0),
-            onError: () => setLoginAttempts((prev) => prev + 1),
+            onSuccess: () => {
+                setLoginAttempts(0);
+
+            },
+            onError: () => {
+                setLoginAttempts((prev) => prev + 1);
+            },
         });
     };
 
@@ -64,9 +71,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             onChange={(e) => setData('email', e.target.value)}
                             placeholder="correo@ejemplo.com"
                         />
-                        <InputError message={errors.email} />
                     </div>
-
                     <div className="grid gap-2">
                         <div className="relative">
                             <Input
@@ -87,7 +92,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 {showPassword ? <EyeOff /> : <Eye />}
                             </button>
                         </div>
-                        <InputError message={errors.password} />
                     </div>
 
                     <div className="flex items-center space-x-3">
@@ -112,7 +116,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             Has alcanzado el límite de intentos fallidos. Intenta nuevamente más tarde.
                         </div>
                     )}
-
                     <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing || showLockMessage}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Iniciar sesión
@@ -121,6 +124,11 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             </form>
 
             {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
+            {(errors.email || errors.password) && (
+                <div className="text-red-600 text-center mt-4">
+                    Correo electrónico o contraseña incorrectos. Por favor, intente nuevamente.
+                </div>
+            )}
         </AuthLayout>
     );
 }
