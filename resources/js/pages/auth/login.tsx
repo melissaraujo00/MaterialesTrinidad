@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,9 @@ type LoginForm = {
     remember: boolean;
 };
 
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-}
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+
+export default function Login() {
     const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
         email: '',
         password: '',
@@ -30,7 +27,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     const [showLockMessage, setShowLockMessage] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
@@ -39,12 +35,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             return;
         }
 
-
         post(route('login'), {
             onFinish: () => reset('password'),
             onSuccess: () => {
                 setLoginAttempts(0);
-
             },
             onError: () => {
                 setLoginAttempts((prev) => prev + 1);
@@ -104,11 +98,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         />
                         <Label htmlFor="remember">Recordar</Label>
 
-                        {canResetPassword && (
+
                             <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
                                 ¿Has olvidado tu contraseña?
                             </TextLink>
-                        )}
                     </div>
 
                     {showLockMessage && (
@@ -117,13 +110,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         </div>
                     )}
                     <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing || showLockMessage}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                        {processing && <span className="h-4 w-4 animate-spin" />}
                         Iniciar sesión
                     </Button>
                 </div>
             </form>
 
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
             {(errors.email || errors.password) && (
                 <div className="text-red-600 text-center mt-4">
                     Correo electrónico o contraseña incorrectos. Por favor, intente nuevamente.
