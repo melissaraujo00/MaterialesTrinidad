@@ -3,6 +3,7 @@ import { Head, usePage } from "@inertiajs/react";
 import UserFormModal from "@/components/UserFormModal";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
+import DeleteUserModal from "@/components/DeleteUserModal";
 
 export default function Users() {
   const { users, roles } = usePage<{
@@ -21,6 +22,7 @@ export default function Users() {
   }>().props;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{
     id: number;
     name: string;
@@ -53,6 +55,21 @@ export default function Users() {
     const role = roles.find(r => r.id === roleId);
     return role ? role.name.trim() : "No Role";  // Uso de .trim() para eliminar espacios innecesarios
   };
+
+  const openDeleteModal=(user: {
+    id: number;
+    name: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    birthdate: Date;
+    phoneNumber: string;
+    password: string;
+    role_id: number;
+  } | null = null)=>{
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true)
+ }
 
   return (
     <AppLayout>
@@ -89,7 +106,7 @@ export default function Users() {
                   <td className="p-3">{user.phoneNumber}</td>
                   <td className="p-3">{getRoleName(user.role_id)}</td>
                   <td className="p-3 flex gap-2">
-                    <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                    <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600" onClick={()=>openDeleteModal(user)}>Delete</button>
                     <button onClick={() => openModal(user)} className="bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Edit</button>
                   </td>
                 </tr>
@@ -101,6 +118,7 @@ export default function Users() {
         </table>
       </div>
       <UserFormModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} user={selectedUser} />
+      <DeleteUserModal isOpen={isDeleteModalOpen} closeModal={() => setIsDeleteModalOpen(false)} user={selectedUser} />
     </AppLayout>
   );
 }

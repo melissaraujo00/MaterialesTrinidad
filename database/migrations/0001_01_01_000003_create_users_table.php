@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('password');
             $table->foreignIdFor(Role::class)->constrained();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 
