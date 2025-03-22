@@ -13,7 +13,7 @@ Route::get('/', function () {
     return Inertia::render('auth/login');
 })->middleware('guest')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
 
     // Ruta para verificar si una categoría ya existe (solo nombre)
