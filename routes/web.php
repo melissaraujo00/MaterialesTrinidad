@@ -6,6 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
+use App\Models\Category;
+
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -25,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return response()->json(['exists' => $exists]);
     });
 
-    // Rutas para las categorías (CRUD completo)
+    // Rutas para las categorías (CRUD completo) - Solo una declaración
     Route::resource('categories', CategoryController::class);
 
     // Ruta para el dashboard

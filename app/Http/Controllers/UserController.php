@@ -15,9 +15,9 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        return Inertia::render(component: 'user/Users', props: [
+        return Inertia::render('user/Users', [
             'users' => User::all(),
             'roles' => Role::all(),  // Obtener los roles y pasarlos a la vista
         ]);
