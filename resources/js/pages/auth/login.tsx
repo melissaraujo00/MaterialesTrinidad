@@ -15,7 +15,6 @@ type LoginForm = {
 };
 
 
-
 export default function Login() {
     const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
         email: '',
