@@ -1,86 +1,53 @@
-import { useState } from "react";
 import { Head, usePage } from "@inertiajs/react";
-import UserFormModal from "@/components/UserFormModal";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
-import DeleteUserModal from "@/components/DeleteUserModal";
+import { Link } from "@inertiajs/react";
+import DeleteUserModal from "@/components/DeleteUserModal"; // Usamos Link de inertia para navegar sin recargar
+import { useState } from "react"; // Importar useState para gestionar el estado del modal
+
+// Definir la interfaz para un usuario
+interface User {
+  id: number;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  birthdate: Date;
+  phoneNumber: string;
+  password: string;
+  role_id: number;
+}
 
 export default function Users() {
   const { users, roles } = usePage<{
-    users: {
-      id: number;
-      name: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      birthdate: Date;
-      phoneNumber: string;
-      password: string;
-      role_id: number;
-    }[];
-    roles: { id: number, name: string }[];
+    users: User[]; // Usar la interfaz User aquí
+    roles: { id: number; name: string }[];
   }>().props;
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{
-    id: number;
-    name: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    birthdate: Date;
-    phoneNumber: string;
-    password: string;
-    role_id: number;
-  } | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Estado del modal
+  const [selectedUser, setSelectedUser] = useState<User | null>(null); // Tipo definido para el usuario
 
-  const openModal = (user: {
-    id: number;
-    name: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    birthdate: Date;
-    phoneNumber: string;
-    password: string;
-    role_id: number;
-  } | null = null) => {
-    setSelectedUser(user);
-    setIsModalOpen(true);
-  };
-
-  // Función para obtener el nombre del rol y asegurar que no haya espacios extra
   const getRoleName = (roleId: number) => {
     const role = roles.find(r => r.id === roleId);
-    return role ? role.name.trim() : "No Role";  // Uso de .trim() para eliminar espacios innecesarios
+    return role ? role.name.trim() : "No Role";
   };
 
-  const openDeleteModal=(user: {
-    id: number;
-    name: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    birthdate: Date;
-    phoneNumber: string;
-    password: string;
-    role_id: number;
-  } | null = null)=>{
+  // Función para abrir el modal con el usuario seleccionado
+  const openDeleteModal = (user: User) => {
     setSelectedUser(user);
-    setIsDeleteModalOpen(true)
- }
+    setIsDeleteModalOpen(true); // Abrir el modal
+  };
 
   return (
     <AppLayout>
       <Head title="Users" />
-      <Toaster position="top-right" richColors/>
+      <Toaster position="top-right" richColors />
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
         <div className="flex justify-end">
-          <button onClick={() => openModal()} className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
+          <Link href="/users/create" className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
             Add User
-          </button>
+          </Link>
         </div>
 
         <table className="w-full border-collapse bg-white text-black shadow-sm rounded-lg dark:bg-gray-700 dark:text-white">
@@ -89,9 +56,7 @@ export default function Users() {
               {["Usuario", "Nombre", "Apellido", "Correo Electronico", "Fecha de Nacimiento", "Telefono", "Rol"].map((header) => (
                 <th key={header} className="border p-3 text-left">{header}</th>
               ))}
-              <th>
-                Acciones
-              </th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -106,19 +71,28 @@ export default function Users() {
                   <td className="p-3">{user.phoneNumber}</td>
                   <td className="p-3">{getRoleName(user.role_id)}</td>
                   <td className="p-3 flex gap-2">
-                    <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600" onClick={()=>openDeleteModal(user)}>Delete</button>
-                    <button onClick={() => openModal(user)} className="bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Edit</button>
+                    {/* Enlace a la página de eliminación */}
+                    <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600" onClick={() => openDeleteModal(user)}>Delete</button>
+                    {/* Enlace a la página de edición */}
+                    <Link href={`/users/edit/${user.id}`} className="bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={4} className="text-center p-4 text-gray-600 dark:text-gray-300">No posts found.</td></tr>
+              <tr><td colSpan={7} className="text-center p-4 text-gray-600 dark:text-gray-300">No users found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-      <UserFormModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} user={selectedUser} />
-      <DeleteUserModal isOpen={isDeleteModalOpen} closeModal={() => setIsDeleteModalOpen(false)} user={selectedUser} />
+
+      {/* Pasamos los props necesarios para controlar el estado del modal */}
+      <DeleteUserModal
+        isOpen={isDeleteModalOpen}
+        closeModal={() => setIsDeleteModalOpen(false)}
+        user={selectedUser}
+      />
     </AppLayout>
   );
 }

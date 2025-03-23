@@ -15,6 +15,13 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
+    Route::get('/users/create', [UserController::class, 'create']);
+    // En web.php de Laravel (routes/web.php)
+    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('edit');
+    
+
+
+
 
     // Ruta para verificar si una categoría ya existe (solo nombre)
     Route::get('/categories/check-duplicate', function (Request $request) {

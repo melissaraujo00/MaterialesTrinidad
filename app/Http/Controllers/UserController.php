@@ -30,7 +30,12 @@ class UserController extends Controller
      */
     public function create()
     {
+        $roles = Role::all();
 
+        // Devolver la vista de Inertia con los roles
+        return Inertia::render('user/userCreate', [
+            'roles' => $roles
+        ]);
     }
 
     /**
@@ -57,7 +62,16 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        // Obtener roles u otras cosas que necesites
+        $roles = Role::all();
+
+        // Usar Inertia para enviar datos al componente React
+        return Inertia::render('user/userEdit', [
+            'user' => $user,
+            'roles' => $roles,
+        ]);
     }
 
     /**
@@ -79,7 +93,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
-        
+
         return redirect()->route('users.index')->with('success','Usuario eliminado correctamente');
     }
 }
