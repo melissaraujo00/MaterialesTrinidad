@@ -27,12 +27,12 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                {/* <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild>
                     <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2" />
                         Ajustes
                     </Link>
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
                 {!isEmailVerified && (
                     <DropdownMenuItem asChild>
                         <Link className="block w-full text-red-600" href={route('verification.notice')} as="button" onClick={cleanup}>
