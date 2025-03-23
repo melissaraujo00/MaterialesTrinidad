@@ -1,19 +1,33 @@
+import { useState } from 'react';
 import { Head } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
-import { usePage } from "@inertiajs/react";
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 
 export default function CategoryCreate() {
+  const [categoryExists, setCategoryExists] = useState(false);
+
+  // Verifica si la categoría ya existe mientras el usuario escribe
+  const checkCategoryExists = async (name) => {
+    const response = await fetch(`/categories/check-duplicate?name=${name}`);
+    const data = await response.json();
+    setCategoryExists(data.exists);
+  };
+
   const validationSchema = Yup.object({
     name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
     description: Yup.string().min(5, 'La descripción debe tener al menos 5 caracteres').required('Campo requerido'),
   });
 
   const handleSubmit = (values: any) => {
+    if (categoryExists) {
+      toast.error("Este nombre de categoría ya existe.");
+      return;
+    }
+
     const data = new FormData();
     data.append("name", values.name);
     data.append("description", values.description);
@@ -56,11 +70,15 @@ export default function CategoryCreate() {
                   id="name"
                   name="name"
                   value={values.name}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    checkCategoryExists(e.target.value); // Verificar la existencia del nombre
+                  }}
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 />
                 {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
+                {categoryExists && <small className="text-red-500">Este nombre de categoría ya existe.</small>}
               </div>
 
               {/* Description */}
@@ -79,7 +97,7 @@ export default function CategoryCreate() {
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-start">
+              <div className="flex justify-start space-x-3">
                 <button
                   type="button"
                   onClick={() => window.history.back()}  // Volver a la página anterior

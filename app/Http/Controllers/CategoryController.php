@@ -17,6 +17,18 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function create()
+{
+    // Obtener todas las categorías (si es necesario, se puede modificar)
+    $categories = Category::all(); // Si quieres pre-poblar con datos existentes, puedes hacer una consulta similar
+
+    // Devolver la vista de Inertia con las categorías
+    return Inertia::render('category/categoryCreate', [
+        'categories' => $categories
+    ]);
+}
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([

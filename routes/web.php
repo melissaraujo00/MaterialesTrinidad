@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
@@ -14,15 +13,6 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('users', UserController::class);
-    Route::get('/users/create', [UserController::class, 'create']);
-    // En web.php de Laravel (routes/web.php)
-    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('edit');
-    
-
-
-
-
     // Ruta para verificar si una categoría ya existe (solo nombre)
     Route::get('/categories/check-duplicate', function (Request $request) {
         $name = $request->query('name'); // Obtiene el nombre de la categoría desde la URL
@@ -36,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas para las categorías (CRUD completo)
     Route::resource('categories', CategoryController::class);
+    Route::get('categories/create', [CategoryController::class, 'create']);
 
     // Ruta para el dashboard
     Route::get('dashboard', function () {
