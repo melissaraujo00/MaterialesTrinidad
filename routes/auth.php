@@ -10,6 +10,9 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Http\Controllers\CategoryController;
+use App\Models\Category;
 
 Route::middleware('guest')->group(function () {
     // Route::get('register', [RegisteredUserController::class, 'create'])
@@ -59,4 +62,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/create', [UserController::class, 'create']);
         // En web.php de Laravel (routes/web.php)
         Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('edit');
+
+        Route::get('/categories/check-duplicate', function (Request $request) {
+            $name = $request->query('name'); // Obtiene el nombre de la categoría desde la URL
+
+            // Verifica si ya existe una categoría con ese nombre
+            $exists = Category::where('name', $name)->exists();
+
+            // Retorna una respuesta JSON con 'exists' en true o false
+            return response()->json(['exists' => $exists]);
+        });
+
+        // Rutas para las categorías (CRUD completo)
+        Route::resource('categories', CategoryController::class);
+        Route::get('categories/create', [CategoryController::class, 'create']);
 });

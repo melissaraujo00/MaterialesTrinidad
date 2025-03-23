@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\CategoryController;
-use Illuminate\Http\Request;
-use App\Models\Category;
+
+
+
 
 
 Route::get('/', function () {
@@ -14,19 +14,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     // Ruta para verificar si una categoría ya existe (solo nombre)
-    Route::get('/categories/check-duplicate', function (Request $request) {
-        $name = $request->query('name'); // Obtiene el nombre de la categoría desde la URL
 
-        // Verifica si ya existe una categoría con ese nombre
-        $exists = Category::where('name', $name)->exists();
-
-        // Retorna una respuesta JSON con 'exists' en true o false
-        return response()->json(['exists' => $exists]);
-    });
-
-    // Rutas para las categorías (CRUD completo)
-    Route::resource('categories', CategoryController::class);
-    Route::get('categories/create', [CategoryController::class, 'create']);
 
     // Ruta para el dashboard
     Route::get('dashboard', function () {
