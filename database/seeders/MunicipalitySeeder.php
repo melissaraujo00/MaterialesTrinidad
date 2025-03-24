@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Municipality;
 
 class MunicipalitySeeder extends Seeder
 {
@@ -12,7 +13,7 @@ class MunicipalitySeeder extends Seeder
      */
     public function run(): void
     {
-        $municipalies = [
+        $municipalities = [
             ['name' => 'Atiquizaya', 'district_id' => 1],
             ['name' => 'El Refugio', 'district_id' => 1],
             ['name' => 'San Lorenzo', 'district_id' => 1],
@@ -335,5 +336,9 @@ class MunicipalitySeeder extends Seeder
             ['name' => 'San Francisco Javier', 'district_id' => 42],
 
         ];
+
+        foreach($municipalities as $municipality){
+            Municipality::create($municipality);
+        }
     }
 }

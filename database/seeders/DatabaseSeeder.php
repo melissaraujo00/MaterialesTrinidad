@@ -22,17 +22,9 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            RoleSeeder::class
-        ]);
-        $this->call([
-            DepartmentSeeder::class
-        ]);
-
-        $this->call([
-            District::class
-        ]);
-
-        $this->call([
+            RoleSeeder::class,
+            DepartmentSeeder::class,
+            DistrictSeeder::class,
             MunicipalitySeeder::class
         ]);
     }
