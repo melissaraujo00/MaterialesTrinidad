@@ -3,7 +3,7 @@ import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-import DeleteUser from '@/components/delete-user';
+
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface ProfileForm {
     name: string;
+    firstName: string;
+    lastName: string;
+    birthdate: string;
     email: string;
+    phoneNumber: string;
 }
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
@@ -29,7 +33,11 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
         name: auth.user.name,
+        firstName: auth.user.firstName,
+        lastName: auth.user.lastName,
+        birthdate: auth.user.birthdate,
         email: auth.user.email,
+        phoneNumber: auth.user.phoneNumber
     });
 
     const submit: FormEventHandler = (e) => {
@@ -48,6 +56,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 <div className="space-y-6">
                     <HeadingSmall title="Información de perfil" description="Actualiza tu nombre y dirección de correo electrónico" />
 
+
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="name">Nombre</Label>
@@ -64,6 +73,54 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                             <InputError className="mt-2" message={errors.name} />
                         </div>
+                        <div>
+                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            First Name
+                            </label>
+                            <input
+                            type="text"
+                            id="firstName"
+                            name="firstName"
+                            value={data.firstName}
+                            onChange={(e) => setData('firstName', e.target.value)}
+
+                            className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                            required
+                            />
+                            {errors.firstName && <div className="text-red-500 text-sm">{errors.firstName}</div>}
+                        </div>
+
+                        <div>
+                            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Last Name
+                            </label>
+                            <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            value={data.lastName}
+                            onChange={(e) => setData('lastName', e.target.value)}
+                            className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                            required
+                            />
+                            {errors.lastName && <div className="text-red-500 text-sm">{errors.lastName}</div>}
+                        </div>
+                        <div>
+                            <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Birthdate
+                            </label>
+                            <input
+                            type="date"
+                            id="birthdate"
+                            name="birthdate"
+                            value={data.birthdate}
+                            onChange={(e) => setData('birthdate', e.target.value)}
+                            className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                            required
+                            />
+                            {errors.birthdate && <div className="text-red-500 text-sm">{errors.birthdate}</div>}
+                        </div>
+
 
                         <div className="grid gap-2">
                             <Label htmlFor="email">Dirección de correo electrónico</Label>
@@ -104,6 +161,22 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             </div>
                         )}
 
+                        <div>
+                            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Phone Number
+                            </label>
+                            <input
+                           type="text"
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            value={data.phoneNumber}
+                            onChange={(e) => setData('phoneNumber', e.target.value)}
+                            className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                                required
+                            />
+                            {errors.phoneNumber && <div className="text-red-500 text-sm">{errors.phoneNumber}</div>}
+                        </div>
+
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>Guardar</Button>
 
@@ -119,8 +192,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     </form>
                 </div>
-
-                <DeleteUser />
             </SettingsLayout>
         </AppLayout>
     );

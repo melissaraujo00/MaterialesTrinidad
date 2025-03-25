@@ -67,7 +67,7 @@ export default function Users() {
                   <td className="p-3">{user.firstName}</td>
                   <td className="p-3">{user.lastName}</td>
                   <td className="p-3">{user.email}</td>
-                  <td className="p-3">{user.birthdate ? new Date(user.birthdate).toLocaleDateString() : "N/A"}</td>
+                  <td className="p-3">{user.birthdate? new Date(user.birthdate + 'T00:00:00').toLocaleDateString('en-GB'): "N/A"}</td>
                   <td className="p-3">{user.phoneNumber}</td>
                   <td className="p-3">{getRoleName(user.role_id)}</td>
                   <td className="p-3 flex gap-2">
