@@ -41,9 +41,10 @@ class CategoryController extends Controller
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
 
-    public function edit(Category $category)
+    public function edit(string $id)
     {
-        return Inertia::render('Categories/Edit', [
+        $category = Category::findOrFail($id);
+        return Inertia::render('category/categoryEdit', [
             'category' => $category,
         ]);
     }

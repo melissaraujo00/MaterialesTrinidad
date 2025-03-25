@@ -51,9 +51,9 @@ export default function Categories() {
                     {/* Enlace a la página de eliminación */}
                     <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
                     {/* Enlace a la página de edición */}
-                    <button className="bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">
-                      Edit
-                    </button>
+                    <Link href={`/categories/edit/${category.id}`}  className="bg-orange-500 text-white rounded px-3 py-1 text-sm  hover:bg-orange-600 transition">
+                      edit
+                    </Link>
                   </td>
                 </tr>
               ))
