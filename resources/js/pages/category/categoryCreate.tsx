@@ -70,7 +70,7 @@ export default function CategoryCreate() {
                   id="name"
                   name="name"
                   value={values.name}
-                  onChange={(e) => {
+                  onChange={(e: any) => {
                     handleChange(e);
                     checkCategoryExists(e.target.value); // Verificar la existencia del nombre
                   }}
