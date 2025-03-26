@@ -72,7 +72,7 @@ Route::middleware('auth')->group(function () {
             // Retorna una respuesta JSON con 'exists' en true o false
             return response()->json(['exists' => $exists]);
         });
-
+    Route::post('/users/check', [UserController::class, 'checkUnique']);
         // Rutas para las categorías (CRUD completo)
         Route::resource('categories', CategoryController::class);
         Route::get('categories/create', [CategoryController::class, 'create']);

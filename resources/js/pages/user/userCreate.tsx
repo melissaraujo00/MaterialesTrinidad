@@ -45,12 +45,19 @@ export default function UserCreate() {
         toast.success("Usuario creado con éxito.");
         router.reload();
       },
-      onError: (err) => {
-        console.error("Error al crear usuario:", err);
-        toast.error("Error al crear usuario.");
+      onError: (errors) => {
+        console.error("Errores de validación:", errors);
+
+        if (errors.email) {
+          toast.error(errors.email);
+        }
+        if (errors.phoneNumber) {
+          toast.error(errors.phoneNumber);
+        }
       },
     });
-  };
+};
+
 
   return (
     <AppLayout>

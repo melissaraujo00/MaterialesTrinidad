@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
-
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\Role;
 
 class UserController extends Controller
@@ -77,7 +77,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
         $data = $request->validated();
 
