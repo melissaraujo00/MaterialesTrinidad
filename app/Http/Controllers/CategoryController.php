@@ -6,7 +6,9 @@ use App\Models\Category;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use Illuminate\Http\RedirectResponse;
 
 class CategoryController extends Controller
 {
@@ -29,14 +31,11 @@ class CategoryController extends Controller
 }
 
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:50|unique:categories',
-            'description' => 'required|string|max:100',
-        ]);
+        $data = $request->validated();
 
-        Category::create($validated);
+        Category::create($data);
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
@@ -49,17 +48,11 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => [
-                'required', 'string', 'max:50',
-                Rule::unique('categories')->ignore($category->id), // Permitir mismo nombre al editar
-            ],
-            'description' => 'required|string|max:100',
-        ]);
+        $data = $request->validated();
 
-        $category->update($validated);
+        $category->update($data);
 
         return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
     }
