@@ -3,6 +3,8 @@ import { Head, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { Link } from "@inertiajs/react";
+import { useState } from "react";
+import DeleteCategoryModal from "@/components/DeleteCategoryModal";
 
 // Definir la interfaz para una categoría
 interface Category {
@@ -19,6 +21,14 @@ export default function Categories() {
 //     setSelectedCategory(category);
 //     setIsModalOpen(true); // Abrir el modal
 //   };
+
+const [isDeleteModalOpen, setIsDeleteModalOpen] =useState(false);
+const [selectedCategory, setSelectedCategory] = useState<Category| null>(null);
+
+const OpenDeleteModal = (category: Category) =>{
+  setSelectedCategory(category);
+  setIsDeleteModalOpen(true);
+}
 
   return (
     <AppLayout>
@@ -49,7 +59,7 @@ export default function Categories() {
                   <td className="p-3">{category.description}</td>
                   <td className="p-3 flex gap-2">
                     {/* Enlace a la página de eliminación */}
-                    <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                    <button className="bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600 "onClick={()=> OpenDeleteModal(category)}>Delete</button>
                     {/* Enlace a la página de edición */}
                     <Link href={`/categories/edit/${category.id}`}  className="bg-orange-500 text-white rounded px-3 py-1 text-sm  hover:bg-orange-600 transition">
                       edit
@@ -63,6 +73,12 @@ export default function Categories() {
           </tbody>
         </table>
       </div>
+
+      <DeleteCategoryModal
+      isOpen={isDeleteModalOpen}
+      closeModal={()=>setIsDeleteModalOpen(false)}
+      category={selectedCategory}
+      ></DeleteCategoryModal>
 
     </AppLayout>
   );
