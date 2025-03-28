@@ -33,8 +33,6 @@ class UserController extends Controller
         ]);
 
     }
-
-
     /**
      * Show the form for creating a new resource.
      */
@@ -53,8 +51,6 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
-
-
         User::create($request->validated());
         return redirect()->route('users.index')->with('success', 'User created successfully');
     }
