@@ -11,7 +11,7 @@ export default function CategoryCreate() {
   const [categoryExists, setCategoryExists] = useState(false);
 
   // Verifica si la categoría ya existe mientras el usuario escribe
-  const checkCategoryExists = async (name) => {
+  const checkCategoryExists = async (name: string) => {
     const response = await fetch(`/categories/check-duplicate?name=${name}`);
     const data = await response.json();
     setCategoryExists(data.exists);
@@ -70,7 +70,7 @@ export default function CategoryCreate() {
                   id="name"
                   name="name"
                   value={values.name}
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleChange(e);
                     checkCategoryExists(e.target.value); // Verificar la existencia del nombre
                   }}

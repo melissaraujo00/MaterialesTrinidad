@@ -76,4 +76,5 @@ Route::middleware('auth')->group(function () {
         // Rutas para las categorías (CRUD completo)
         Route::resource('categories', CategoryController::class);
         Route::get('categories/create', [CategoryController::class, 'create']);
+        Route::get('categories/edit/{id}', [CategoryController::class, 'edit'])->name('edit');
 });
