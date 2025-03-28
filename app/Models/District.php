@@ -16,8 +16,6 @@ class District extends Model
         'department_id'
     ];
 
-
-
     //CADA distrito PERTENECE A UN departamento
     public function department():BelongsTo
     {

@@ -15,9 +15,9 @@ class Municipality extends Model
 
     ];
 
-        //CADA municipio PERTENECE A UN distrito
-        public function district():BelongsTo
-        {
-            return $this->belongsTo(District::class);
-        }
+    //CADA municipio PERTENECE A UN distrito
+    public function district():BelongsTo
+    {
+        return $this->belongsTo(District::class);
+    }
 }

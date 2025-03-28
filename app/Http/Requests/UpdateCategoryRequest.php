@@ -24,10 +24,17 @@ class UpdateCategoryRequest extends FormRequest
     {
         return [
             'name' => [
-                'required', 'string', 'max:50',
+                'required',
+                'string',
+                'max:50',
                 Rule::unique('categories', 'name')->ignore($this->route('category')) // Permitir mismo nombre al editar
             ],
-            'description' => 'required|string|max:100',
+            'description' => [
+                'required',
+                'string',
+                'max:100'
+
+            ],
         ];
     }
 }

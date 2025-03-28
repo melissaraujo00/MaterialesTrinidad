@@ -8,14 +8,7 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 
 export default function CategoryCreate() {
-  const [categoryExists, setCategoryExists] = useState(false);
-
-  // Verifica si la categoría ya existe mientras el usuario escribe
-  const checkCategoryExists = async (name: string) => {
-    const response = await fetch(`/categories/check-duplicate?name=${name}`);
-    const data = await response.json();
-    setCategoryExists(data.exists);
-  };
+  const [categoryExists] = useState(false);
 
   const validationSchema = Yup.object({
     name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
@@ -39,7 +32,9 @@ export default function CategoryCreate() {
       },
       onError: (err) => {
         console.error("Error al crear categoría:", err);
-        toast.error("Error al crear categoría.");
+        if (err.name) {
+            toast.error(err.name);
+        }
       },
     });
   };
@@ -70,10 +65,7 @@ export default function CategoryCreate() {
                   id="name"
                   name="name"
                   value={values.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleChange(e);
-                    checkCategoryExists(e.target.value); // Verificar la existencia del nombre
-                  }}
+                  onChange={handleChange}
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 />

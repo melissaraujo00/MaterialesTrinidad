@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Rules\CategoryRules;
 
 class Category extends Model
 {
@@ -11,11 +12,7 @@ class Category extends Model
 
     protected $fillable = ['name', 'description'];
 
- 
-    public static $rules = [
-        'name' => 'required|string|max:50',
-        'description' => 'required|string|max:100',
-    ];
+
 }
 
 
