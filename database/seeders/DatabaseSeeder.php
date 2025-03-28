@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\District;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,7 +22,10 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            RoleSeeder::class
+            RoleSeeder::class,
+            DepartmentSeeder::class,
+            DistrictSeeder::class,
+            MunicipalitySeeder::class
         ]);
     }
 }
