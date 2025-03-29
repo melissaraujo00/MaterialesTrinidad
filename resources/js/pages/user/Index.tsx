@@ -32,13 +32,12 @@ export default function Users() {
         { data: 'role'},
         {
             data: null,
-            title: "Acciones",
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 td.innerHTML = `
                 <a href="users/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>
-                <button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                <button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>
             `;
 
                 td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
@@ -60,7 +59,7 @@ export default function Users() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
                     <Link href="/users/create" className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
-                        Add User
+                        Agregar Usuario
                     </Link>
                 </div>
 

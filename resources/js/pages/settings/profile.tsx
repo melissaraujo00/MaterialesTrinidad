@@ -68,12 +68,21 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     toast.success("Perfil actualizado correctamente 🎉");
                 },
                 onError: (errors) => {
-                    toast.error("Hubo un error al actualizar el perfil. Verifica los datos.");
-                    const formattedErrors: Record<string, string> = {};
-                    Object.keys(errors).forEach((key) => {
-                        formattedErrors[key] = errors[key];
-                    });
-                    setFormattedErrors(formattedErrors);
+                    if (errors.email) {
+                      toast.error(errors.email);
+                    }
+                    if (errors.phoneNumber) {
+                      toast.error(errors.phoneNumber);
+
+                    }
+                    else{
+                        const formattedErrors: Record<string, string> = {};
+                        Object.keys(errors).forEach((key) => {
+                            formattedErrors[key] = errors[key];
+                        });
+                        setFormattedErrors(formattedErrors);
+                    }
+
                 }
             });
         } catch (error) {

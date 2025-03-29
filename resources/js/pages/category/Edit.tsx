@@ -40,8 +40,12 @@ const CategoryEdit: React.FC<Props> = ({ category }) => {
         router.reload();
       },
       onError: (err) => {
-        console.error("Error al crear usuario:", err);
-        toast.error(errorMessage);
+        if (err.name) {
+            toast.error(err.name);
+        }
+        else{
+            toast.error(errorMessage);
+        }
       },
     });
   };

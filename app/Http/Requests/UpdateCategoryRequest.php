@@ -37,4 +37,15 @@ class UpdateCategoryRequest extends FormRequest
             ],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'El nombre es obligatorio.',
+            'name.string' => 'El nombre debe ser una cadena de texto.',
+            'name.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'name.unique' => 'Este nombre de categoria ya está registrado.'
+
+        ];
+    }
 }
