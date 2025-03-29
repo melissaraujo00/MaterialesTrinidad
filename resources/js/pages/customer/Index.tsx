@@ -9,8 +9,8 @@ import DT from 'datatables.net-dt';
 import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
 import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
-import "datatables.net-buttons/js/buttons.html5";
-import "datatables.net-buttons/js/buttons.print";
+// import "datatables.net-buttons/js/buttons.html5";
+// import "datatables.net-buttons/js/buttons.print";
 import jszip from 'jszip';
 
 window.JSZip = jszip;
@@ -23,6 +23,7 @@ export default function Customers() {
     const columns = [
         { data: 'name' },
         { data: 'email'},
+        { data: 'register'},
         { data: 'phoneNumber'},
         { data: 'nit'},
         { data: 'district' },
@@ -53,19 +54,17 @@ export default function Customers() {
                 <DataTable ajax="/api/customers/getCustomerData" options={{
                     language: languageES,
                     responsive: true,
+                    dom: 'lBrtip',
                     layout: {
                         topStart: ['pageLength'],
-                        topEnd: {
-                            search: {
-                                placeholder: 'Buscar'
-                            }
-                        }
+
                     },
                 }} columns={columns} className="display">
                     <thead>
                         <tr>
                             <th>Cliente</th>
                             <th>Correo Electonico</th>
+                            <th>Fecha de Registro</th>
                             <th>Telefono</th>
                             <th>NIT</th>
                             <th>Distrito</th>
