@@ -40,7 +40,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
             <Head title="Reset password" />
 
             <form onSubmit={submit}>
-                <div className="grid gap-6">
+                <div className="grid gap-6 ">
 
                     <div className="grid gap-2">
                         <Label htmlFor="password">Password</Label>
