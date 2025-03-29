@@ -26,6 +26,9 @@ export default function CategoryCreate() {
     data.append("description", values.description);
 
     router.post("/categories", data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',  // 🔹 Asegura que Laravel reconozca los datos correctamente
+      },
       onSuccess: () => {
         toast.success("Categoría creada con éxito.");
         router.reload();

@@ -42,7 +42,7 @@ export default function Categories() {
         searchable: false,
         createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
             td.innerHTML = `
-            <a href="users/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>
+            <a href="categories/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>
             <button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
         `;
 
