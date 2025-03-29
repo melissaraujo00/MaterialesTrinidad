@@ -1,9 +1,10 @@
 <?php
 
+use App\Models\Department;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\District;
+
 
 return new class extends Migration
 {
@@ -15,7 +16,7 @@ return new class extends Migration
         Schema::create('municipalities', function (Blueprint $table) {
             $table->id();
             $table->string('name',30);
-            $table->foreignIdFor(District::class)->constrained();
+            $table->foreignIdFor(Department::class)->constrained();
             $table->timestamps();
         });
     }

@@ -13,7 +13,7 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $departamens = [
+        $departmens = [
             [
                 'name' => 'Ahuachapán'
             ],
@@ -58,8 +58,8 @@ class DepartmentSeeder extends Seeder
             ]
         ];
 
-        foreach($departamens as $departamen){
-            Department::create($departamen);
+        foreach($departmens as $departmen){
+            Department::create($departmen);
         }
     }
 }

@@ -18,21 +18,18 @@ window.JSZip = jszip;
 DataTable.use(DT);
 
 
-export default function Users() {
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Estado del modal
-    const [selectedUser, setSelectedUser] = useState<any>(null);
+export default function Customers() {
 
     const columns = [
         { data: 'name' },
-        { data: 'firstName' },
-        { data: 'lastName' },
-        { data: 'email' },
-        { data: 'birthdate' },
-        { data: 'phoneNumber' },
-        { data: 'role'},
+        { data: 'email'},
+        { data: 'phoneNumber'},
+        { data: 'nit'},
+        { data: 'district' },
+        { data: 'address'},
+        { data: 'description'},
         {
             data: null,
-            title: "Acciones",
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
@@ -46,52 +43,39 @@ export default function Users() {
         }
     ];
 
-
-    const openDeleteModal = (user: any) => {
-        setSelectedUser(user);
-        setIsDeleteModalOpen(true); // Abrir el modal
-    };
-
     return (
         <AppLayout>
             <Head title="Users" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <div className="flex justify-end">
-                    <Link href="/users/create" className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
-                        Add User
-                    </Link>
-                </div>
 
-                <DataTable ajax="/api/users/getUsersData" options={{
+                <DataTable ajax="/api/customers/getCustomerData" options={{
                     language: languageES,
                     responsive: true,
                     layout: {
                         topStart: ['pageLength'],
+                        topEnd: {
+                            search: {
+                                placeholder: 'Buscar'
+                            }
+                        }
                     },
                 }} columns={columns} className="display">
                     <thead>
                         <tr>
-                            <th>Usuario</th>
-                            <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>Email</th>
-                            <th>Fecha de Nacimiento</th>
+                            <th>Cliente</th>
+                            <th>Correo Electonico</th>
                             <th>Telefono</th>
-                            <th>Roles</th>
+                            <th>NIT</th>
+                            <th>Distrito</th>
+                            <th>Direccion</th>
+                            <th>Descripcion</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                 </DataTable>
             </div>
-
-            {/* Pasamos los props necesarios para controlar el estado del modal */}
-            <DeleteUserModal
-                isOpen={isDeleteModalOpen}
-                closeModal={() => setIsDeleteModalOpen(false)}
-                user={selectedUser}
-            />
         </AppLayout>
     );
 }

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\District;
 use App\Models\User;
+use App\Models\Customer;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,11 +22,16 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+
+
         $this->call([
             RoleSeeder::class,
             DepartmentSeeder::class,
-            DistrictSeeder::class,
-            MunicipalitySeeder::class
+            MunicipalitySeeder::class,
+            DistrictSeeder::class
+
         ]);
+
+        Customer::factory(10)->create();
     }
 }

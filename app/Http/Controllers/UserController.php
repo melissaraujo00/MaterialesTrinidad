@@ -17,8 +17,20 @@ class UserController extends Controller
     {
         $users = User::query()
             ->with('role')
-            ->select('id', 'name', 'firstName', 'lastName', 'email','birthdate', 'phoneNumber','role_id')
-            ->get();
+            ->get()
+            ->map( function ($user){
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'firstName' => $user->firstName,
+                    'lastName' => $user->lastName,
+                    'email' => $user->email,
+                    'birthdate'=> $user->birthdate,
+                    'phoneNumber' => $user->phoneNumber,
+                    'role' => $user->role->name,
+
+                ];
+            });
 
         return response()->json(['data' => $users]);
     }
