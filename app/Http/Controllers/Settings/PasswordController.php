@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Notifications\PasswordUpdateNotification;
 
 class PasswordController extends Controller
 {
@@ -38,6 +39,8 @@ class PasswordController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        return back();
+        $request->user()->notify(new PasswordUpdateNotification());
+
+        return redirect()->route('users.index')->with('success','contraseña actualizada correctamente');
     }
 }

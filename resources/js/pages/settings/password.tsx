@@ -5,6 +5,11 @@ import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
+import { toast } from "sonner";
+import { Toaster } from "sonner";
+import { usePage } from "@inertiajs/react";
+import * as Yup from 'yup';
+import { useState } from "react";
 
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
@@ -21,6 +26,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Password() {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+    const [validationError, setValidationError] = useState<string | null>(null);
 
     const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
@@ -31,68 +38,87 @@ export default function Password() {
     const updatePassword: FormEventHandler = (e) => {
         e.preventDefault();
 
-        put(route('password.update'), {
-            preserveScroll: true,
-            onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.password) {
-                    reset('password', 'password_confirmation');
-                    passwordInput.current?.focus();
-                }
+        if (passwordRegex.test(data.password)) {
+            setValidationError(null); // Limpiar error si la contraseña es válida
 
-                if (errors.current_password) {
-                    reset('current_password');
-                    currentPasswordInput.current?.focus();
-                }
-            },
-        });
+            put(route('password.update'), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success("Contraseña actualizada con éxito.");
+                    reset();
+                },
+                onError: (errors) => {
+                    if (errors.password) {
+                        reset('password', 'password_confirmation');
+                        passwordInput.current?.focus();
+                    }
+    
+                    if (errors.current_password) {
+                        reset('current_password');
+                        currentPasswordInput.current?.focus();
+                    }
+                },
+            });
+        } else {
+            setValidationError("La contraseña debe tener al menos 8 caracteres, una mayúscula y un símbolo.");
+        }
+
+        
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
-
             <SettingsLayout>
-                <div className="space-y-6">
-                    <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
+                <div className="space-y-6 ">
+                    <HeadingSmall title="Actualizar contraseña" description="Asegúrate de que tu cuenta use una contraseña larga y aleatoria para mantenerla segura." />
 
                     <form onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="current_password">Current password</Label>
+                            <Label htmlFor="current_password">contraseña actual</Label>
 
                             <Input
                                 id="current_password"
                                 ref={currentPasswordInput}
                                 value={data.current_password}
-                                onChange={(e) => setData('current_password', e.target.value)}
+                                onChange={(e) =>{ 
+                                    setData('current_password', e.target.value)
+                                    errors.current_password=""
+
+                                }}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="current-password"
-                                placeholder="Current password"
+                                placeholder="contraseña actual"
                             />
 
                             <InputError message={errors.current_password} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">New password</Label>
+                            <Label htmlFor="password">contraseña nueva</Label>
 
                             <Input
                                 id="password"
                                 ref={passwordInput}
                                 value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
+                                onChange={(e) =>{
+                                    setData('password', e.target.value);
+                                    setValidationError(null);
+                                    errors.password=""
+                                }}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="New password"
+                                placeholder="contraseña nueva"
                             />
 
                             <InputError message={errors.password} />
+                            {validationError && <p style={{ color: 'red' }}>{validationError}</p>}
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">Confirm password</Label>
+                            <Label htmlFor="password_confirmation">confirmacion de la nueva contraseña</Label>
 
                             <Input
                                 id="password_confirmation"
@@ -101,14 +127,14 @@ export default function Password() {
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
-                                placeholder="Confirm password"
+                                placeholder="confirmacion"
                             />
 
                             <InputError message={errors.password_confirmation} />
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save password</Button>
+                            <Button disabled={processing}>Guardar contraseña</Button>
 
                             <Transition
                                 show={recentlySuccessful}
