@@ -23,7 +23,8 @@ class CustomerController extends Controller
                 'district' => $customer->district->municipality->department->name  .", ".$customer->district->municipality->name .", ".$customer->district->name,
                 'address'=> $customer->address,
                 'description' => $customer->description,
-                'register' => $customer->created_at->format('d-m-Y')
+                'status' => $customer->status,
+                'register' => $customer->created_at->format('d-m-Y'),
             ];
         });
         return response()->json(['data' => $data]);

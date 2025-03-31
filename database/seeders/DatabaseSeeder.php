@@ -32,6 +32,6 @@ class DatabaseSeeder extends Seeder
 
         ]);
 
-        Customer::factory(10)->create();
+         Customer::factory(20)->create();
     }
 }

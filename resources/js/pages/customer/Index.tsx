@@ -29,6 +29,7 @@ export default function Customers() {
         { data: 'district' },
         { data: 'address'},
         { data: 'description'},
+        { data: 'status'},
         {
             data: null,
             orderable: false,
@@ -70,6 +71,7 @@ export default function Customers() {
                             <th>Distrito</th>
                             <th>Direccion</th>
                             <th>Descripcion</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>

@@ -18,7 +18,8 @@ class Customer extends Model
         'nit',
         'district_id',
         'address',
-        'description'
+        'description',
+        'status'
 
     ];
     public function district(): BelongsTo

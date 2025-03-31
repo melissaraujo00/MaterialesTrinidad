@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignIdFor(District::class)->constrained();
             $table->text('address');
             $table->text('description')->nullable();
+            $table->string('status',45);
             $table->timestamps();
         });
     }

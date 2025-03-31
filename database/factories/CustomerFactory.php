@@ -24,6 +24,8 @@ class CustomerFactory extends Factory
             'district_id' =>  rand(1, 10),
             'address' => fake()->address(),
             'description' => fake()->sentence(),
+            'status' => fake()->randomElement(['activo', 'desactivo']),
+
         ];
     }
 }

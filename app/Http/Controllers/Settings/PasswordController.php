@@ -39,8 +39,9 @@ class PasswordController extends Controller
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+        $request->user()->notify(new PasswordUpdateNotification());
 
-        Auth::logout(); 
+        Auth::logout();
 
         return redirect()->route('login')->with('success', 'Contraseña actualizada correctamente. Inicia sesión nuevamente.');
     }
