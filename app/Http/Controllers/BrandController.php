@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreBrandRequest;
 use App\Models\Brand;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
-use Inertia\Response;
 use Illuminate\Http\Request;
 
 class BrandController extends Controller
@@ -38,9 +39,11 @@ class BrandController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBrandRequest $request):RedirectResponse
     {
-        //
+        Brand::create($request->validated());
+
+        return redirect()->route('brands.index')->with('success', 'Brand created successfully.');
     }
 
     /**
