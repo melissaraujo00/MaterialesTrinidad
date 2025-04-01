@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('phoneNumber', 15);
             $table->string('nit',17)->nullable()->unique();
-            $table->foreignIdFor(District::class)->constrained();
-            $table->text('address');
+            $table->foreignIdFor(District::class)->constrained()->nullable();
+            $table->text('address')->nullable();
             $table->text('description')->nullable();
             $table->string('status',45);
             $table->timestamps();

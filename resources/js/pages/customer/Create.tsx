@@ -14,43 +14,38 @@ export default function CustomerCreate() {
     districts: { id: number; name: string; municipality_id: number }[];
   }>().props;
 
-  // Estado para almacenar los municipios filtrados por departamento
   const [filteredMunicipalities, setFilteredMunicipalities] = useState(municipalities);
-  const [filteredDistricts, setFilteredDistricts] = useState(districts); // Estado para distritos filtrados
-
-  // Estado para los valores seleccionados
+  const [filteredDistricts, setFilteredDistricts] = useState(districts);
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedMunicipality, setSelectedMunicipality] = useState('');
 
-  // Filtrar municipios cuando el departamento cambie
   useEffect(() => {
-    // Filtrar municipios cuando el departamento cambie
-    if (selectedDepartment) {
-      setFilteredMunicipalities(
-        municipalities.filter(
-          (municipality) => municipality.department_id === parseInt(selectedDepartment)
-        )
-      );
-    } else {
-      setFilteredMunicipalities([]); // Si no hay departamento seleccionado, limpiar los municipios
-    }
+    setFilteredMunicipalities(
+      selectedDepartment
+        ? municipalities.filter(m => m.department_id === Number(selectedDepartment))
+        : []
+    );
   }, [selectedDepartment, municipalities]);
 
   useEffect(() => {
-    // Filtrar distritos cuando el municipio cambie
-    if (selectedMunicipality) {
-      setFilteredDistricts(
-        districts.filter((district) => district.municipality_id === parseInt(selectedMunicipality))
-      );
-    } else {
-      setFilteredDistricts([]); // Si no hay municipio seleccionado, limpiar los distritos
-    }
+    setFilteredDistricts(
+      selectedMunicipality
+        ? districts.filter(d => d.municipality_id === Number(selectedMunicipality))
+        : []
+    );
   }, [selectedMunicipality, districts]);
 
+
+
   const validationSchema = Yup.object({
-    department_id: Yup.string().required("Department is required"),
-    municipality_id: Yup.string().required("Municipality is required"),
-    district_id: Yup.string().required("District is required"), // Aseguramos que el distrito esté seleccionado
+    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido '),
+    email: Yup.string().email('Formato de correo no válido'),
+    phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
+    nit: Yup.string().matches(/^\d{4}-\d{6}-\d{3}-\d{1}$/, 'El NIT debe tener el formato 0000-000000-000-0'),
+    status: Yup.string().required("Seleccione un estado"),
+    department_id: Yup.string().required("El Departamento es requerido"),
+    municipality_id: Yup.string().required("El Municipio es requerido"),
+    district_id: Yup.string().required("El distrito es requerido"),
   });
 
   const handleSubmit = (values: any) => {
@@ -65,27 +60,25 @@ export default function CustomerCreate() {
     data.append("status",values.status);
 
     router.post("/customers", data, {
-        headers: {
-            'Content-Type': 'multipart/form-data',  // 🔹 Asegura que Laravel reconozca los datos correctamente
-          },
         onSuccess: () => {
-          toast.success("Usuario creado con éxito.");
-          router.reload();
+        console.log("✅ Cliente creado con éxito");
+          toast.success("Cliente creado con éxito.");
         },
         onError: (errors) => {
           console.error("Errores de validación:", errors);
-
+          toast.error("Hubo un error al crear el cliente. Verifica los datos.");
         },
-    });
+      });
+
   };
 
   return (
     <AppLayout>
-      <Head title="Create User" />
+      <Head title="Crear Cliente" />
       <Toaster position="top-right" richColors />
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Create New User</h2>
+        <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Cliente</h2>
 
         <Formik
           initialValues={{
@@ -107,11 +100,12 @@ export default function CustomerCreate() {
             <Form className="space-y-2">
                 {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
                 <Field
                   type="text"
                   id="name"
                   name="name"
+                  placeholder="Ej: Juan Perez"
                   value={values.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -121,11 +115,12 @@ export default function CustomerCreate() {
               </div>
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electronico</label>
                 <Field
                   type="email"
                   id="email"
                   name="email"
+                  placeholder="Ej: nombre@gmail.com"
                   value={values.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -135,11 +130,12 @@ export default function CustomerCreate() {
               </div>
               {/* Phone Number */}
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Numero de Telefono</label>
                 <Field
                   type="text"
                   id="phoneNumber"
                   name="phoneNumber"
+                  placeholder="56437632"
                   value={values.phoneNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -154,6 +150,7 @@ export default function CustomerCreate() {
                   type="text"
                   id="nit"
                   name="nit"
+                  placeholder="Ej: 0000-000000-000-0"
                   value={values.nit}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -164,7 +161,7 @@ export default function CustomerCreate() {
 
               {/* Departamento */}
               <div>
-                <label htmlFor="department_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
+                <label htmlFor="department_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Departamento</label>
                 <Field
                   as="select"
                   id="department_id"
@@ -178,7 +175,7 @@ export default function CustomerCreate() {
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 >
-                  <option value="" disabled>Select Department</option>
+                  <option value="" disabled>Seleccione un Departamento </option>
                   {departments.map((department) => (
                     <option key={department.id} value={department.id}>{department.name}</option>
                   ))}
@@ -188,7 +185,7 @@ export default function CustomerCreate() {
 
               {/* Municipio */}
               <div>
-                <label htmlFor="municipality_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Municipality</label>
+                <label htmlFor="municipality_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Municipio</label>
                 <Field
                   as="select"
                   id="municipality_id"
@@ -201,7 +198,7 @@ export default function CustomerCreate() {
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 >
-                  <option value="" disabled>Select Municipality</option>
+                  <option value="" disabled>Selecciones un Municipio</option>
                   {filteredMunicipalities.map((municipality) => (
                     <option key={municipality.id} value={municipality.id}>{municipality.name}</option>
                   ))}
@@ -211,7 +208,7 @@ export default function CustomerCreate() {
 
               {/* Distrito */}
               <div>
-                <label htmlFor="district_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">District</label>
+                <label htmlFor="district_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Distrito</label>
                 <Field
                   as="select"
                   id="district_id"
@@ -221,7 +218,7 @@ export default function CustomerCreate() {
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 >
-                  <option value="" disabled>Select District</option>
+                  <option value="" disabled>Seleccione un Distrito</option>
                   {filteredDistricts.map((district) => (
                     <option key={district.id} value={district.id}>{district.name}</option>
                   ))}
@@ -235,6 +232,7 @@ export default function CustomerCreate() {
                   type="text"
                   id="address"
                   name="address"
+                  placeholder="Ej: Col. Franciso Casa #4"
                   value={values.address}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -249,6 +247,7 @@ export default function CustomerCreate() {
                   type="text"
                   id="description"
                   name="description"
+                  placeholder="Ej: Frente de ferreteria Olivia"
                   value={values.description}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -259,7 +258,7 @@ export default function CustomerCreate() {
 
               {/* Status */}
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
                 <Field
                   as="select"
                   id="status"
@@ -269,9 +268,9 @@ export default function CustomerCreate() {
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 >
-                  <option value="" disabled>Select Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="" disabled>Selecciona un Estado</option>
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
                 </Field>
                 {touched.status && errors.status && <small className="text-red-500">{errors.status}</small>}
               </div>

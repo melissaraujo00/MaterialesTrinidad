@@ -22,14 +22,42 @@ class StoreCustomer extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email',
-            'phoneNumber' => 'nullable|string',
-            'nit' => 'nullable|string',
-            'district_id' => 'required|exists:districts,id',
-            'address' => '|string',
-            'description' => 'nullable|string',
-            'status' => 'required|string',
+            'name' => [
+                'required',
+                'string',
+                'max:65'
+            ],
+            'email' => [
+                'nullable',
+                'email'
+            ],
+            'phoneNumber' => [
+                'required',
+                'string',
+                'max:15'
+            ],
+            'nit' => [
+                'nullable',
+                'string',
+                'max:17'
+            ],
+            'district_id' => [
+                'required',
+                'exists:districts,id'
+            ],
+            'address' => [
+                'nullable',
+                'string',
+            ],
+
+            'description' =>[
+                'nullable',
+                'string',
+            ],
+            'status' =>  [
+                'required',
+                'string'
+            ]
         ];
     }
 }
