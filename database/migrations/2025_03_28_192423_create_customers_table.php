@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name', 65);
             $table->string('email')->nullable();
             $table->string('phoneNumber', 15);
-            $table->string('nit',14)->nullable()->unique();
+            $table->string('nit',17)->nullable()->unique();
             $table->foreignIdFor(District::class)->constrained();
             $table->text('address');
             $table->text('description')->nullable();

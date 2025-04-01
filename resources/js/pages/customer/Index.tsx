@@ -2,8 +2,8 @@ import { Head, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { Link } from "@inertiajs/react";
-import DeleteUserModal from "@/components/DeleteUserModal"; // Usamos Link de inertia para navegar sin recargar
-import { useState } from "react"; // Importar useState para gestionar el estado del modal
+import DeleteUserModal from "@/components/DeleteUserModal";
+import { useState } from "react";
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
@@ -51,6 +51,14 @@ export default function Customers() {
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
+            <div className="flex justify-end">
+                <Link
+                    href="/customers/create"
+                    className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+                >
+                    Agregar Cliente
+                </Link>
+            </div>
 
                 <DataTable ajax="/api/customers/getCustomerData" options={{
                     language: languageES,

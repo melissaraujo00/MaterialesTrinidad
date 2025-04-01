@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCustomer;
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\District;
+use App\Models\Municipality;
+use App\Models\Department;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -45,15 +49,25 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        //
+        $departments = Department::all();
+        $municipalities = Municipality::all();
+        $districts = District::all();
+
+        // Pasar los datos a la vista
+        return Inertia::render('customer/Create', [
+            'departments' => $departments,
+            'municipalities' => $municipalities,
+            'districts' => $districts,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCustomer $request)
     {
-        //
+        Customer::create($request->validated());
+        return redirect()->route('customers.index')->with('success', 'Customer created successfully');
     }
 
     /**
