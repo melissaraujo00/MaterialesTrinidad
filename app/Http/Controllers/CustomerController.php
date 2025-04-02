@@ -9,6 +9,7 @@ use App\Models\District;
 use App\Models\Municipality;
 use App\Models\Department;
 use Inertia\Inertia;
+use App\Http\Requests\UpdateCustomerRequest;
 
 class CustomerController extends Controller
 {
@@ -81,17 +82,27 @@ class CustomerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Customer $customer)
     {
-        //
+        $departments = Department::all();
+        $municipalities = Municipality::all();
+        $districts = District::all();
+    
+        return Inertia::render('customer/Edit', [
+            'customer' => $customer,
+            'departments' => $departments,
+            'municipalities' => $municipalities,
+            'districts' => $districts,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Customer $customer)
     {
-        //
+        $customer->update($request->all()); // No valida nada
+        return redirect()->route('customers.index')->with('success', 'Cliente actualizado correctamente.');
     }
 
     /**
