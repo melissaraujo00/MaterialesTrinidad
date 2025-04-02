@@ -36,7 +36,9 @@ const CategoryEdit: React.FC<Props> = ({ category }) => {
     }
     router.put(route('categories.update', category.id), values, {
       onSuccess: () => {
-        toast.success(successMessage);
+        setTimeout(() => {
+            toast.success(successMessage);
+        }, 1000);
         router.reload();
       },
       onError: (err) => {

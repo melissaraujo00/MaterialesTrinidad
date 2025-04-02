@@ -47,8 +47,8 @@ export default function Customers() {
 
     return (
         <AppLayout>
-            <Head title="Users" />
             <Toaster position="top-right" richColors />
+            <Head title="Users" />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
             <div className="flex justify-end">

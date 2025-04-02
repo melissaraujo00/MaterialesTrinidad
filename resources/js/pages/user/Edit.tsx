@@ -89,8 +89,10 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
         // Si la validación es exitosa
         put(route('users.update', user.id), {
           onSuccess: () => {
-            toast.success(successMessage);
-            router.reload();
+            setTimeout(() => {
+                        toast.success(successMessage);
+                    }, 1000);
+                router.reload();
           },
           onError: (err) => {
             console.error("Error al crear usuario:", err);

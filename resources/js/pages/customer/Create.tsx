@@ -61,8 +61,9 @@ export default function CustomerCreate() {
 
     router.post("/customers", data, {
         onSuccess: () => {
-        console.log("✅ Cliente creado con éxito");
-          toast.success("Cliente creado con éxito.");
+            setTimeout(() => {
+                toast.success("Cliente creado con éxito.");
+            }, 1000);
         },
         onError: (errors) => {
           console.error("Errores de validación:", errors);
@@ -75,7 +76,8 @@ export default function CustomerCreate() {
   return (
     <AppLayout>
       <Head title="Crear Cliente" />
-      <Toaster position="top-right" richColors />
+        <Toaster position="top-right" richColors />
+
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
         <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Cliente</h2>

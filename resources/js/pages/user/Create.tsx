@@ -42,7 +42,9 @@ export default function UserCreate() {
 
     router.post("/users", data, {
       onSuccess: () => {
-        toast.success("Usuario creado con éxito.");
+        setTimeout(() => {
+            toast.success("Usuario creado con éxito.");
+        }, 1000);
         router.reload();
       },
       onError: (errors) => {
