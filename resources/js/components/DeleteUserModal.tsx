@@ -22,6 +22,7 @@ export default function DeleteUserModal({isOpen,closeModal,user}:Props){
         router.delete(`/users/${user.id}`,{
             onSuccess:()=>{
                 toast.success('Usuario eliminado correctamente')
+                window.location.reload();
                 closeModal()
             },
             onError:(errors)=>{

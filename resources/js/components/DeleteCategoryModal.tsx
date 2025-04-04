@@ -21,6 +21,7 @@ export default function DeleteCategoryModal({ isOpen, closeModal, category }: Pr
             onSuccess: () => {
                 toast.success('categoria eliminada conrrectamente')
                 closeModal()
+                window.location.reload();
             },
             onError: (errors) => {
                 console.error("error al eliminar categoria:", errors)

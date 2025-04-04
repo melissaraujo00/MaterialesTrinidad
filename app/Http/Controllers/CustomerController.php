@@ -10,6 +10,7 @@ use App\Models\Municipality;
 use App\Models\Department;
 use Inertia\Inertia;
 use App\Http\Requests\UpdateCustomerRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class CustomerController extends Controller
 {
@@ -99,9 +100,10 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        $customer->update($request->all()); // No valida nada
+       
+        $customer->update($request->validated());
         return redirect()->route('customers.index')->with('success', 'Cliente actualizado correctamente.');
     }
 
