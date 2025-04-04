@@ -12,6 +12,7 @@ import "datatables.net-responsive-dt";
 // import "datatables.net-buttons/js/buttons.html5";
 // import "datatables.net-buttons/js/buttons.print";
 import jszip from "jszip";
+import DeleteEntityModal from "../../components/DeleteEntityModal";
 
 window.JSZip = jszip;
 DataTable.use(DT);
@@ -86,11 +87,13 @@ export default function Categories() {
         </DataTable>
       </div>
 
-      <DeleteCategoryModal
-        isOpen={isDeleteModalOpen}
-        closeModal={() => setIsDeleteModalOpen(false)}
-        category={selectedCategory}
-      />
+      <DeleteEntityModal
+                          isOpen={isDeleteModalOpen}
+                          closeModal={() => setIsDeleteModalOpen(false)}
+                          entity={selectedCategory}
+                          entityType="Categoria"
+                          deleteEndpoint="/categories"
+                        />
     </AppLayout>
   );
 }

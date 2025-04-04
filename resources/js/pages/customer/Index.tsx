@@ -1,8 +1,7 @@
-import { Head, usePage } from "@inertiajs/react";
+import { Head, } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { Link } from "@inertiajs/react";
-import DeleteUserModal from "@/components/DeleteUserModal";
 import { useState } from "react";
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
@@ -12,13 +11,26 @@ import 'datatables.net-responsive-dt';
 // import "datatables.net-buttons/js/buttons.html5";
 // import "datatables.net-buttons/js/buttons.print";
 import jszip from 'jszip';
+import DeleteEntityModal from "../../components/DeleteEntityModal";
 
 window.JSZip = jszip;
 
 DataTable.use(DT);
 
+interface Customer {
+    id: number;
+    name: string;
+  }
 
 export default function Customers() {
+
+     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+      const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    
+      const openDeleteModal = (customer: Customer) => {
+        setSelectedCustomer(customer);
+        setIsDeleteModalOpen(true);
+      };
 
     const columns = [
         { data: 'name' },
@@ -47,8 +59,8 @@ export default function Customers() {
 
     return (
         <AppLayout>
-            <Toaster position="top-right" richColors />
             <Head title="Users" />
+            <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
             <div className="flex justify-end">
@@ -85,6 +97,12 @@ export default function Customers() {
                     </thead>
                 </DataTable>
             </div>
-        </AppLayout>
-    );
+            <DeleteEntityModal
+                    isOpen={isDeleteModalOpen}
+                    closeModal={() => setIsDeleteModalOpen(false)}
+                    entity={selectedCustomer}
+                    entityType="cliente"
+                    deleteEndpoint="/customers"
+                  />
+        </AppLayout>);
 }

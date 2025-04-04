@@ -12,6 +12,7 @@ import 'datatables.net-responsive-dt';
 // import "datatables.net-buttons/js/buttons.html5";
 // import "datatables.net-buttons/js/buttons.print";
 import jszip from 'jszip';
+import DeleteEntityModal from "../../components/DeleteEntityModal";
 
 window.JSZip = jszip;
 
@@ -87,11 +88,13 @@ export default function Users() {
             </div>
 
             {/* Pasamos los props necesarios para controlar el estado del modal */}
-            <DeleteUserModal
-                isOpen={isDeleteModalOpen}
-                closeModal={() => setIsDeleteModalOpen(false)}
-                user={selectedUser}
-            />
+             <DeleteEntityModal
+                                isOpen={isDeleteModalOpen}
+                                closeModal={() => setIsDeleteModalOpen(false)}
+                                entity={selectedUser}
+                                entityType="Usuario"
+                                deleteEndpoint="/users"
+                              />
         </AppLayout>
     );
 }
