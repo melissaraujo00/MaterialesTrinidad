@@ -63,8 +63,12 @@
         "pdfmake": "^0.2.18",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+<<<<<<< HEAD
         "react-input-mask": "^2.0.4",
         "sonner": "^2.0.1",
+=======
+        "sonner": "^2.0.3",
+>>>>>>> Brand
         "tailwind-merge": "^3.0.1",
         "tailwindcss": "^4.0.0",
         "tailwindcss-animate": "^1.0.7",

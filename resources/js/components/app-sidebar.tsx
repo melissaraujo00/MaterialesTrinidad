@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         title: 'Clientes',
         href: '/customers',
         icon: Users
+    },
+    {
+        title: 'Marcas',
+        href: '/brands',
+        icon: Users
     }
 ];
 
