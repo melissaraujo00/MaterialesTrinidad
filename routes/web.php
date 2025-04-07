@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductController;
+use App\Models\Product;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -17,6 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('brands', BrandController::class);
+    Route::resource('products', ProductController::class);
     // Ruta para el dashboard
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

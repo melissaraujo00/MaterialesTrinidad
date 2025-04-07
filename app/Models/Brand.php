@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Product;
 
 class Brand extends Model
 {
@@ -10,4 +12,9 @@ class Brand extends Model
         'name',
         'description'
     ];
+
+    public function products():HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 }
