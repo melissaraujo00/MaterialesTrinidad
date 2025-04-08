@@ -19,10 +19,12 @@ return new class extends Migration
             $table->string('description', 100);
             $table->decimal('price', 12, 2);
             $table->decimal('priceWithTax', 12, 2);
+            $table->decimal('discountPrice',12,2);
             $table->integer('stock');
-            $table->string('image', 100);
             $table->foreignIdFor(Category::class)->constrained();
             $table->foreignIdFor(Brand::class)->constrained();
+            $table->integer('stockMinimun');
+            $table->string('image', 100);
             $table->timestamps();
         });
     }

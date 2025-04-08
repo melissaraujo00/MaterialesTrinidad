@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,20 +16,21 @@ class ProductController extends Controller
 
      public function getProductData()
      {
+
         $data = Product::query()
         ->with('category', 'brand')
         ->get()
         ->map( function ($product){
             return [
                 'id' => $product->id,
-                'name' => $product->name, 
-                'description'  => $product->description, 
+                'name' => $product->name,
+                'description'  => $product->description,
                 'price'  => $product->price,
                 'priceWithTax' => $product->priceWithTax,
-                'stock'  => $product->stock, 
-                'image'  => $product->image, 
-                'category_id'  => $product->category->name, 
-                'brand_id' => $product->brand->name, 
+                'stock'  => $product->stock,
+                'image'  => $product->image,
+                'category_id'  => $product->category->name,
+                'brand_id' => $product->brand->name,
             ];
         });
         return response()->json(['data' => $data]);
@@ -45,7 +48,14 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        $category = Category::all();
+        $brand = Brand::all();
+
+        // Pasar los datos a la vista
+        return Inertia::render('product/Create', [
+            'categories' => $category,
+            'brands' => $brand,
+        ]);
     }
 
     /**
@@ -53,7 +63,21 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        // Si hay un archivo de imagen, procesarlo
+        if ($request->hasFile('picture')) {
+            $file = $request->file('picture');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            // Almacenar el archivo en el directorio "public/uploads"
+            $path = $file->storeAs('uploads', $filename, 'public');
+            $data['picture'] = '/storage/' . $path;
+        }
+
+        // Crear el post con los datos validados
+        Product::create($data);
+
+        // Redirigir al índice de posts con un mensaje de éxito
+        return redirect()->route('products.index')->with('success', 'Post created successfully.');
     }
 
     /**
