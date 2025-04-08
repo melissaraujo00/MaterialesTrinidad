@@ -94,6 +94,7 @@ export default function Products() {
                             <th>Marca</th>
                             <th>stock minimo</th>
                             <th>Imagen</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                 </DataTable>

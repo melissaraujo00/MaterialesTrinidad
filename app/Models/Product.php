@@ -13,7 +13,7 @@ class Product extends Model
         'description', 
         'price',
         'priceWithTax',
-        'discountPrince',
+        'discountPrice',
         'stock', 
         'category_id', 
         'brand_id', 
