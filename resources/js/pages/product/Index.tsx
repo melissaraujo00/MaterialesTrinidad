@@ -37,10 +37,12 @@ export default function Products() {
         { data: 'description'},
         { data: 'price'},
         { data: 'priceWithTax'},
+        { data: 'discountPrice'},
         { data: 'stock'},
-        { data: 'image'},
         { data: 'category_id'},
         { data: 'brand_id'},
+        { data: 'stockMinimun'},
+        { data: 'image'},
         {
             data: null,
             orderable: false,
@@ -86,10 +88,12 @@ export default function Products() {
                             <th>Descripcion</th>
                             <th>Precio</th>
                             <th>Precio con IVA</th>
+                            <th>Precio con descuento</th>
                             <th>Stock</th>
-                            <th>Imagen</th>
                             <th>Categoria</th>
                             <th>Marca</th>
+                            <th>stock minimo</th>
+                            <th>Imagen</th>
                         </tr>
                     </thead>
                 </DataTable>

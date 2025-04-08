@@ -27,10 +27,12 @@ class ProductController extends Controller
                 'description'  => $product->description,
                 'price'  => $product->price,
                 'priceWithTax' => $product->priceWithTax,
+                'discountPrice' => $product->discountPrice,
                 'stock'  => $product->stock,
-                'image'  => $product->image,
                 'category_id'  => $product->category->name,
                 'brand_id' => $product->brand->name,
+                'stockMinimun' => $product->stockMinimun,
+                'image'  => $product->image,
             ];
         });
         return response()->json(['data' => $data]);
