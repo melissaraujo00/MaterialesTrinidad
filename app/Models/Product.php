@@ -14,12 +14,11 @@ class Product extends Model
         'price',
         'priceWithTax',
         'discountPrice',
+        'stock',
         'category_id',
         'brand_id',
-        'stock',
         'stockMinimun',
         'image',
-
     ];
 
     public function category():BelongsTo

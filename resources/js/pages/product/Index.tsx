@@ -20,27 +20,41 @@ DataTable.use(DT);
 interface Product {
     id: number;
     name: string;
-  }
+}
 
 export default function Products() {
 
-     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-      const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    
-      const openDeleteModal = (product: Product) => {
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const getStockBadge = (stock: number, stockMinimun: number) => {
+        if (stock <= stockMinimun) {
+            return `<span class="bg-red-100 text-red-800 text-x font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-red-900 dark:text-red-300">${stock}</span>`;
+        }
+        return '';
+    };
+
+    const openDeleteModal = (product: Product) => {
         setSelectedProduct(product);
         setIsDeleteModalOpen(true);
-      };
+    };
+
 
     const columns = [
         { data: 'name' },
-        { data: 'description'},
-        { data: 'price'},
-        { data: 'priceWithTax'},
-        { data: 'stock'},
-        { data: 'image'},
-        { data: 'category_id'},
-        { data: 'brand_id'},
+        { data: 'description' },
+        { data: 'price' },
+        { data: 'priceWithTax' },
+        { data: 'discountPrice' },
+        { data: 'stock',
+            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
+                td.innerHTML = getStockBadge(rowData.stock, rowData.stockMinimun) || rowData.stock;
+            }
+        },
+        { data: 'category_id' },
+        { data: 'brand_id' },
+        { data: 'stockMinimun' },
+        { data: 'image' },
         {
             data: null,
             orderable: false,
@@ -54,6 +68,7 @@ export default function Products() {
                 td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
             }
         }
+
     ];
 
     return (
@@ -62,14 +77,14 @@ export default function Products() {
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-            <div className="flex justify-end">
-                <Link
-                    href="/products/create"
-                    className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
-                >
-                    Agregar Producto
-                </Link>
-            </div>
+                <div className="flex justify-end">
+                    <Link
+                        href="/products/create"
+                        className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+                    >
+                        Agregar Producto
+                    </Link>
+                </div>
 
                 <DataTable ajax="/api/products/getProductData" options={{
                     language: languageES,
@@ -86,20 +101,23 @@ export default function Products() {
                             <th>Descripcion</th>
                             <th>Precio</th>
                             <th>Precio con IVA</th>
+                            <th>Precio con descuento</th>
                             <th>Stock</th>
-                            <th>Imagen</th>
                             <th>Categoria</th>
                             <th>Marca</th>
+                            <th>stock minimo</th>
+                            <th>Imagen</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                 </DataTable>
             </div>
             <DeleteEntityModal
-                    isOpen={isDeleteModalOpen}
-                    closeModal={() => setIsDeleteModalOpen(false)}
-                    entity={selectedProduct}
-                    entityType="producto"
-                    deleteEndpoint="/products"
-                  />
+                isOpen={isDeleteModalOpen}
+                closeModal={() => setIsDeleteModalOpen(false)}
+                entity={selectedProduct}
+                entityType="producto"
+                deleteEndpoint="/products"
+            />
         </AppLayout>);
 }
