@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name', 45);
-            $table->string('description', 100);
+            $table->text('description')->nullable();
             $table->decimal('price', 12, 2);
             $table->decimal('priceWithTax', 12, 2);
             $table->decimal('discountPrice',12,2);
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignIdFor(Category::class)->constrained();
             $table->foreignIdFor(Brand::class)->constrained();
             $table->integer('stockMinimun');
-            $table->string('image', 100);
+            $table->text('image')->nullable();
             $table->timestamps();
         });
     }

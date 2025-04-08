@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProduct;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -61,23 +62,25 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProduct $request)
     {
+
+        // Obtener datos validados
+        $data = $request->validated();
 
         // Si hay un archivo de imagen, procesarlo
         if ($request->hasFile('picture')) {
             $file = $request->file('picture');
             $filename = time() . '_' . $file->getClientOriginalName();
-            // Almacenar el archivo en el directorio "public/uploads"
             $path = $file->storeAs('uploads', $filename, 'public');
             $data['picture'] = '/storage/' . $path;
         }
 
-        // Crear el post con los datos validados
+        // Crear el producto con los datos completos
         Product::create($data);
 
-        // Redirigir al índice de posts con un mensaje de éxito
-        return redirect()->route('products.index')->with('success', 'Post created successfully.');
+        // Redirigir al índice con mensaje de éxito
+        return redirect()->route('products.index')->with('success', 'Producto creado exitosamente.');
     }
 
     /**
