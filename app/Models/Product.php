@@ -18,7 +18,7 @@ class Product extends Model
         'category_id',
         'brand_id',
         'stockMinimun',
-        'image',
+        'imagen',
     ];
 
     public function category():BelongsTo

@@ -33,7 +33,7 @@ class ProductController extends Controller
                 'category_id'  => $product->category->name,
                 'brand_id' => $product->brand->name,
                 'stockMinimun' => $product->stockMinimun,
-                'image'  => $product->image,
+                'imagen'  => $product->imagen,
             ];
         });
         return response()->json(['data' => $data]);
@@ -67,22 +67,22 @@ class ProductController extends Controller
     public function store(StoreProduct $request)
     {
 
-        // Obtener datos validados
-        $data = $request->validated();
+         // Obtener datos validados
+    $data = $request->validated();
 
-        // Si hay un archivo de imagen, procesarlo
-        if ($request->hasFile('picture')) {
-            $file = $request->file('picture');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('uploads', $filename, 'public');
-            $data['picture'] = '/storage/' . $path;
-        }
+    // Procesar la imagen si se envió
+    if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+        $file = $request->file('imagen');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('uploads', $filename, 'public');
+        $data['imagen'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
+    }
 
-        // Crear el producto con los datos completos
-        Product::create($data);
+    // Crear el producto con los datos completos
+    Product::create($data);
 
-        // Redirigir al índice con mensaje de éxito
-        return redirect()->route('products.index')->with('success', 'Producto creado exitosamente.');
+    // Redirigir al índice con mensaje de éxito
+    return redirect()->route('products.index')->with('success', 'Producto creado exitosamente.');
     }
 
     /**

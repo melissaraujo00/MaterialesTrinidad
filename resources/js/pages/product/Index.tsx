@@ -54,7 +54,7 @@ export default function Products() {
         { data: 'category_id' },
         { data: 'brand_id' },
         { data: 'stockMinimun' },
-        { data: 'image' },
+        { data: 'imagen' },
         {
             data: null,
             orderable: false,

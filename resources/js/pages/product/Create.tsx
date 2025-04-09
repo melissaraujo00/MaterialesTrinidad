@@ -14,37 +14,40 @@ export default function ProductCreate() {
 
     const [preview, setPreview] = useState<string | null>(null);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.currentTarget.files?.[0];
-        if (file) {
-            const objectUrl = URL.createObjectURL(file);
-            setPreview(objectUrl);
-        }
-    };
-
     const validationSchema = Yup.object({
         name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido'),
-        price: Yup.number().positive('El precio debe ser positivo').required('El precio es requerido'),
-        priceWithTax: Yup.number().positive('Debe ser positivo'),
-        discountPrice: Yup.number().positive('Debe ser positivo'),
-        stock: Yup.number().integer().min(0, 'Debe ser un número válido'),
-        stockMinimun: Yup.number().integer().min(0, 'Debe ser un número válido'),
+        price: Yup.number().positive('El precio debe ser positivo y mayor a 0').required('El precio es requerido'),
+        discountPrice: Yup.number().positive('El precio con descuento debe ser positivo y mayor a 0').required('El precio con descuento es requerido'),
+        description: Yup.string().max(255, 'La descripción no puede exceder los 255 caracteres'),
         category_id: Yup.string().required('Debe seleccionar una categoría'),
         brand_id: Yup.string().required('Debe seleccionar una marca'),
+        stock: Yup.number().integer().min(0, 'El stock debe ser un número entero').required('El stock es requerido'),
+        stockMinimun: Yup.number().integer().min(0, 'El stock mínimo debe ser un número entero').required('El stock mínimo es requerido'),
+        imagen: Yup.mixed()
+            .nullable()
+            .test("fileSize", "La imagen es muy grande", (value) => {
+                return !value || (value instanceof File && value.size <= 2 * 1024 * 1024); // Verifica que
+            })
+            .test("fileFormat", "Formato no soportado", (value) => {
+                return !value || (value instanceof File && ["image/jpeg", "image/png", "image/webp"].includes(value.type));
+            }),
     });
 
     const handleSubmit = (values: any) => {
         const data = new FormData();
         data.append("name", values.name);
-        data.append("description", values.description);
-        data.append("price", values.price);
-        data.append("priceWithTax", values.priceWithTax);
+        data.append("description", values.description || "");
+        data.append("price", values.price.toString());
+        data.append("priceWithTax", (values.price + values.price * 0.13).toFixed(2));
         data.append("discountPrice", values.discountPrice);
         data.append("category_id", values.category_id);
         data.append("brand_id", values.brand_id);
         data.append("stock", values.stock);
-        data.append("stockMinimun", values.stockMinimun);
-        data.append("imagen", values.imagen);
+        data.append("stockMinimun", values.stockMinimun)
+
+        if (values.imagen) {
+            data.append("imagen", values.imagen);
+        }
 
         router.post("/products", data, {
             onSuccess: () => {
@@ -72,13 +75,12 @@ export default function ProductCreate() {
                         name: "",
                         description: "",
                         price: "",
-                        priceWithTax: "",
                         discountPrice: "",
                         category_id: "",
                         brand_id: "",
                         stock: "",
                         stockMinimun: "",
-                        imagen: ""
+                        imagen: null,
                     }}
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
@@ -103,12 +105,12 @@ export default function ProductCreate() {
 
                             {/* Description */}
                             <div>
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción Opcional</label>
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción (Opcional)</label>
                                 <Field
                                     type="text"
                                     id="description"
                                     name="description"
-                                    placeholder="Ej: Frente de ferreteria Olivia"
+                                    placeholder="Ej: El producto es para uso general"
                                     value={values.description}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
@@ -127,30 +129,16 @@ export default function ProductCreate() {
                                     name="price"
                                     placeholder="Ej: 12.50"
                                     value={values.price}
-                                    onChange={handleChange}
+                                    onChange={(event) => {
+                                        const price = parseFloat(event.target.value) || 0;
+                                        setFieldValue("price", price);
+                                        setFieldValue("priceWithTax", parseFloat((price + price * 0.13).toFixed(2))); // Calcula automáticamente el precio con IVA
+                                    }}
                                     onBlur={handleBlur}
                                     className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                                 />
                                 {touched.price && errors.price && <small className="text-red-500">{errors.price}</small>}
                             </div>
-
-                            {/* Price With Tax */}
-                            <div>
-                                <label htmlFor="priceWithTax" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio con IVA incluido</label>
-                                <Field
-                                    type="number"
-                                    step="0.01"
-                                    id="priceWithTax"
-                                    name="priceWithTax"
-                                    placeholder="Ej: 15.50"
-                                    value={values.priceWithTax}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.priceWithTax && errors.priceWithTax && <small className="text-red-500">{errors.priceWithTax}</small>}
-                            </div>
-
                             {/* Discount Price */}
                             <div>
                                 <label htmlFor="discountPrice" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio con descuento</label>
@@ -213,6 +201,7 @@ export default function ProductCreate() {
                                 <label htmlFor="stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad de producto disponible</label>
                                 <Field
                                     type="number"
+                                    placeholder = "Ej: 100"
                                     id="stock"
                                     name="stock"
                                     value={values.stock}
@@ -228,6 +217,7 @@ export default function ProductCreate() {
                                 <label htmlFor="stockMinimun" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Mínimo</label>
                                 <Field
                                     type="number"
+                                    placeholder = "Ej: 10"
                                     id="stockMinimun"
                                     name="stockMinimun"
                                     value={values.stockMinimun}

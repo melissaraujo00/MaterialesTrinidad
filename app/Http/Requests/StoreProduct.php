@@ -11,7 +11,7 @@ class StoreProduct extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,14 +24,14 @@ class StoreProduct extends FormRequest
         return [
             'name' => ['required', 'string', 'max:45'],
             'description' => ['nullable', 'string'],
-            'price' => ['required', 'decimal:2', 'between:0,9999999999.99'],
-            'priceWithTax' => ['required', 'decimal:2', 'between:0,9999999999.99'],
-            'discountPrice' => ['nullable', 'decimal:2', 'between:0,9999999999.99'],
+            'price' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
+            'priceWithTax' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
+            'discountPrice' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'category_id' => ['required', 'exists:categories,id'],
             'brand_id' => ['required', 'exists:brands,id'],
             'stock' => ['required', 'integer', 'min:0'],
             'stockMinimun' => ['required', 'integer', 'min:0', 'lte:stock'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp']
+            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:255']
         ];
     }
 }
