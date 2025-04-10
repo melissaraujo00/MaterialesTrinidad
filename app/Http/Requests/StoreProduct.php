@@ -31,7 +31,7 @@ class StoreProduct extends FormRequest
             'brand_id' => ['required', 'exists:brands,id'],
             'stock' => ['required', 'integer', 'min:0'],
             'stockMinimun' => ['required', 'integer', 'min:0', 'lte:stock'],
-            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:255']
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:255']
         ];
     }
 }

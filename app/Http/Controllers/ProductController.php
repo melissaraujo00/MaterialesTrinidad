@@ -33,7 +33,7 @@ class ProductController extends Controller
                 'category_id'  => $product->category->name,
                 'brand_id' => $product->brand->name,
                 'stockMinimun' => $product->stockMinimun,
-                'imagen'  => $product->imagen,
+                'image'  => $product->image,
             ];
         });
         return response()->json(['data' => $data]);
@@ -71,11 +71,11 @@ class ProductController extends Controller
     $data = $request->validated();
 
     // Procesar la imagen si se envió
-    if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
-        $file = $request->file('imagen');
+    if ($request->hasFile('image') && $request->file('image')->isValid()) {
+        $file = $request->file('image');
         $filename = time() . '_' . $file->getClientOriginalName();
         $path = $file->storeAs('uploads', $filename, 'public');
-        $data['imagen'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
+        $data['image'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
     }
 
     // Crear el producto con los datos completos

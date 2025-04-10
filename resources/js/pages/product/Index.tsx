@@ -46,7 +46,8 @@ export default function Products() {
         { data: 'price' },
         { data: 'priceWithTax' },
         { data: 'discountPrice' },
-        { data: 'stock',
+        {
+            data: 'stock',
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 td.innerHTML = getStockBadge(rowData.stock, rowData.stockMinimun) || rowData.stock;
             }
@@ -54,7 +55,12 @@ export default function Products() {
         { data: 'category_id' },
         { data: 'brand_id' },
         { data: 'stockMinimun' },
-        { data: 'imagen' },
+        {
+            data: 'image',
+            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
+                td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="100" height="100"/>`;
+            }
+        },
         {
             data: null,
             orderable: false,
