@@ -58,7 +58,7 @@ export default function Products() {
         {
             data: 'image',
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="100" height="100"/>`;
+                td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="200" height="200" class="object-cover rounded shadow-md transition-transform duration-200 hover:scale-110"/>`;
             }
         },
         {
