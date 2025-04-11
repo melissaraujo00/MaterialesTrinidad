@@ -14,20 +14,15 @@ export default function UserCreate() {
   }>().props;
 
   const validationSchema = Yup.object({
-    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    firstName: Yup.string().min(2, 'El primer nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    lastName: Yup.string().min(2, 'El apellido debe tener al menos 2 caracteres').required('Campo requerido'),
-    email: Yup.string().email('Formato de correo no válido').required('Campo requerido'),
-    birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
-    phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
-    password: Yup.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .matches(/[A-Z]/, 'La contraseña debe tener al menos una letra mayúscula')
-    .matches(/[\W_]/, 'La contraseña debe tener al menos un carácter especial')
-    .required('Campo requerido'),
-    confirmPassword: Yup.string().oneOf([Yup.ref('password'), undefined], 'Las contraseñas no coinciden').required('Campo requerido'),
-    role_id: Yup.string().required('Campo requerido'), // O si es un número, usar .number()
-  });
+    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido'),
+    price: Yup.number().positive('El precio debe ser positivo').required('El precio es requerido'),
+    priceWithTax: Yup.number().positive('Debe ser positivo'),
+    discountPrice: Yup.number().positive('Debe ser positivo'),
+    stock: Yup.number().integer().min(0, 'Debe ser un número válido'),
+    stockMinimun: Yup.number().integer().min(0, 'Debe ser un número válido'),
+    category_id: Yup.number().required('Debe seleccionar una categoría'), // Cambiado a número
+    brand_id: Yup.number().required('Debe seleccionar una marca'), // Cambiado a número
+});
 
   const handleSubmit = (values: any) => {
     const data = new FormData();

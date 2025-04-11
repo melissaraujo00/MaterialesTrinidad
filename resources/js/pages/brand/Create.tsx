@@ -30,8 +30,8 @@ export default function BrandCreate() {
         'Content-Type': 'multipart/form-data', 
       },
       onSuccess: () => {
+        toast.success("Marca editada con éxito.");
         setTimeout(() => {
-          toast.success("Marca creada con éxito.");
         }, 500);
         router.reload();
       },

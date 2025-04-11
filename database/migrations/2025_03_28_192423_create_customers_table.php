@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->text('description')->nullable();
             $table->string('status',45);
-            $table->dropSoftDeletes();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
