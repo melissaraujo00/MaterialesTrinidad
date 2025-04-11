@@ -23,13 +23,16 @@ export default function ProductCreate() {
         brand_id: Yup.string().required('Debe seleccionar una marca'),
         stock: Yup.number().integer().min(0, 'El stock debe ser un número entero').required('El stock es requerido'),
         stockMinimun: Yup.number().integer().min(0, 'El stock mínimo debe ser un número entero').required('El stock mínimo es requerido'),
-        imagen: Yup.mixed()
+        image: Yup.mixed()
             .nullable()
-            .test("fileSize", "La imagen es muy grande", (value) => {
-                return !value || (value instanceof File && value.size <= 2 * 1024 * 1024); // Verifica que
+            .test("fileSize", "La imagen es muy grande debe de ser menor de 2MB", (value) => {
+                return !value || (value instanceof File && value.size <= 2097152);
             })
             .test("fileFormat", "Formato no soportado", (value) => {
                 return !value || (value instanceof File && ["image/jpeg", "image/png", "image/webp"].includes(value.type));
+            })
+            .test("filePathLength", "La ruta del archivo excede los 255 caracteres", (value) => {
+                return !value || (value instanceof File && value.name.length <= 255);
             }),
     });
 
@@ -58,6 +61,9 @@ export default function ProductCreate() {
             onError: (errors) => {
                 console.error("Errores de validación:", errors);
                 toast.error("Hubo un error al crear el Producto. Verifica los datos.");
+                if (errors.image) {
+                    toast.error(errors.image);
+                }
             },
         });
     };
@@ -244,13 +250,14 @@ export default function ProductCreate() {
                                     }}
                                     className="w-full text-gray-950 dark:text-white"
                                 />
+                                {touched.image && errors.image && <small className="text-red-500">{errors.image}</small>}
                             </div>
 
                             {/* Image Preview */}
                             {preview && (
                                 <div className="mb-3">
                                     <p className="text-sm mb-1 dark:text-gray-300">Vista previa de la imagen:</p>
-                                    <img src={preview} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                                    <img src={preview} alt="Vista Previa" className="w-32 h-32 object-cover rounded" />
                                 </div>
                             )}
 

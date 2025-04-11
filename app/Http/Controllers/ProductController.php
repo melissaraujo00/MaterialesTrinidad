@@ -71,21 +71,21 @@ class ProductController extends Controller
     {
 
          // Obtener datos validados
-    $data = $request->validated();
+        $data = $request->validated();
 
-    // Procesar la imagen si se envió
-    if ($request->hasFile('image') && $request->file('image')->isValid()) {
-        $file = $request->file('image');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $path = $file->storeAs('uploads', $filename, 'public');
-        $data['image'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
-    }
+        // Procesar la imagen si se envió
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('products', $filename, 'public');
+            $data['image'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
+        }
 
-    // Crear el producto con los datos completos
-    Product::create($data);
+        // Crear el producto con los datos completos
+        Product::create($data);
 
-    // Redirigir al índice con mensaje de éxito
-    return redirect()->route('products.index')->with('success', 'Producto creado exitosamente.');
+        // Redirigir al índice con mensaje de éxito
+        return redirect()->route('products.index')->with('success', 'Producto creado exitosamente.');
     }
 
     /**
@@ -116,19 +116,19 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-       
+
         $data = $request->validated();
 
     // Procesar la imagen si se envió
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('uploads', $filename, 'public');
+            $path = $file->storeAs('products', $filename, 'public');
             $data['image'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
         }
-    
+
         $product->update($data);
-    
+
         return redirect()->route('products.index')->with('success', 'Producto actualizado correctamente.');
     }
 

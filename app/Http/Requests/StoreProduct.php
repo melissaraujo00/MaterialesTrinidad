@@ -35,6 +35,48 @@ class StoreProduct extends FormRequest
         ];
     }
 
-    
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'El nombre es obligatorio.',
+            'name.string' => 'El nombre debe ser una cadena de texto.',
+            'name.max' => 'El nombre no debe exceder los 45 caracteres.',
+
+            'description.string' => 'La descripción debe ser una cadena de texto.',
+
+            'price.required' => 'El precio es obligatorio.',
+            'price.numeric' => 'El precio debe ser un valor numérico.',
+            'price.regex' => 'El formato del precio no es válido. Ejemplo válido: 12345.67',
+
+            'priceWithTax.required' => 'El precio con impuesto es obligatorio.',
+            'priceWithTax.numeric' => 'El precio con impuesto debe ser numérico.',
+            'priceWithTax.regex' => 'El formato del precio con impuesto no es válido. Ejemplo válido: 12345.67',
+
+            'discountPrice.required' => 'El precio con descuento es obligatorio.',
+            'discountPrice.numeric' => 'El precio con descuento debe ser numérico.',
+            'discountPrice.regex' => 'El formato del precio con descuento no es válido. Ejemplo válido: 12345.67',
+
+            'category_id.required' => 'La categoría es obligatoria.',
+            'category_id.exists' => 'La categoría seleccionada no existe.',
+
+            'brand_id.required' => 'La marca es obligatoria.',
+            'brand_id.exists' => 'La marca seleccionada no existe.',
+
+            'stock.required' => 'El stock es obligatorio.',
+            'stock.integer' => 'El stock debe ser un número entero.',
+            'stock.min' => 'El stock no puede ser menor que 0.',
+
+            'stockMinimun.required' => 'El stock mínimo es obligatorio.',
+            'stockMinimun.integer' => 'El stock mínimo debe ser un número entero.',
+            'stockMinimun.min' => 'El stock mínimo no puede ser menor que 0.',
+            'stockMinimun.lte' => 'El stock mínimo debe ser menor o igual al stock actual.',
+
+            'image.image' => 'El archivo debe ser una imagen.',
+            'image.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif o webp.',
+            'image.max' => 'La imagen no debe superar los 600 kilobytes.',
+        ];
+}
+
+
 }
 
