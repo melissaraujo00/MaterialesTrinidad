@@ -31,7 +31,7 @@ class UpdateProductRequest extends FormRequest
             'brand_id' => ['required', 'exists:brands,id'],
             'stock' => ['required', 'integer', 'min:0'],
             'stockMinimun' => ['required', 'integer', 'min:0', 'lte:stock'],
-            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:255']
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:1024']
         ];
 
         return $rules;
@@ -76,9 +76,9 @@ class UpdateProductRequest extends FormRequest
         'stockMinimun.min' => 'El stock mínimo no puede ser menor que 0.',
         'stockMinimun.lte' => 'El stock mínimo debe ser menor o igual al stock actual.',
 
-        'imagen.image' => 'El archivo debe ser una imagen.',
-        'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif o webp.',
-        'imagen.max' => 'La imagen no debe superar los 255 kilobytes.',
+        'image.image' => 'El archivo debe ser una imagen.',
+        'image.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg, gif o webp.',
+        'image.max' => 'La imagen no debe superar los 600 kilobytes.',
     ];
 }
 }

@@ -34,4 +34,7 @@ class StoreProduct extends FormRequest
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:255']
         ];
     }
+
+    
 }
+

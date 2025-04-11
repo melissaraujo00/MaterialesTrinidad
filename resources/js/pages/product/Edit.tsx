@@ -13,11 +13,12 @@ export default function ProductEdit() {
       description: string;
       price: number;
       discountPrice: number;
-      priceWithTax:number
+      priceWithTax: number
       category_id: number;
       brand_id: number;
       stock: number;
       stockMinimun: number;
+      image: string;
     };
     brands: { id: number; name: string }[];
     categories: { id: number; name: string }[];
@@ -25,22 +26,38 @@ export default function ProductEdit() {
 
   const [preview, setPreview] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (product.image) {
+      // Asegúrate de que la URL sea absoluta (agregando el dominio si es necesario)
+      if (product.image.startsWith('/storage')) {
+        // Aquí obtenemos la URL base del sitio
+        const baseUrl = window.location.origin;
+        setPreview(baseUrl + product.image);
+        console.log("URL completa:", baseUrl + product.image);
+      } else {
+        setPreview(product.image);
+      }
+    }
+  }, [product]);
+
+
+
   const validationSchema = Yup.object({
     name: Yup.string().min(2, "Debe tener al menos 2 caracteres").required("Requerido"),
     price: Yup.number()
-    .typeError("Por favor ingresa un valor numérico válido")  // Este es el mensaje personalizado
-    .positive("Debe ser positivo")
-    .required("Requerido"),
+      .typeError("Por favor ingresa un valor numérico válido")  // Este es el mensaje personalizado
+      .positive("Debe ser positivo")
+      .required("Requerido"),
     discountPrice: Yup.number().positive("Debe ser positivo").required("Requerido"),
     description: Yup.string().max(255, "Máximo 255 caracteres"),
     category_id: Yup.string().required("Seleccione una categoría"),
     brand_id: Yup.string().required("Seleccione una marca"),
     stock: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
     stockMinimun: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
-    imagen: Yup.mixed()
+    image: Yup.mixed()
       .nullable()
       .test("fileSize", "La imagen es muy grande", (value) => {
-        return !value || (value instanceof File && value.size <= 2 * 1024 * 1024);
+        return !value || (value instanceof File && value.size <= 2 * 1024 * 1024); // Verifica que
       })
       .test("fileFormat", "Formato no soportado", (value) => {
         return !value || (value instanceof File && ["image/jpeg", "image/png", "image/webp"].includes(value.type));
@@ -52,29 +69,29 @@ export default function ProductEdit() {
     data.append("name", values.name);
     data.append("description", values.description || "");
     data.append("price", values.price.toString());
-    data.append("priceWithTax",values.priceWithTax.toString());
+    data.append("priceWithTax", values.priceWithTax.toString());
     data.append("discountPrice", values.discountPrice.toString());
     data.append("category_id", values.category_id.toString());
     data.append("brand_id", values.brand_id.toString());
     data.append("stock", values.stock.toString());
     data.append("stockMinimun", values.stockMinimun.toString());
 
-    if (values.imagen) {
-        data.append("imagen", values.imagen);
+    if (values.image && values.image instanceof File) {
+      data.append("image", values.image);
     }
 
     data.append("_method", "PUT");
 
     router.post(`/products/${product.id}`, data, {
-        onSuccess: () => {
-          setTimeout(() => {
-            toast.success("Producto actualizado con éxito.");
+      onSuccess: () => {
+        setTimeout(() => {
+          toast.success("Producto actualizado con éxito.");
         }, 1000);
-        },
-        onError: (errors) => {
-            console.log(errors)
-          toast.error(Object.values(errors)[0])
-        },
+      },
+      onError: (errors) => {
+        console.log(errors)
+        toast.error(Object.values(errors)[0])
+      },
     });
   };
 
@@ -92,17 +109,17 @@ export default function ProductEdit() {
             description: product.description,
             price: product.price,
             discountPrice: product.discountPrice,
-            priceWithTax: product.priceWithTax , 
+            priceWithTax: product.priceWithTax,
             category_id: product.category_id,
             brand_id: product.brand_id,
             stock: product.stock,
             stockMinimun: product.stockMinimun,
-            imagen: null,
+            image: null,
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur, touched, errors, setFieldValue }) => (
+          {({ values, handleChange, handleBlur, touched, errors, setFieldValue,setFieldTouched }) => (
             <Form className="space-y-2">
               {/* Name */}
               <div>
@@ -138,22 +155,22 @@ export default function ProductEdit() {
 
               {/* Price */}
               <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
-                                <Field
-                                    type="number"
-                                    step="0.01"
-                                    id="price"
-                                    name="price"
-                                    placeholder="Ej: 12.50"
-                                    value={values.price}
-                                    onChange={(event) => {
-                                        const price = parseFloat(event.target.value) ;
-                                        setFieldValue("price", price);
-                                        setFieldValue("priceWithTax", parseFloat((price + price * 0.13).toFixed(2))); // Calcula automáticamente el precio con IVA
-                                    }}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
+                <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
+                <Field
+                  type="number"
+                  step="0.01"
+                  id="price"
+                  name="price"
+                  placeholder="Ej: 12.50"
+                  value={values.price}
+                  onChange={(event) => {
+                    const price = parseFloat(event.target.value);
+                    setFieldValue("price", price);
+                    setFieldValue("priceWithTax", parseFloat((price + price * 0.13).toFixed(2))); // Calcula automáticamente el precio con IVA
+                  }}
+                  onBlur={handleBlur}
+                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                />
                 {touched.price && errors.price && <small className="text-red-500">{errors.price}</small>}
               </div>
               {/* Discount Price */}
@@ -246,30 +263,48 @@ export default function ProductEdit() {
               </div>
 
               {/* Image Upload */}
-              <div className="mb-3">
-                <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Imagen (opcional)</label>
+              <div>
+                <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen</label>
                 <input
+                  id="image"
+                  name="image"
                   type="file"
-                  name="imagen"
                   accept="image/*"
-                  onChange={(event) => {
-                    const file = event.currentTarget.files?.[0];
-                    if (file) {
-                      setPreview(URL.createObjectURL(file));
-                      setFieldValue("imagen", file);
-                    }
+                  onChange={e => {
+                    const file = e.currentTarget.files?.[0] ?? null;
+                    setFieldValue("image", file);
+                    // marcar como tocado para que Formik muestre el error
+                    setFieldTouched("image", true, false);
+                    if (file) setPreview(URL.createObjectURL(file));
                   }}
-                  className="w-full text-gray-950 dark:text-white"
+                  onBlur={() => {
+                    setFieldTouched("image", true, false);
+                  }}
                 />
-              </div>
+                {touched.image && errors.image && (
+                  <div className="text-red-500 mt-1">{errors.image}</div>
+                )}
 
-              {/* Image Preview */}
-              {preview && (
-                <div className="mb-3">
-                  <p className="text-sm mb-1 dark:text-gray-300">Vista previa de la imagen:</p>
-                  <img src={preview} alt="Preview" className="w-32 h-32 object-cover rounded" />
-                </div>
-              )}
+
+                {/* Image Preview */}
+                {preview && (
+                  <div className="mb-3">
+                    <p className="text-sm mb-1 dark:text-gray-300">Vista previa de la imagen:</p>
+                    <img
+                      src={preview}
+                      alt="Vista previa"
+                      className="w-32 h-32 object-cover rounded-md border border-gray-300"
+                      onError={(e) => {
+                        console.error("Error al cargar la imagen:", e);
+                        // Muestra un mensaje de error
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Error+al+cargar";
+                        // También muestra la URL que causó el error
+                        console.log("URL que causó el error:", preview);
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Buttons */}
               <div className="flex justify-start">

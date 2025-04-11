@@ -117,9 +117,18 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
        
-        
-       $product->update($request->validated());
-        
+        $data = $request->validated();
+
+    // Procesar la imagen si se envió
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('uploads', $filename, 'public');
+            $data['image'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
+        }
+    
+        $product->update($data);
+    
         return redirect()->route('products.index')->with('success', 'Producto actualizado correctamente.');
     }
 

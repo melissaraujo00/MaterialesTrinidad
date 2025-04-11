@@ -92,6 +92,8 @@ export default function Products() {
                     </Link>
                 </div>
 
+                
+
                 <DataTable ajax="/api/products/getProductData" options={{
                     language: languageES,
                     responsive: true,
