@@ -8,6 +8,9 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Requests\UpdateProductRequest;
+
+use function Termwind\render;
 
 class ProductController extends Controller
 {
@@ -96,17 +99,28 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Product $product)
     {
-        //
+        $brand = Brand::all();
+        $category = Category::all();
+
+        return Inertia::render('product/Edit', [
+        'product' => $product,
+        'brands' => $brand,
+        'categories' => $category,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+       
+        
+       $product->update($request->validated());
+        
+        return redirect()->route('products.index')->with('success', 'Producto actualizado correctamente.');
     }
 
     /**

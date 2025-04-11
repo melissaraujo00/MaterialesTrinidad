@@ -96,6 +96,7 @@ class CustomerController extends Controller
             'districts' => $districts,
         ]);
     }
+    
 
     /**
      * Update the specified resource in storage.
