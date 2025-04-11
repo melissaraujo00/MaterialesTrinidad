@@ -31,7 +31,8 @@ class StoreBrandRequest extends FormRequest
             ,
             'description' => [
                 'string',
-                'max:50',
+                'max:100',
+                'nullable'
             ],
         ];
     }

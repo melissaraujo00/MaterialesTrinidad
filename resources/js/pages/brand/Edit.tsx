@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
-import { Head, useForm } from "@inertiajs/react";
+import React  from "react";
+import { Head } from "@inertiajs/react";
 import { Toaster, toast } from "sonner";
 import { router } from "@inertiajs/react";
 import * as Yup from 'yup';
 import { useState } from 'react';
 import AppLayout from "@/layouts/app-layout";
-import { Formik, Form, Field } from 'formik';
+import { Formik, Field } from 'formik';
 
 interface Brand {
     id: number;
@@ -22,11 +22,9 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
 
     const validationSchema = Yup.object({
         name: Yup.string().min(3, 'El nombre debe tener al menos 3 caracteres').required('Campo requerido'),
-        description: Yup.string().min(3, 'La descripcion debe tener al menos 3 caracteres').required('Campo requerido')
+        description: Yup.string().min(3, 'La descripcion debe tener al menos 3 caracteres')
     });
 
-    const successMessage = "La marca fue editada Correctamente";
-    const errorMessage = "Fallo al editar la marca";
 
     const handleSubmit = (values: { name: string; description: string }) => {
         if (brandExists) {
@@ -41,6 +39,7 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
             router.reload();
             },
             onError: (err) => {
+                toast.error("Marca editada con éxito.")
                 console.error("Error al editar marca:", err);
                 if (err.name) {
                     toast.error(err.name);
@@ -51,7 +50,7 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
 
     return (
         <AppLayout>
-            <Head title="Edit brand" />
+            <Head title="Editar Marca" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
@@ -60,7 +59,7 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
                 initialValues={{
                     id: brand.id.toString(),
                     name: brand.name,
-                    description: brand.description,
+                    description: brand.description ?? '',
                 }}
                 enableReinitialize={true}
                 validationSchema={validationSchema}
@@ -77,6 +76,7 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
                         <Field
                         type="text"
                         id="name"
+                        placeholder="Ej: Terniun"
                         name="name"
                         value={values.name}
                         onChange={handleChange}
@@ -90,17 +90,17 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
                     {/* First Name */}
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Descripcion
+                        Descripcion (Opcional)
                         </label>
                         <Field
                         type="text"
                         id="description"
                         name="description"
+                        placeholder="Ej: Lamina es una marca de productos de calidad"
                         value={values.description}
                         onChange={handleChange}
                         onBlur={handleBlur}
                         className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                        required
                         />
                         {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
                     </div>

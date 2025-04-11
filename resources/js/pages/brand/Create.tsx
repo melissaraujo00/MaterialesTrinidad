@@ -11,7 +11,7 @@ export default function BrandCreate() {
   const [brandExists] = useState(false);
 
   const validationSchema = Yup.object({
-    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
+    name: Yup.string().min(3, 'El nombre debe tener al menos 3 caracteres').required('Campo requerido'),
     description: Yup.string().min(5, 'La descripción debe tener al menos 5 caracteres'),
   });
 
@@ -27,7 +27,7 @@ export default function BrandCreate() {
 
     router.post("/brands", data, {
       headers: {
-        'Content-Type': 'multipart/form-data', 
+        'Content-Type': 'multipart/form-data',
       },
       onSuccess: () => {
         toast.success("Marca editada con éxito.");
@@ -46,11 +46,11 @@ export default function BrandCreate() {
 
   return (
     <AppLayout>
-      <Head title="Create brand" />
+      <Head title="Crear Marca" />
       <Toaster position="top-right" richColors />
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Create New Brand</h2>
+        <h2 className="text-2xl font-semibold mb-4">Crear Nueva Marca</h2>
 
         <Formik
           initialValues={{
@@ -64,10 +64,11 @@ export default function BrandCreate() {
             <Form className="space-y-2">
               {/* Brand Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Brand Name</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de Marca</label>
                 <Field
                   type="text"
                   id="name"
+                  placeholder="Ej: Ternin"
                   name="name"
                   value={values.name}
                   onChange={handleChange}
@@ -80,11 +81,12 @@ export default function BrandCreate() {
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripcion (Opciona)</label>
                 <Field
                   as="textarea"
                   id="description"
                   name="description"
+                  placeholder="Ej: Lamina es una marca de productos de calidad"
                   value={values.description}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -97,7 +99,7 @@ export default function BrandCreate() {
               <div className="flex justify-start space-x-3">
                 <button
                   type="button"
-                  onClick={() => window.history.back()} 
+                  onClick={() => window.history.back()}
                   className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
                 >
                   Cancelar
@@ -106,7 +108,7 @@ export default function BrandCreate() {
                   type="submit"
                   className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
                 >
-                  Create Brand
+                  Crear Marca
                 </button>
               </div>
             </Form>

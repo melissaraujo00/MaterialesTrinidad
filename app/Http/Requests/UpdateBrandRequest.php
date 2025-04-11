@@ -27,15 +27,15 @@ class UpdateBrandRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'max:30',
+                'max:50',
                 Rule::unique('brands', 'name')->ignore($this->route(
                     'brand'
                 ))
                 ],
                 'description' => [
-                    'required',
                     'string',
-                    'max:100'
+                    'max:100',
+                    'nullable'
                 ],
         ];
     }
