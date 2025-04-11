@@ -45,8 +45,8 @@ export default function ProductCreate() {
         data.append("stock", values.stock);
         data.append("stockMinimun", values.stockMinimun)
 
-        if (values.imagen) {
-            data.append("imagen", values.imagen);
+        if (values.image) {
+            data.append("image", values.image);
         }
 
         router.post("/products", data, {
@@ -80,7 +80,7 @@ export default function ProductCreate() {
                         brand_id: "",
                         stock: "",
                         stockMinimun: "",
-                        imagen: null,
+                        image: null,
                     }}
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
@@ -233,13 +233,13 @@ export default function ProductCreate() {
                                 <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Imagen (opcional)</label>
                                 <input
                                     type="file"
-                                    name="imagen"
+                                    name="image"
                                     accept="image/*"
                                     onChange={(event) => {
                                         const file = event.currentTarget.files?.[0];
                                         if (file) {
                                             setPreview(URL.createObjectURL(file));
-                                            setFieldValue("imagen", file);
+                                            setFieldValue("image", file);
                                         }
                                     }}
                                     className="w-full text-gray-950 dark:text-white"
