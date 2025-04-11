@@ -6,6 +6,7 @@ import { usePage } from "@inertiajs/react";
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import AppLayout from "@/layouts/app-layout";
+import { forEach } from "jszip";
 
 interface Customer {
   id: number;
@@ -74,7 +75,7 @@ export default function CustomerEdit() {
   }, [customer, customerDepartmentId, customerMunicipalityId]);
 
   const validationSchema = Yup.object({
-    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido '),
+    name: Yup.string().min(3, 'El nombre debe tener al menos 3 caracteres').required('El nombre es requerido '),
     email: Yup.string().email('Formato de correo no válido').matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'El correo debe ser válido'),
     phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
     nit: Yup.string().matches(/^\d{4}-\d{6}-\d{3}-\d{1}$/, 'El NIT debe tener el formato 0000-000000-000-0'),
@@ -99,11 +100,13 @@ export default function CustomerEdit() {
     router.post(`/customers/${customer.id}`, data, {
       onSuccess: () => {
         toast.success("Cliente actualizado con éxito.");
-      },
-      onError: (errors) => {
-        console.error("Errores de validación:", errors);
-        toast.error("Hubo un error al actualizar el cliente. Verifica los datos.");
-      },
+        setTimeout(() => {
+        }, 1000);
+    },
+    onError: (errors) => {
+      console.error("Errores de validación:", errors);
+      toast.error(Object.values(errors)[0]);
+    },
     });
   };
 

@@ -39,7 +39,8 @@ class UpdateCustomerRequest extends FormRequest
             'nit' => [
                 'nullable',
                 'string',
-                'max:17'
+                'max:17',
+                Rule::unique('customers', 'nit')->ignore($this->route('customer'))
             ],
             'district_id' => [
                 'required',
@@ -72,7 +73,9 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
-            'name.min' => 'El nombre debe tener al menos 3 caracteres.'
+            'name.min' => 'El nombre debe tener al menos 3 caractereeeees.',
+
+            'nit.unique'=>'el nit debe ser un campo unico'
         ];
     }
 }
