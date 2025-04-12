@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, User, ListChecks, Box, Users} from 'lucide-react';
+import { LayoutGrid, User, ListChecks, Box, Users, ListIcon} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -31,7 +31,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Marcas',
         href: '/brands',
-        icon: Users,
+        icon: ListIcon,
     },
     {
         title: 'Productos',

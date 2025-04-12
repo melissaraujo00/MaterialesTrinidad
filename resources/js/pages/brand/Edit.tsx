@@ -39,11 +39,15 @@ const BrandEdit: React.FC<Props> = ({ brand }) => {
             router.reload();
             },
             onError: (err) => {
-                toast.error("Marca editada con éxito.")
-                console.error("Error al editar marca:", err);
                 if (err.name) {
                     toast.error(err.name);
                 }
+                else{
+                    toast.error("Error al editar marca.")
+                console.error("Error al editar marca", err);
+                }
+
+
             },
         });
     };
