@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PermissionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,3 +21,4 @@ Route::get('/categories/getCategoryData', [CategoryController::class, 'getCatego
 Route::get('/customers/getCustomerData', [CustomerController::class, 'getCustomerData']);
 Route::get('/brands/getBrandData', [BrandController::class, 'getBrandData']);
 Route::get('/products/getProductData', [ProductController::class, 'getProductData']);
+Route::get('/permissions/getPermissionData', [PermissionController::class, 'getPermissionData']);

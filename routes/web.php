@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PermissionController;
 use App\Models\Product;
 
 Route::get('/', function () {
@@ -20,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('customers', CustomerController::class);
     Route::resource('brands', BrandController::class);
     Route::resource('products', ProductController::class);
+    Route::resource('permissions', PermissionController::class);
     // Ruta para el dashboard
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
