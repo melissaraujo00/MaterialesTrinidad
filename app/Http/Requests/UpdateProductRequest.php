@@ -20,7 +20,7 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        
+
         $rules = [
            'name' => ['required', 'string', 'max:45'],
             'description' => ['nullable', 'string'],
