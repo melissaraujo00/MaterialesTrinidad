@@ -8,14 +8,12 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PermissionController;
-use App\Models\Product;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    // Ruta para verificar si una categoría ya existe (solo nombre)
     Route::resource('users', UserController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('customers', CustomerController::class);
