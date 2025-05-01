@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Permission;
 use Inertia\Inertia;
 use App\http\Requests\StorePermissionRequest;
-
+use App\Http\Requests\UpdatePermissionRequest;
 use Illuminate\Http\Request;
 
 class PermissionController extends Controller
@@ -40,5 +40,18 @@ class PermissionController extends Controller
         Permission::create($request->validated());
 
         return redirect()->route('permissions.index')->with('success', 'Permission created successfully.');
+    }
+
+    public function edit(Permission $permission){
+        return Inertia::render('permission/Edit', [
+            'permission' => $permission,
+        ]);
+    }
+
+    public function update(UpdatePermissionRequest $request, Permission $permission)
+    {
+       
+        $permission->update($request->validated());
+        return redirect()->route('permissions.index')->with('success', 'Cliente actualizado correctamente.');
     }
 }
