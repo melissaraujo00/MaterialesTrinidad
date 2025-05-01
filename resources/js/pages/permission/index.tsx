@@ -8,6 +8,7 @@ import DT from "datatables.net-dt";
 import languageES from "datatables.net-plugins/i18n/es-ES.mjs";
 import "datatables.net-buttons-dt";
 import "datatables.net-responsive-dt";
+import DeleteEntityModal from "../../components/DeleteEntityModal"
 // import "datatables.net-buttons/js/buttons.html5";
 // import "datatables.net-buttons/js/buttons.print";
 import jszip from "jszip";
@@ -20,7 +21,7 @@ interface Permission {
     name: string;
 }
 
-export default function Permissions(){
+export default function Permissions() {
     const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -28,8 +29,9 @@ export default function Permissions(){
         setSelectedPermission(Permission);
         setIsDeleteModalOpen(true);
     };
+    
     const columns = [
-        { data: 'id'},
+        { data: 'id' },
         { data: 'name' },
         {
             data: null,
@@ -47,12 +49,12 @@ export default function Permissions(){
 
     return (
         <AppLayout>
-            <Head title="Permisos"/>
-            <Toaster position="top-right" richColors/>
+            <Head title="Permisos" />
+            <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
 
-            <div className="flex justify-end">
+                <div className="flex justify-end">
                     <Link
                         href="/permissions/create"
                         className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
@@ -77,6 +79,13 @@ export default function Permissions(){
                     </thead>
                 </DataTable>
             </div>
+            <DeleteEntityModal
+                isOpen={isDeleteModalOpen}
+                closeModal={() => setIsDeleteModalOpen(false)}
+                entity={selectedPermission}
+                entityType="Marcas"
+                deleteEndpoint="/permissions"
+            />
         </AppLayout>
     );
 }
