@@ -25,7 +25,9 @@ return new class extends Migration
             $table->foreignIdFor(Brand::class)->constrained();
             $table->integer('stockMinimun');
             $table->string('image', 255)->nullable();
+            $table->softDeletes();
             $table->timestamps();
+
         });
     }
 
