@@ -58,7 +58,11 @@ export default function Products() {
         {
             data: 'image',
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="200" height="200" class="object-cover rounded shadow-md transition-transform duration-200 hover:scale-110"/>`;
+                if (cellData) {
+                    td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="200" height="200" class="object-cover rounded shadow-md transition-transform duration-200 hover:scale-110"/>`;
+                } else {
+                    td.innerHTML = `<span class="text-gray-500 italic">Sin imagen</span>`;
+                }
             }
         },
         {
@@ -68,7 +72,7 @@ export default function Products() {
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 td.innerHTML = `
                 <a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>
-                <button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                <button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>
             `;
 
                 td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
@@ -92,7 +96,7 @@ export default function Products() {
                     </Link>
                 </div>
 
-                
+
 
                 <DataTable ajax="/api/products/getProductData" options={{
                     language: languageES,

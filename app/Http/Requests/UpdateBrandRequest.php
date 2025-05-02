@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreBrandRequest extends FormRequest
+class UpdateBrandRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,29 +23,29 @@ class StoreBrandRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'name' =>[
+            'name' => [
                 'required',
                 'string',
+                'min:3',
                 'max:50',
-                'unique:brands'
-            ]
-            ,
-            'description' => [
-                'string',
-                'max:100',
-                'nullable'
-            ],
+                Rule::unique('brands', 'name')->ignore($this->route(
+                    'brand'
+                ))
+                ],
+                'description' => [
+                    'string',
+                    'max:100',
+                    'nullable'
+                ],
         ];
     }
-
     public function messages()
     {
         return [
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
             'name.min' => 'El nombre debe tener al menos 3 caracteres.',
-            'name.unique' => 'Este nombre de marca ya está registrado.'
-
+            'name.unique' => 'Este nombre de Marca ya está registrado.'
         ];
     }
 }

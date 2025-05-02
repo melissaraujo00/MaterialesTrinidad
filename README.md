@@ -19,7 +19,7 @@ DB_PASSWORD= suclave
 5️⃣ **Ejecutar migraciones** con `php artisan migrate`.  
 
 6️⃣ **Agregar nuevo usaurio** con `php artisan tinker` y colocar 
-\App\Models\User::create(['name'=>'usuario','firstName'=> 'Dalia','lastName' => 'apellido', 'email'=> 'correo', 'birthdate' => 'fechaNacimiento','phoneNumber' => 'numero', 'password'=> 'contraseña', 'role_id'=> 1 ]);
+\App\Models\User::create(['name'=>'Steveen','firstName'=> 'Steveen','lastName' => 'Gomez', 'email'=> 'steveen@ejemplo.com', 'birthdate' => '2004-0510','phoneNumber' => '12345678', 'password'=> bcrypt('Contrase;a123'), 'role_id'=> 1 ]);
 
 7️⃣  **Compilar los assets** con `npm run build` (o `npm run dev` en desarrollo).  
 

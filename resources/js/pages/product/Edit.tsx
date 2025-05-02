@@ -49,7 +49,7 @@ export default function ProductEdit() {
       .positive("Debe ser positivo")
       .required("Requerido"),
     discountPrice: Yup.number().positive("Debe ser positivo").required("Requerido"),
-    description: Yup.string().max(255, "Máximo 255 caracteres"),
+    description: Yup.string().max(255, "Máximo 255 caracteres").nullable(),
     category_id: Yup.string().required("Seleccione una categoría"),
     brand_id: Yup.string().required("Seleccione una marca"),
     stock: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
@@ -97,11 +97,11 @@ export default function ProductEdit() {
 
   return (
     <AppLayout>
-      <Head title="Crear Producto" />
+      <Head title="Editar Producto" />
       <Toaster position="top-right" richColors />
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Producto</h2>
+        <h2 className="text-2xl font-semibold mb-4">Editar Producto</h2>
 
         <Formik
           initialValues={{
