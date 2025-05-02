@@ -28,7 +28,9 @@ export default function DeleteEntityModal({isOpen,closeModal,entity,entityType,d
             onSuccess:()=>{
                 toast.success(`${entityType} eliminado correctamente`)
                 closeModal()
-                window.location.reload();
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
             },
             onError:(errors)=>{
                 console.error(`error al eliminar ${entityType}`,errors);

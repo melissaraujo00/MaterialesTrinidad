@@ -83,7 +83,7 @@ export default function Permissions() {
                 isOpen={isDeleteModalOpen}
                 closeModal={() => setIsDeleteModalOpen(false)}
                 entity={selectedPermission}
-                entityType="Marcas"
+                entityType="Permiso"
                 deleteEndpoint="/permissions"
             />
         </AppLayout>
