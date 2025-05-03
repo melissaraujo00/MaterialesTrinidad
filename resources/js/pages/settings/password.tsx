@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Password settings',
+        title: 'Ajuste de Contraseña',
         href: '/settings/password',
     },
 ];
@@ -52,7 +52,7 @@ export default function Password() {
                         reset('password', 'password_confirmation');
                         passwordInput.current?.focus();
                     }
-    
+
                     if (errors.current_password) {
                         reset('current_password');
                         currentPasswordInput.current?.focus();
@@ -63,12 +63,12 @@ export default function Password() {
             setValidationError("La contraseña debe tener al menos 8 caracteres, una mayúscula y un símbolo.");
         }
 
-        
+
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title="Ajuste de Perfil "/>
             <SettingsLayout>
                 <div className="space-y-6 ">
                     <HeadingSmall title="Actualizar contraseña" description="Asegúrate de que tu cuenta use una contraseña larga y aleatoria para mantenerla segura." />
@@ -81,7 +81,7 @@ export default function Password() {
                                 id="current_password"
                                 ref={currentPasswordInput}
                                 value={data.current_password}
-                                onChange={(e) =>{ 
+                                onChange={(e) =>{
                                     setData('current_password', e.target.value)
                                     errors.current_password=""
 
@@ -143,7 +143,7 @@ export default function Password() {
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-neutral-600">Saved</p>
+                                <p className="text-sm text-neutral-600">Guardar</p>
                             </Transition>
                         </div>
                     </form>
