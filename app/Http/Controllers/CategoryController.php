@@ -9,6 +9,7 @@ use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use Illuminate\Http\RedirectResponse;
 
+
 class CategoryController extends Controller
 {
 

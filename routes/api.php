@@ -8,6 +8,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +24,6 @@ Route::get('/customers/getCustomerData', [CustomerController::class, 'getCustome
 Route::get('/brands/getBrandData', [BrandController::class, 'getBrandData']);
 Route::get('/products/getProductData', [ProductController::class, 'getProductData']);
 Route::get('/permissions/getPermissionData', [PermissionController::class, 'getPermissionData']);
+Route::get('/roles/getRolData', [RoleController::class, 'getRolData']);
+
+

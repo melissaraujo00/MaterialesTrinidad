@@ -42,6 +42,11 @@ const mainNavItems: NavItem[] = [
         title: 'Permisos',
         href: '/permissions',
         icon: UserRoundCog,
+    }, 
+    {
+        title: 'Roles',
+        href: '/roles',
+        icon: UserCheck,
     }
 
 ];
