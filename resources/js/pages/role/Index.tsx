@@ -14,6 +14,7 @@ import jszip from "jszip";
 import DeleteEntityModal from "../../components/DeleteEntityModal";
 
 window.JSZip = jszip;
+DataTable.use(DT);
 
 // Definir la interfaz para un rol
 interface Role {
@@ -23,10 +24,7 @@ interface Role {
 }
 
 export default function Roles() {
-  // Inicializar DataTable dentro del componente funcional
-  useEffect(() => {
-    DataTable.use(DT);
-  }, []);
+  
   
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

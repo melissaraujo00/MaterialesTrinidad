@@ -88,7 +88,7 @@ export default function RoleCreate({ roles }) {
                     checkRoleName(e.target.value);
                   }}
                   onBlur={handleBlur}
-                  className={`mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white ${
+                  className={`mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white ${
                     touched.name && (errors.name || nameExists) ? 'border-red-500' : ''
                   }`}
                 />
@@ -110,7 +110,7 @@ export default function RoleCreate({ roles }) {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   rows="4"
-                  className={`mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white ${
+                  className={`mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white ${
                     touched.description && errors.description ? 'border-red-500' : ''
                   }`}
                 />
