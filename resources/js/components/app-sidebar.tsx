@@ -6,6 +6,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog} from 'lucide-react';
 import AppLogo from './app-logo';
+import { Children } from 'react';
 
 const mainNavItems: NavItem[] = [
     {
@@ -19,50 +20,51 @@ const mainNavItems: NavItem[] = [
         icon: User,
     },
     {
-        title: 'Categoria',
-        href: '/categories',
-        icon: ListChecks,
-    },
-    {
         title: 'Clientes',
         href: '/customers',
         icon: Users,
     },
     {
-        title: 'Marcas',
-        href: '/brands',
-        icon: ListIcon,
-    },
-    {
-        title: 'Productos',
-        href: '/products',
+        title: 'Inventario',
         icon: Box,
+        children: [
+            {
+                title: 'Categoria',
+                href: '/categories',
+                icon: ListChecks,
+            },
+            {
+                title: 'Marcas',
+                href: '/brands',
+                icon: ListIcon,
+            },
+            {
+                title: 'Productos',
+                href: '/products',
+                icon: Box,
+            },
+        ]
     },
     {
-        title: 'Permisos',
-        href: '/permissions',
+        title: 'Roles y Permisos',
         icon: UserRoundCog,
-    }, 
-    {
-        title: 'Roles',
-        href: '/roles',
-        icon: UserCheck,
+        children: [
+            {
+                title: 'Permisos',
+                href: '/permissions',
+                icon: UserRoundCog,
+            },
+            {
+                title: 'Roles',
+                href: '/roles',
+                icon: UserCheck,
+            }
+        ]
     }
 
 ];
 
-// const footerNavItems: NavItem[] = [
-//     {
-//         title: 'Repository',
-//         href: 'https://github.com/laravel/react-starter-kit',
-//         icon: Folder,
-//     },
-//     {
-//         title: 'Documentation',
-//         href: 'https://laravel.com/docs/starter-kits',
-//         icon: BookOpen,
-//     },
-// ];
+
 
 export function AppSidebar() {
     return (

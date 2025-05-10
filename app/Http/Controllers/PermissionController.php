@@ -50,9 +50,9 @@ class PermissionController extends Controller
 
     public function update(UpdatePermissionRequest $request, Permission $permission)
     {
-       
+
         $permission->update($request->validated());
-        return redirect()->route('permissions.index')->with('success', 'Cliente actualizado correctamente.');
+        return redirect()->route('permissions.index')->with('success', 'Permiso actualizado correctamente.');
     }
 
     public function destroy(Permission $permission)
