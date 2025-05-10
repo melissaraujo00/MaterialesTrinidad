@@ -76,7 +76,7 @@ export default function RoleCreate({ roles }) {
               {/* Role Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Role Name
+                  Nombre del rol
                 </label>
                 <Field
                   type="text"
@@ -100,7 +100,7 @@ export default function RoleCreate({ roles }) {
               {/* Description */}
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Description
+                  Descripción
                 </label>
                 <Field
                   as="textarea"
@@ -133,7 +133,7 @@ export default function RoleCreate({ roles }) {
                     isSubmitting || nameExists ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
                   }`}
                 >
-                  {isSubmitting ? 'Creando...' : 'Create Role'}
+                  {isSubmitting ? 'Creando...' : 'Crear rol'}
                 </button>
               </div>
             </Form>
