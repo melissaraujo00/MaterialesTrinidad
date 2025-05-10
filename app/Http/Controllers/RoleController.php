@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Role;
 use Inertia\Inertia;
 use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Requests\UpdateRoleRequest;
 
 class RoleController extends Controller
 {
@@ -44,16 +46,7 @@ class RoleController extends Controller
             'roles' => $roles
         ]);
     }
-    /*public function create()
-{
-    return Inertia::render('role/create', [
-        'roles' => Role::select('id', 'name')->get(), // Solo necesitamos id y nombre para la verificación
-    ]);*/
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreRoleRequest $request)
     {
         Role::create($request->validated());
@@ -72,17 +65,20 @@ class RoleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Role $role)
     {
-        //
+        return Inertia::render('role/Edit',[
+            'role'=>$role
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRoleRequest $request, Role $role)
     {
-        //
+        $role->update($request->validated());
+        return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**
