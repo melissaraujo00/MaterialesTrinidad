@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 use Inertia\Inertia;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateCategoryRequest;
@@ -12,11 +12,6 @@ use App\Http\Requests\UpdateRoleRequest;
 class RoleController extends Controller
 {
     public function getRolData(){
-        // $rol = Role::query()
-        // ->select('id', 'name', 'description')->get();
-
-        // return response()->json(['data' => $rol]);
-
         $role = Role::query()
             ->select('id', 'name', 'description')
             ->get();
@@ -25,9 +20,6 @@ class RoleController extends Controller
     }
     public function index()
     {
-        // return Inertia::render('roles/Index', [
-        //     'roles' => Role::all(),
-        // ]);
         return Inertia::render('role/Index', [
             'roles' => Role::all(),
         ]);
