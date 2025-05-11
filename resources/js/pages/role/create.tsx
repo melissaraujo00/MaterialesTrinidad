@@ -38,7 +38,7 @@ export default function RoleCreate() {
         <Toaster position="top-right" richColors />
 
         <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-          <h2 className="text-2xl font-semibold mb-4">Create New User</h2>
+          <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Rol</h2>
 
           <Formik
             initialValues={{
