@@ -50,7 +50,7 @@ class StoreUserRequest extends FormRequest
                 'min:8',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/'
             ],
-            'role_id' => ['required', 'integer', 'exists:roles,id']
+            'role' => ['required',  'exists:roles,name']
         ];
     }
 
@@ -84,9 +84,8 @@ class StoreUserRequest extends FormRequest
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.regex' => 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número.',
 
-            'role_id.required' => 'El rol es obligatorio.',
-            'role_id.integer' => 'El rol debe ser un número entero.',
-            'role_id.exists' => 'El rol seleccionado no es válido.',
+            'role.required' => 'El rol es obligatorio.',
+            'role.exists' => 'El rol seleccionado no es válido.',
         ];
     }
 

@@ -10,21 +10,32 @@ import { Formik, Form, Field } from 'formik';
 
 export default function UserCreate() {
   const { roles } = usePage<{
-    roles: { id: number; name: string }[];
+    roles: { name: string }[];
   }>().props;
 
+  console.log(roles);
+
+
   const validationSchema = Yup.object({
-    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido'),
-    price: Yup.number().positive('El precio debe ser positivo').required('El precio es requerido'),
-    priceWithTax: Yup.number().positive('Debe ser positivo'),
-    discountPrice: Yup.number().positive('Debe ser positivo'),
-    stock: Yup.number().integer().min(0, 'Debe ser un número válido'),
-    stockMinimun: Yup.number().integer().min(0, 'Debe ser un número válido'),
-    category_id: Yup.number().required('Debe seleccionar una categoría'), // Cambiado a número
-    brand_id: Yup.number().required('Debe seleccionar una marca'), // Cambiado a número
+    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
+    firstName: Yup.string().min(2, 'El primer nombre debe tener al menos 2 caracteres').required('Campo requerido'),
+    lastName: Yup.string().min(2, 'El apellido debe tener al menos 2 caracteres').required('Campo requerido'),
+    email: Yup.string().email('Formato de correo no válido').required('Campo requerido'),
+    birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
+    phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
+    password: Yup.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .matches(/[A-Z]/, 'La contraseña debe tener al menos una letra mayúscula')
+    .matches(/[\W_]/, 'La contraseña debe tener al menos un carácter especial')
+    .required('Campo requerido'),
+    confirmPassword: Yup.string().oneOf([Yup.ref('password'), undefined], 'Las contraseñas no coinciden').required('Campo requerido'),
+    role: Yup.string().required('Campo requerido'),
 });
 
+
+
   const handleSubmit = (values: any) => {
+
     const data = new FormData();
     data.append("name", values.name);
     data.append("firstName", values.firstName);
@@ -33,7 +44,10 @@ export default function UserCreate() {
     data.append("birthdate", values.birthdate);
     data.append("phoneNumber", values.phoneNumber);
     data.append("password", values.password);
-    data.append("role_id", String(values.role_id));
+    data.append("role", values.role);
+    console.log(data);
+
+
 
     router.post("/users", data, {
       onSuccess: () => {
@@ -74,7 +88,7 @@ export default function UserCreate() {
             phoneNumber: "",
             password: "",
             confirmPassword: "",
-            role_id: "",
+            role: "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -203,22 +217,22 @@ export default function UserCreate() {
 
               {/* Role */}
               <div>
-                <label htmlFor="role_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
                 <Field
                   as="select"
-                  id="role_id"
-                  name="role_id"
-                  value={values.role_id}
+                  id="role"
+                  name="role"
+                  value={values.role}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 >
                   <option value="" disabled>Select Role</option>
                   {roles.map((role) => (
-                    <option key={role.id} value={role.id}>{role.name}</option>
+                    <option key={role.name} value={role.name}>{role.name}</option>
                   ))}
                 </Field>
-                {touched.role_id && errors.role_id && <small className="text-red-500">{errors.role_id}</small>}
+                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
               </div>
 
               {/* Submit Button */}

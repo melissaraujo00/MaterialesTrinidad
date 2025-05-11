@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Permission extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
     protected $fillable =[
         'id',
         'name'

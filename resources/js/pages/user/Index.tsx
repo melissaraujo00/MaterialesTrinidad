@@ -30,7 +30,15 @@ export default function Users() {
         { data: 'email' },
         { data: 'birthdate' },
         { data: 'phoneNumber' },
-        { data: 'role'},
+        {
+        data: 'roles',
+        name: 'roles',
+        render: function (data, type, row) {
+            return data && data.length > 0 ? data.join(', ') : '-';
+        },
+        orderable: false,
+        searchable: false
+    },
         {
             data: null,
             orderable: false,

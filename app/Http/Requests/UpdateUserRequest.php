@@ -30,7 +30,7 @@ class UpdateUserRequest extends FormRequest
             'email' => ['required', 'string', 'email', Rule::unique('users', 'email')->ignore($this->user)],
             'birthdate' => ['required', 'string'],
             'phoneNumber' => ['required', 'string', Rule::unique('users', 'phoneNumber')->ignore($this->user)],
-            'role_id' => ['required', 'integer', 'exists:roles,id'],
+            'role' => ['required',  'exists:roles,name'],
         ];
 
         // Si la contraseña está presente en la solicitud (es decir, si se va a cambiar)
@@ -80,9 +80,8 @@ class UpdateUserRequest extends FormRequest
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.regex' => 'La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número.',
 
-            'role_id.required' => 'El rol es obligatorio.',
-            'role_id.integer' => 'El rol debe ser un número entero.',
-            'role_id.exists' => 'El rol seleccionado no es válido.',
+            'role.required' => 'El rol es obligatorio.',
+            'role.exists' => 'El rol seleccionado no es válido.',
         ];
     }
 }
