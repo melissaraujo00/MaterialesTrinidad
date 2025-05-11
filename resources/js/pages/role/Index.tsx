@@ -43,9 +43,7 @@ export default function Roles() {
         orderable: false,
         searchable: false,
         createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-            td.innerHTML = `
-            <a href="roles/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>
-        `;
+            td.innerHTML = `<a href="roles/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
 
             td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
         }

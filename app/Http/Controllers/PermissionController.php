@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Permission;
+use Spatie\Permission\Models\Permission;
 use Inertia\Inertia;
 use App\http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;

@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Inertia\Inertia;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Models\Permission as ModelsPermission;
+use Spatie\Permission\Contracts\Permission as ContractsPermission;
 
 class RoleController extends Controller
 {
@@ -30,19 +33,15 @@ class RoleController extends Controller
      */
     public function create()
     {
-         // Obtener todas las categorías (si es necesario, se puede modificar)
-        $roles = Role::all(); // Si quieres pre-poblar con datos existentes, puedes hacer una consulta similar
-
-        // Devolver la vista de Inertia con las categorías
-        return Inertia::render('role/create', [
-            'roles' => $roles
-        ]);
+        $permissions = Permission::select('id', 'name')
+                                ->get();
+        return Inertia::render('role/create', ['permissions' => $permissions]);
     }
 
     public function store(StoreRoleRequest $request)
     {
-        Role::create($request->validated());
-
+        $role = Role::create($request->validated());
+        $role->syncPermissions($request->input('permissions'));
         return redirect()->route('roles.index')->with('success', 'Role created successfully.');
     }
 

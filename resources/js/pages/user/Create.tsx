@@ -13,9 +13,6 @@ export default function UserCreate() {
     roles: { name: string }[];
   }>().props;
 
-  console.log(roles);
-
-
   const validationSchema = Yup.object({
     name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
     firstName: Yup.string().min(2, 'El primer nombre debe tener al menos 2 caracteres').required('Campo requerido'),
