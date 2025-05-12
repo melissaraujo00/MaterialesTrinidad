@@ -21,3 +21,4 @@ class HandleAppearance
         return $next($request);
     }
 }
+//         return redirect()->route('permissions.index')->with('success', 'Permiso eliminado correctamente.');

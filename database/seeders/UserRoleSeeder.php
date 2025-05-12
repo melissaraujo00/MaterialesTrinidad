@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 
 class UserRoleSeeder extends Seeder
 {
@@ -15,5 +17,14 @@ class UserRoleSeeder extends Seeder
     {
         $user = User::find(1);
         $user->assignRole('Administrador');
+
+        Permission::create(['name' => 'ver usuarios']);
+        Permission::create(['name' => 'crear usuarios']);
+        Permission::create(['name' => 'editar usuarios']);
+        Permission::create(['name' => 'eliminar usuarios']);
+        Permission::create(['name' => 'ver clientes']);
+        Permission::create(['name' => 'crear clientes']);
+        Permission::create(['name' => 'editar clientes']);
+        Permission::create(['name' => 'eliminar clientes']);
     }
 }

@@ -9,8 +9,7 @@ use Inertia\Inertia;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Requests\UpdateRoleRequest;
-use App\Models\Permission as ModelsPermission;
-use Spatie\Permission\Contracts\Permission as ContractsPermission;
+
 
 class RoleController extends Controller
 {
@@ -58,17 +57,28 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        return Inertia::render('role/Edit',[
-            'role'=>$role
+        $permissions = Permission::select('id', 'name')->get();
+        $rolePermissions = $role->permissions->pluck('name')->toArray();
+
+        return Inertia::render('role/Edit', [
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'description' => $role->description,
+                'permissions' => $rolePermissions, 
+            ],
+            'permissions' => $permissions
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
+
     public function update(UpdateRoleRequest $request, Role $role)
     {
         $role->update($request->validated());
+        $role->syncPermissions($request->input('permissions')); // Actualiza los permisos del rol
         return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
     }
 

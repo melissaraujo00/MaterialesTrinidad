@@ -1,78 +1,69 @@
-import React, { useEffect } from "react";
-import { Head, useForm } from "@inertiajs/react";  // Importa `useForm`
+import React from "react";
+import { Head } from "@inertiajs/react";
 import { Toaster, toast } from "sonner";
 import { router } from "@inertiajs/react";
 import * as Yup from 'yup';
-import { useState } from 'react';
 import AppLayout from "@/layouts/app-layout";
 import { Formik, Form, Field } from 'formik';
+
+interface Permission {
+  id: number;
+  name: string;
+}
 
 interface Role {
   id: number;
   name: string;
   description: string;
-
+  permissions: string[]; // nombres de permisos asignados
 }
 
 interface Props {
   role: Role;
+  permissions: Permission[];
 }
 
-const RoleEdit: React.FC<Props> = ({ role }) => {
-  const [roleExists] = useState(false);
-
+const RoleEdit: React.FC<Props> = ({ role, permissions }) => {
   const validationSchema = Yup.object({
-    name: Yup.string().min(3, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    description: Yup.string().min(3, 'la descripcion debe tener al menos 2 caracteres').required('Campo requerido')
+    name: Yup.string().min(3, 'El nombre debe tener al menos 3 caracteres').required('Campo requerido'),
+    description: Yup.string().min(3, 'La descripción debe tener al menos 3 caracteres').required('Campo requerido'),
+    permissions: Yup.array().min(1, 'Selecciona al menos un permiso').required('Campo requerido'),
   });
 
-  const successMessage = "rol fue editado Correctamente";
-  const errorMessage = "Fallo al editar rol";
-
-  const handleSubmit = (values: { name: string; description: string }) => {
-    if (roleExists) {
-      toast.error("Este nombre de este rol ya existe.");
-      return;
-    }
+  const handleSubmit = (values: { name: string; description: string; permissions: string[] }) => {
     router.put(route('roles.update', role.id), values, {
       onSuccess: () => {
         setTimeout(() => {
-            toast.success(successMessage);
+          toast.success("Rol actualizado correctamente");
         }, 1000);
         router.reload();
       },
-      onError: (err) => {
-        if (err.name) {
-            toast.error(err.name);
-        }
-        else{
-            toast.error(errorMessage);
-        }
+      onError: () => {
+        toast.error("Fallo al editar rol");
       },
     });
   };
 
   return (
     <AppLayout>
-      <Head title="Edit role" />
+      <Head title="Editar Rol" />
       <Toaster position="top-right" richColors />
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Editar roles</h2>
+        <h2 className="text-2xl font-semibold mb-4">Editar Rol</h2>
         <Formik
           initialValues={{
-            id: role.id.toString(),
             name: role.name,
             description: role.description,
+            permissions: role.permissions || [],
           }}
           enableReinitialize={true}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur, touched, errors,  handleSubmit}) => (
-
-            <form onSubmit={handleSubmit} className="space-y-2">
-              {/* Name */}
+          {({ values, setFieldValue, handleChange, handleBlur, touched, errors }) => (
+            <Form className="space-y-2">
+              {/* Nombre */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Nombre
@@ -90,7 +81,7 @@ const RoleEdit: React.FC<Props> = ({ role }) => {
                 {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
               </div>
 
-              {/* First Name */}
+              {/* Descripción */}
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Descripción
@@ -107,11 +98,43 @@ const RoleEdit: React.FC<Props> = ({ role }) => {
                 />
                 {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
               </div>
-              {/* Submit Button */}
+
+              {/* Permisos */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Permisos</label>
+                <div className="flex flex-wrap gap-4">
+                  {permissions.map((permission) => (
+                    <label key={permission.name} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        name="permissions"
+                        value={permission.name}
+                        checked={values.permissions.includes(permission.name)}
+                        onChange={() => {
+                          if (values.permissions.includes(permission.name)) {
+                            setFieldValue(
+                              "permissions",
+                              values.permissions.filter((p) => p !== permission.name)
+                            );
+                          } else {
+                            setFieldValue("permissions", [...values.permissions, permission.name]);
+                          }
+                        }}
+                      />
+                      <span>{permission.name}</span>
+                    </label>
+                  ))}
+                </div>
+                {touched.permissions && errors.permissions && (
+                  <small className="text-red-500">{errors.permissions}</small>
+                )}
+              </div>
+
+              {/* Botones */}
               <div className="flex justify-start space-x-5">
                 <button
                   type="button"
-                  onClick={() => window.history.back()}  // Volver a la página anterior
+                  onClick={() => window.history.back()}
                   className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
                 >
                   Cancelar
@@ -123,8 +146,7 @@ const RoleEdit: React.FC<Props> = ({ role }) => {
                   Actualizar
                 </button>
               </div>
-            </form>
-
+            </Form>
           )}
         </Formik>
       </div>
