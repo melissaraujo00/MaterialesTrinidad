@@ -8,6 +8,11 @@ use App\Http\Requests\StoreTypeRequest;
 
 class TypeController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Type::class, 'type');
+    }
+
     public function getTypeData(){
         $type = Type::query()
             ->select('id', 'type', 'description')
@@ -20,7 +25,14 @@ class TypeController extends Controller
     public function index()
     {
         return Inertia::render('type/Index', [
-            'types' => Type::all()
+            'types' => Type::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 
