@@ -41,8 +41,16 @@ class CustomerController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('customer/Index', [
             'customers' => Customer::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 
@@ -88,7 +96,7 @@ class CustomerController extends Controller
         $departments = Department::all();
         $municipalities = Municipality::all();
         $districts = District::all();
-    
+
         return Inertia::render('customer/Edit', [
             'customer' => $customer,
             'departments' => $departments,
@@ -96,14 +104,14 @@ class CustomerController extends Controller
             'districts' => $districts,
         ]);
     }
-    
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-       
+
         $customer->update($request->validated());
         return redirect()->route('customers.index')->with('success', 'Cliente actualizado correctamente.');
     }

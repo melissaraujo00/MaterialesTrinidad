@@ -22,8 +22,16 @@ class RoleController extends Controller
     }
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('role/Index', [
             'roles' => Role::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 
@@ -65,7 +73,7 @@ class RoleController extends Controller
                 'id' => $role->id,
                 'name' => $role->name,
                 'description' => $role->description,
-                'permissions' => $rolePermissions, 
+                'permissions' => $rolePermissions,
             ],
             'permissions' => $permissions
         ]);

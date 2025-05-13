@@ -37,7 +37,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    
+
 public function index(): Response
 {
     $user = auth()->user();
@@ -47,7 +47,6 @@ public function index(): Response
         'roles' => Role::all(),
         'auth' => [
             'user' => [
-                // Otros datos si quieres...
                 'id' => $user?->id,
                 'name' => $user?->name,
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],

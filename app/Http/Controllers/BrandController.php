@@ -23,8 +23,16 @@ class BrandController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('brand/index', [
             'brands' => Brand::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 

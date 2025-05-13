@@ -20,8 +20,16 @@ class PermissionController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('permission/Index', [
             'permissions' => Permission::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 
