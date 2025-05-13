@@ -12,6 +12,11 @@ use Illuminate\Http\RedirectResponse;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Category::class, 'category');
+    }
+
 
     public function getCategoryData()
     {
@@ -23,8 +28,16 @@ class CategoryController extends Controller
     }
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('category/Index', [
             'categories' => Category::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 

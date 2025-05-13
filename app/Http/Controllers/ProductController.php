@@ -17,6 +17,10 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->authorizeResource(Product::class, 'product');
+    }
 
      public function getProductData()
      {
@@ -44,8 +48,16 @@ class ProductController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('product/Index', [
             'products' => Product::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 

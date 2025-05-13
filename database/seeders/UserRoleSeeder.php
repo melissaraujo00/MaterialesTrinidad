@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserRoleSeeder extends Seeder
 {
@@ -15,16 +16,54 @@ class UserRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::find(1);
-        $user->assignRole('Administrador');
+        // Crear el rol Administrador si no existe
+        $adminRole = Role::firstOrCreate(['name' => 'Administrador']);
 
-        Permission::create(['name' => 'ver usuarios']);
-        Permission::create(['name' => 'crear usuarios']);
-        Permission::create(['name' => 'editar usuarios']);
-        Permission::create(['name' => 'eliminar usuarios']);
-        Permission::create(['name' => 'ver clientes']);
-        Permission::create(['name' => 'crear clientes']);
-        Permission::create(['name' => 'editar clientes']);
-        Permission::create(['name' => 'eliminar clientes']);
+        // Lista de permisos
+        $permissions = [
+            'ver usuarios',
+            'crear usuarios',
+            'editar usuarios',
+            'eliminar usuarios',
+            'ver clientes',
+            'crear clientes',
+            'editar clientes',
+            'eliminar clientes',
+            'ver inventario',
+            'ver categorias',
+            'crear categoria',
+            'editar categoria',
+            'eliminar categoria',
+            'ver marcas',
+            'crear marca',
+            'editar marca',
+            'eliminar marca',
+            'ver productos',
+            'crear producto',
+            'editar producto',
+            'eliminar producto',
+            'ver Roles y Permisos',
+            'Ver Roles',
+            'Crear Rol',
+            'Editar Rol',
+            'Ver Permisos',
+            'Crear Permiso',
+            'Editar Permiso',
+        ];
+
+        // Crear los permisos si no existen
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Asignar todos los permisos al rol Administrador
+        $adminRole->syncPermissions(Permission::all());
+
+        // Asignar el rol Administrador al usuario con ID 1
+        $user = User::find(1);
+        if ($user) {
+            $user->assignRole($adminRole);
+        }
+
     }
 }

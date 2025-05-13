@@ -13,6 +13,11 @@ use App\Http\Requests\UpdateRoleRequest;
 
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Role::class, 'role');
+    }
+
     public function getRolData(){
         $role = Role::query()
             ->select('id', 'name', 'description')
@@ -22,9 +27,18 @@ class RoleController extends Controller
     }
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('role/Index', [
-            'roles' => Role::all(),
-        ]);
+                'roles' => Role::with('permissions')->get()->map(function($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'description' => $role->description,
+                        'permissions' => $role->permissions->pluck('name')->toArray(),
+                    ];
+                }),
+                // ...otros datos
+            ]);
     }
 
     /**
@@ -65,7 +79,7 @@ class RoleController extends Controller
                 'id' => $role->id,
                 'name' => $role->name,
                 'description' => $role->description,
-                'permissions' => $rolePermissions, 
+                'permissions' => $rolePermissions,
             ],
             'permissions' => $permissions
         ]);

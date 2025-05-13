@@ -23,17 +23,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        Inertia::share([
-        'auth.user' => function () {
-            $user = Auth::user();
-            //dd($user->getAllPermissions());
-
-            return $user ? [
-                'id' => $user->id,
-                'name' => $user->name,
-                'permissions' => $user->getAllPermissions()->pluck('name'),
-            ] : null;
-        },
-    ]);
     }
 }

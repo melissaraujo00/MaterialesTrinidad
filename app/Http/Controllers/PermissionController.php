@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class PermissionController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Permission::class, 'permission');
+    }
+
     public function getPermissionData()
     {
         $permissions = Permission::query()
@@ -20,8 +25,16 @@ class PermissionController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('permission/Index', [
             'permissions' => Permission::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 
