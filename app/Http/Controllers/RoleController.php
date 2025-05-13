@@ -29,15 +29,16 @@ class RoleController extends Controller
     {
         $user = auth()->user();
         return Inertia::render('role/Index', [
-            'roles' => Role::all(),
-            'auth' => [
-                'user' => [
-                    'id' => $user?->id,
-                    'name' => $user?->name,
-                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
-                ]
-            ]
-        ]);
+                'roles' => Role::with('permissions')->get()->map(function($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'description' => $role->description,
+                        'permissions' => $role->permissions->pluck('name')->toArray(),
+                    ];
+                }),
+                // ...otros datos
+            ]);
     }
 
     /**

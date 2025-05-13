@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Head, usePage, Link } from "@inertiajs/react";
+import { usePage, Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import DataTable from "datatables.net-react";
@@ -16,19 +15,32 @@ interface Role {
   id: number;
   name: string;
   description: string;
+  permissions: string[];
 }
 
 export default function Roles() {
-
   const page = usePage();
   const permissions =
     page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
       ? page.props.auth.user.permissions
       : [];
   const hasPermission = (perm: string) => permissions.includes(perm);
+
+  // Obtén los roles únicos directamente de las props
+  const uniqueRoles: Role[] = page.props.roles ?? [];
+
   const columns = [
-    { data: "name" },
-    { data: "description" },
+    { data: "name", title: "Nombre del Rol" },
+    { data: "description", title: "Descripción" },
+    {
+      data: "permissions",
+      title: "Permisos",
+      render: function (data: string[]) {
+        return data && data.length > 0 ? data.join(", ") : "-";
+      },
+      orderable: false,
+      searchable: false,
+    },
     {
       data: null,
       title: "Acciones",
@@ -40,7 +52,6 @@ export default function Roles() {
           actions += `<a href="roles/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
         }
         td.innerHTML = actions;
-
       },
     },
   ];
@@ -52,7 +63,6 @@ export default function Roles() {
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
         <div className="flex justify-end">
-          {/* Botón para agregar rol solo si tiene permiso */}
           {hasPermission("Crear Rol") && (
             <Link
               href="/roles/create"
@@ -64,7 +74,7 @@ export default function Roles() {
         </div>
 
         <DataTable
-          ajax="/api/roles/getRolData"
+          data={uniqueRoles}
           options={{
             language: languageES,
             responsive: true,
@@ -80,12 +90,12 @@ export default function Roles() {
             <tr>
               <th>Nombre del Rol</th>
               <th>Descripción</th>
+              <th>Permisos</th>
               <th>Acciones</th>
             </tr>
           </thead>
         </DataTable>
       </div>
-
     </AppLayout>
   );
 }
