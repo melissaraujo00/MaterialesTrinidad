@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 
 class BrandController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Brand::class, 'brand');
+    }
+
 
     public function getBrandData()
     {

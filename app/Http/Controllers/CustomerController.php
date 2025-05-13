@@ -14,6 +14,11 @@ use App\Http\Requests\UpdateUserRequest;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Customer::class, 'customer');
+    }
+
     public function getCustomerData()
     {
         $data = Customer::query()

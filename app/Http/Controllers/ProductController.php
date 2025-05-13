@@ -17,6 +17,10 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->authorizeResource(Product::class, 'product');
+    }
 
      public function getProductData()
      {

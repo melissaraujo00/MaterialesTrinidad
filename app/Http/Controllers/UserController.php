@@ -10,8 +10,17 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Spatie\Permission\Models\Role;
 
+
+
+
 class UserController extends Controller
 {
+
+
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
 
     public function getUsersData()
     {

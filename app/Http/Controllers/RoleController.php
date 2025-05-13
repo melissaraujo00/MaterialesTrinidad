@@ -13,6 +13,11 @@ use App\Http\Requests\UpdateRoleRequest;
 
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Role::class, 'role');
+    }
+
     public function getRolData(){
         $role = Role::query()
             ->select('id', 'name', 'description')
