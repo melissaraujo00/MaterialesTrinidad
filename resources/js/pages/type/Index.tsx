@@ -19,7 +19,8 @@ DataTable.use(DT);
 
 interface Type {
     id: number;
-    name: string;
+    type: string;
+    description: string;
 }
 
 export default function Types() {
@@ -48,7 +49,7 @@ export default function Types() {
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 let actions = "";
                 if (hasPermission("Editar Tipo Movimiento")) {
-                    actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
+                    actions += `<a href="types/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
                 }
                 if (hasPermission("Eliminar Tipo Movimiento")) {
                     actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;

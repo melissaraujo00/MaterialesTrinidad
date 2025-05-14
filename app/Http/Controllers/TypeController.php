@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreTypeRequest;
+use App\Http\Requests\UpdateTypeRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Type;
-use App\Http\Requests\StoreTypeRequest;
 
 class TypeController extends Controller
 {
@@ -68,17 +71,21 @@ class TypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Type $type)
     {
-        //
+        return Inertia::render('type/Edit', [
+            'type' => $type,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateTypeRequest $request, Type $type)
     {
-        //
+        $type->update($request->validated());
+
+        return redirect()->route('types.index')->with('success', 'Type updated successfully.');
     }
 
     /**
