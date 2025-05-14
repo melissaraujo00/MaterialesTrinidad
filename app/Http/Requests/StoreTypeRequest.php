@@ -34,8 +34,20 @@ class StoreTypeRequest extends FormRequest
             [
                 'string',
                 'min:5',
-                'max:100'
+                'max:100',
+                'unique:types'
             ],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'type.required' => 'El nombre es obligatorio.',
+            'type.string' => 'El nombre debe ser una cadena de texto.',
+            'type.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'type.unique' => 'Este tipo de movimiento ya está registrado.'
+
         ];
     }
 }

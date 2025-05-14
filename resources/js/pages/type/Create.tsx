@@ -33,7 +33,11 @@ export default function TypeCreate() {
         setTimeout(() => router.visit("/types"), 1000);
       },
       onError: (errors) => {
-        toast.error(errors.name || "Ocurrió un error al crear el tipo de movimiento.");
+        console.error("Error al crear categoría:", errors);
+        if (errors.type) {
+            toast.error(errors.type);
+            
+        }
       },
     });
   };
