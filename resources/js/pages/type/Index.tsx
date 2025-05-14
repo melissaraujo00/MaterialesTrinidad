@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Head } from "@inertiajs/react";
+import { Head, usePage} from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { Link } from "@inertiajs/react";
@@ -23,6 +23,13 @@ interface Type {
 }
 
 export default function Types() {
+    const page = usePage();
+    const permissions =
+        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
+            ? page.props.auth.user.permissions
+            : [];
+    const hasPermission = (perm: string) => permissions.includes(perm);
+    
     const [selectedType, setSelectedType] = useState<Type | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -36,18 +43,23 @@ export default function Types() {
         { data: 'description' },
         {
             data: null,
-            title: "Acciones",
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                td.innerHTML = `
-            <a href="types/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>
-            <button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
-        `;
+                let actions = "";
+                if (hasPermission("Editar Tipo Movimiento")) {
+                    actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
+                }
+                if (hasPermission("Eliminar Tipo Movimiento")) {
+                    actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
+                }
+                td.innerHTML = actions;
 
-                td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
+                if (hasPermission("Eliminar Tipo Movimiento")) {
+                    td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
+                }
             }
-        },
+        }
     ];
 
     return (
@@ -57,13 +69,14 @@ export default function Types() {
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
-                    {/* Botón para agregar tipo de movimiento */}
-                    <Link
-                        href="/types/create"
-                        className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
-                    >
-                        Agregar tipo
-                    </Link>
+                   {hasPermission("Crear Tipo Movimiento") && (
+                        <Link
+                            href="/types/create"
+                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+                        >
+                            Agregar Tipo
+                        </Link>
+                    )}
                 </div>
 
                 <DataTable ajax="/api/types/getTypeData" options={{

@@ -24,6 +24,7 @@ class TypeController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('type/Index', [
             'types' => Type::all(),
             'auth' => [

@@ -49,6 +49,11 @@ class UserRoleSeeder extends Seeder
             'Ver Permisos',
             'Crear Permiso',
             'Editar Permiso',
+            'Ver Movimientos',
+            'Ver Tipo Movimiento',
+            'Crear Tipo Movimiento',
+            'Editar Tipo Movimiento',
+            'Eliminar Tipo Movimiento'
         ];
 
         // Crear los permisos si no existen
