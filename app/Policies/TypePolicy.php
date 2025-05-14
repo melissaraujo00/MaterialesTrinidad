@@ -13,7 +13,7 @@ class TypePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('Ver Tipos Movimientos');
+        return $user->can('Ver Tipo Movimiento');
     }
 
     /**
