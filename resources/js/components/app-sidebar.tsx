@@ -75,11 +75,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Movimientos',
                 href: '/movements',
                 icon: ListChecks,
+                permission: 'Ver Movimiento',
             },
             {
                 title: 'Tipos',
                 href: '/types',
                 icon: ListChecks,
+                permission: 'Ver Tipo Movimiento',
             }
         ]
     }
