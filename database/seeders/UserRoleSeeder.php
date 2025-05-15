@@ -51,7 +51,7 @@ class UserRoleSeeder extends Seeder
             'Ver Permisos',
             'Crear Permiso',
             'Editar Permiso',
-           'Ver Movimientos y Tipos',
+            'Ver Movimientos y Tipos',
             'Ver Tipo Movimiento',
             'Crear Tipo Movimiento',
             'Editar Tipo Movimiento',
@@ -98,17 +98,21 @@ class UserRoleSeeder extends Seeder
 
         // Asignar el rol Administrador al usuario con ID 1
         $user = User::find(1);
-        $warehouseUser = User::find(5);
-        $supervisorUser = User::find(2);
         if ($user) {
             $user->assignRole($adminRole);
         }
-        else if ($warehouseUser){
+
+
+        // Asignar el rol Bodega al usuario con ID 5
+        $warehouseUser = User::find(5);
+        if ($warehouseUser) {
             $warehouseUser->assignRole($warehouseRole);
         }
-        else if($supervisorUser){
+
+        // Asignar el rol Supervisor al usuario con ID 2
+        $supervisorUser = User::find(2);
+        if ($supervisorUser) {
             $supervisorUser->assignRole($supervisorRole);
         }
-
     }
 }

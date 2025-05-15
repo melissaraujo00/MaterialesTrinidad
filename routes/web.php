@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\MovementController;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -24,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('permissions', PermissionController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('types', TypeController::class);
+    Route::resource('movements', MovementController::class);
     // Ruta para el dashboard
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

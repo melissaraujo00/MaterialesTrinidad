@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\MovementController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,5 +28,6 @@ Route::get('/products/getProductData', [ProductController::class, 'getProductDat
 Route::get('/permissions/getPermissionData', [PermissionController::class, 'getPermissionData']);
 Route::get('/roles/getRolData', [RoleController::class, 'getRolData']);
 Route::get('/types/getTypeData', [TypeController::class, 'getTypeData']);
+Route::get('/movements/getMovementData', [MovementController::class, 'getMovementData']);
 
 
