@@ -104,10 +104,10 @@ class UserRoleSeeder extends Seeder
             $user->assignRole($adminRole);
         }
         else if ($warehouseUser){
-            $user2->assignRole($warehouseRole);
+            $warehouseUser->assignRole($warehouseRole);
         }
         else if($supervisorUser){
-            $user->assignRole($supervisorRole);
+            $supervisorUser->assignRole($supervisorRole);
         }
 
     }
