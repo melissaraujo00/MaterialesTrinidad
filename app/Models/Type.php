@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Type extends Model
 {
-    protected $fillable = 
+    use SoftDeletes;
+
+    protected $fillable =
     [
         'type',
         'description'
