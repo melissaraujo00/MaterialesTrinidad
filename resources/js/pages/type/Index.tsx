@@ -3,14 +3,14 @@ import { Head, usePage} from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { Link } from "@inertiajs/react";
-import DeleteCategoryModal from "@/components/DeleteCategoryModal";
+// import DeleteTypeModal from "@/components/DeleteTypeModal";
 import DataTable from "datatables.net-react";
 import DT from "datatables.net-dt";
 import languageES from "datatables.net-plugins/i18n/es-ES.mjs";
 import "datatables.net-buttons-dt";
 import "datatables.net-responsive-dt";
-import "datatables.net-buttons/js/buttons.html5";
-import "datatables.net-buttons/js/buttons.print";
+// import "datatables.net-buttons/js/buttons.html5";
+// import "datatables.net-buttons/js/buttons.print";
 import jszip from "jszip";
 import DeleteEntityModal from "../../components/DeleteEntityModal";
 
@@ -93,6 +93,7 @@ export default function Types() {
                         <tr>
                             <th>Tipo de movimiento</th>
                             <th>Descripción</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                 </DataTable>
