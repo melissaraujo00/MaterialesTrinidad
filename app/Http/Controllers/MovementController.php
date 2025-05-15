@@ -8,6 +8,10 @@ use Inertia\Inertia;
 
 class MovementController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Movement::class, 'movement');
+    }
 
      public function getMovementData()
      {
