@@ -6,6 +6,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight} from 'lucide-react';
 import AppLogo from './app-logo';
+import { permission } from 'process';
 
 const mainNavItems: NavItem[] = [
     {
@@ -75,11 +76,13 @@ const mainNavItems: NavItem[] = [
                 title: 'Movimientos',
                 href: '/movements',
                 icon: ListChecks,
+                permission: 'Ver Movimiento',
             },
             {
                 title: 'Tipos',
                 href: '/types',
                 icon: ListChecks,
+                permission: 'Ver Tipo Movimiento',
             }
         ]
     }
