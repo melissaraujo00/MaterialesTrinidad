@@ -29,8 +29,9 @@ export default function TypeCreate() {
 
     router.post("/types", values, {
       onSuccess: () => {
-        toast.success("Tipo de movimiento creado con éxito.");
-        setTimeout(() => router.visit("/types"), 1000);
+        
+        setTimeout(() => toast.success("Tipo de movimiento creado con éxito"), 1000);
+        router.visit("/types");
       },
       onError: (errors) => {
         console.error("Error al crear categoría:", errors);
