@@ -51,35 +51,39 @@ class UserRoleSeeder extends Seeder
             'Ver Permisos',
             'Crear Permiso',
             'Editar Permiso',
-            'Ver Movimientos',
+            'Ver Movimientos y Tipos',
             'Ver Tipo Movimiento',
             'Crear Tipo Movimiento',
             'Editar Tipo Movimiento',
-            'Eliminar Tipo Movimiento'
+            'Eliminar Tipo Movimiento',
+            'Ver Movimiento',
+            'Crear Movimiento',
+            'Editar Movimiento',
+            'Eliminar Movimiento'
         ];
 
         $warehousePermissions = [
-            'Ver Movimientos',
+            'Ver Movimientos y Tipos',
             'Ver Tipo Movimiento',
             'Crear Tipo Movimiento',
             'Editar Tipo Movimiento',
-            'Eliminar Tipo Movimiento'
-        ];
-
-        $warehousePermissions = [
-            'Ver Movimientos',
-            'Ver Tipo Movimiento',
-            'Crear Tipo Movimiento',
-            'Editar Tipo Movimiento',
-            'Eliminar Tipo Movimiento'
+            'Eliminar Tipo Movimiento',
+            'Ver Movimiento',
+            'Crear Movimiento',
+            'Editar Movimiento',
+            'Eliminar Movimiento'
         ];
 
         $supervisorPermissions = [
-            'Ver Movimientos',
+            'Ver Movimientos y Tipos',
             'Ver Tipo Movimiento',
             'Crear Tipo Movimiento',
             'Editar Tipo Movimiento',
-            'Eliminar Tipo Movimiento'
+            'Eliminar Tipo Movimiento',
+            'Ver Movimiento',
+            'Crear Movimiento',
+            'Editar Movimiento',
+            'Eliminar Movimiento'
         ];
 
 
