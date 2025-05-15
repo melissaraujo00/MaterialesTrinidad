@@ -89,8 +89,8 @@ export default function Movements() {
                 }} columns={columns} className="display">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Hour</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
                             <th>Cantidad</th>
                             <th>Producto</th>
                             <th>Tipo de movimiento</th>
