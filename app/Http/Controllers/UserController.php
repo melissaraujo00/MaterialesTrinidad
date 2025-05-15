@@ -8,15 +8,24 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
+
+
+
 
 class UserController extends Controller
 {
 
+
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
+
     public function getUsersData()
     {
         $users = User::query()
-            ->with('role')
+            ->with('roles')
             ->get()
             ->map( function ($user){
                 return [
@@ -27,7 +36,7 @@ class UserController extends Controller
                     'email' => $user->email,
                     'birthdate'=> $user->birthdate,
                     'phoneNumber' => $user->phoneNumber,
-                    'role' => $user->role->name,
+                    'roles' => $user->roles->pluck('name')->toArray(),
 
                 ];
             });
@@ -37,14 +46,23 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
-    {
-        return Inertia::render('user/Index', [
-            'users' => User::all(),
-            'roles' => Role::all(),  // Obtener los roles y pasarlos a la vista
-        ]);
 
-    }
+public function index(): Response
+{
+    $user = auth()->user();
+
+    return Inertia::render('user/Index', [
+        'users' => User::all(),
+        'roles' => Role::all(),
+        'auth' => [
+            'user' => [
+                'id' => $user?->id,
+                'name' => $user?->name,
+                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+            ]
+        ]
+    ]);
+}
     /**
      * Show the form for creating a new resource.
      */
@@ -63,7 +81,8 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        User::create($request->validated());
+        $user = User::create($request->validated());
+        $user->syncRoles($request->role);
         return redirect()->route('users.index')->with('success', 'User created successfully');
     }
 
@@ -80,7 +99,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $user->load('role');
+        $user->load('roles');
         $roles = Role::all();
 
         return Inertia::render('user/Edit', [
@@ -95,7 +114,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $user->update($request->validated());
-
+        $user->syncRoles($request->role);
         return redirect()->route(route: 'users.index')->with(key: 'success', value: 'User updated successfully');
     }
 

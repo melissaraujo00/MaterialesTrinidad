@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('birthdate');
             $table->string('phoneNumber', 15);
             $table->string('password');
-            $table->foreignIdFor(Role::class)->constrained();
+            // $table->foreignIdFor(Role::class)->constrained();
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

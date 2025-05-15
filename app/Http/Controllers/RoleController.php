@@ -3,18 +3,42 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Inertia\Inertia;
+use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Http\Requests\UpdateRoleRequest;
+
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->authorizeResource(Role::class, 'role');
+    }
+
+    public function getRolData(){
+        $role = Role::query()
+            ->select('id', 'name', 'description')
+            ->get();
+
+        return response()->json(['data' => $role]);
+    }
     public function index()
     {
-        $roles = Role::all();
-
-        return response()->json($roles);
+        $user = auth()->user();
+        return Inertia::render('role/Index', [
+                'roles' => Role::with('permissions')->get()->map(function($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'description' => $role->description,
+                        'permissions' => $role->permissions->pluck('name')->toArray(),
+                    ];
+                }),
+                // ...otros datos
+            ]);
     }
 
     /**
@@ -22,15 +46,16 @@ class RoleController extends Controller
      */
     public function create()
     {
-        //
+        $permissions = Permission::select('id', 'name')
+                                ->get();
+        return Inertia::render('role/create', ['permissions' => $permissions]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request)
     {
-        //
+        $role = Role::create($request->validated());
+        $role->syncPermissions($request->input('permissions'));
+        return redirect()->route('roles.index')->with('success', 'Role created successfully.');
     }
 
     /**
@@ -44,17 +69,31 @@ class RoleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Role $role)
     {
-        //
+        $permissions = Permission::select('id', 'name')->get();
+        $rolePermissions = $role->permissions->pluck('name')->toArray();
+
+        return Inertia::render('role/Edit', [
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'description' => $role->description,
+                'permissions' => $rolePermissions,
+            ],
+            'permissions' => $permissions
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+
+    public function update(UpdateRoleRequest $request, Role $role)
     {
-        //
+        $role->update($request->validated());
+        $role->syncPermissions($request->input('permissions')); // Actualiza los permisos del rol
+        return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**

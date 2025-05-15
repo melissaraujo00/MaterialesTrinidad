@@ -12,11 +12,10 @@ interface User {
   birthdate: string;
   email: string;
   phoneNumber: string;
-  role_id: number;
+  role: string;
 }
 
 interface Role {
-  id: number;
   name: string;
 }
 
@@ -35,7 +34,7 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
       .matches(/^[0-9]{8}$/, "El número de teléfono debe tener 8 dígitos y solo contener números")
       .required("Campo requerido"),
     birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
-    role_id: Yup.number().required("Campo requerido").positive("El rol es inválido").integer("El rol es inválido")
+    role: Yup.string().required("Campo requerido")
   });
 
   const { data, setData, put, processing, errors } = useForm({
@@ -45,7 +44,7 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
     birthdate: user.birthdate,
     email: user.email,
     phoneNumber: user.phoneNumber,
-    role_id: user.role_id,
+    role: user.role,
   });
 
   useEffect(() => {
@@ -56,7 +55,7 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
       birthdate: user.birthdate,
       email: user.email,
       phoneNumber: user.phoneNumber,
-      role_id: user.role_id,
+      role: user.role,
 
     });
   }, [user]);
@@ -73,7 +72,7 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
     const { value } = e.target;
     setData((prevData) => ({
       ...prevData,
-      role_id: parseInt(value), // Convertir el valor a número
+      role: value, // Convertir el valor a número
     }));
   };
 
@@ -103,6 +102,7 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
       .catch((validationErrors) => {
         // Mostrar errores de validación en los campos
         validationErrors.inner.forEach((error: any) => {
+            console.error(error.message);
           toast.error(error.message); // Muestra el mensaje de error de la validación
         });
       });
@@ -221,25 +221,25 @@ const UserEdit: React.FC<Props> = ({ user, roles }) => {
 
           {/* Role */}
           <div>
-            <label htmlFor="role_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Role
             </label>
             <select
-              id="role_id"
-              name="role_id"
-              value={data.role_id}
+              id="role"
+              name="role"
+              value={data.role}
               onChange={handleSelectChange}
               className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
               required
             >
               <option value="" disabled>Select Role</option>
               {roles.map((role) => (
-                <option key={role.id} value={role.id}>
+                <option key={role.name} value={role.name}>
                   {role.name}
                 </option>
               ))}
             </select>
-            {errors.role_id && <div className="text-red-500 text-sm">{errors.role_id}</div>}
+            {errors.role && <div className="text-red-500 text-sm">{errors.role}</div>}
           </div>
 
           {/* Submit Button */}

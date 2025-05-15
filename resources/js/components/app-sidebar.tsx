@@ -1,10 +1,10 @@
-
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { usePage } from '@inertiajs/react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog} from 'lucide-react';
+import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -17,49 +17,92 @@ const mainNavItems: NavItem[] = [
         title: 'Usuarios',
         href: '/users',
         icon: User,
-    },
-    {
-        title: 'Categoria',
-        href: '/categories',
-        icon: ListChecks,
+        permission: 'ver usuarios',
     },
     {
         title: 'Clientes',
         href: '/customers',
         icon: Users,
+        permission: 'ver clientes',
     },
     {
-        title: 'Marcas',
-        href: '/brands',
-        icon: ListIcon,
-    },
-    {
-        title: 'Productos',
-        href: '/products',
+        title: 'Inventario',
         icon: Box,
+        children: [
+            {
+                title: 'Categoria',
+                href: '/categories',
+                icon: ListChecks,
+                permission: 'ver categorias',
+            },
+            {
+                title: 'Marcas',
+                href: '/brands',
+                icon: ListIcon,
+                permission: 'ver marcas',
+            },
+            {
+                title: 'Productos',
+                href: '/products',
+                icon: Box,
+                permission: 'ver productos',
+            },
+        ]
     },
     {
-        title: 'Permisos',
-        href: '/permissions',
+        title: 'Roles y Permisos',
         icon: UserRoundCog,
+        children: [
+            {
+                title: 'Permisos',
+                href: '/permissions',
+                icon: UserRoundCog,
+                permission: 'Ver Permisos',
+            },
+            {
+                title: 'Roles',
+                href: '/roles',
+                icon: UserCheck,
+                permission: 'Ver Roles',
+            }
+        ]
+    },
+    {
+        title: 'Movimientos',
+        icon: ArrowLeftRight,
+        children: [
+            {
+                title: 'Movimientos',
+                href: '/movements',
+                icon: ListChecks,
+            },
+            {
+                title: 'Tipos',
+                href: '/types',
+                icon: ListChecks,
+            }
+        ]
     }
-
 ];
 
-// const footerNavItems: NavItem[] = [
-//     {
-//         title: 'Repository',
-//         href: 'https://github.com/laravel/react-starter-kit',
-//         icon: Folder,
-//     },
-//     {
-//         title: 'Documentation',
-//         href: 'https://laravel.com/docs/starter-kits',
-//         icon: BookOpen,
-//     },
-// ];
+// Función recursiva para filtrar ítems según permisos
+function filterNavItems(items: NavItem[], hasPermission: (perm: string) => boolean): NavItem[] {
+    return items
+        .filter(item => !item.permission || hasPermission(item.permission))
+        .map(item =>
+            item.children
+                ? { ...item, children: filterNavItems(item.children, hasPermission) }
+                : item
+        )
+        .filter(item => !item.children || item.children.length > 0);
+}
 
 export function AppSidebar() {
+    const permissions = usePage().props.auth?.user?.permissions ?? [];
+    const hasPermission = (perm: string) => permissions.includes(perm);
+
+    const filteredNavItems = filterNavItems(mainNavItems, hasPermission);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -75,11 +118,10 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={filteredNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

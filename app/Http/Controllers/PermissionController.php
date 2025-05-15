@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Permission;
+use Spatie\Permission\Models\Permission;
 use Inertia\Inertia;
 use App\http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class PermissionController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Permission::class, 'permission');
+    }
+
     public function getPermissionData()
     {
         $permissions = Permission::query()
@@ -20,8 +25,16 @@ class PermissionController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
         return Inertia::render('permission/Index', [
             'permissions' => Permission::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
 
@@ -50,9 +63,9 @@ class PermissionController extends Controller
 
     public function update(UpdatePermissionRequest $request, Permission $permission)
     {
-       
+
         $permission->update($request->validated());
-        return redirect()->route('permissions.index')->with('success', 'Cliente actualizado correctamente.');
+        return redirect()->route('permissions.index')->with('success', 'Permiso actualizado correctamente.');
     }
 
     public function destroy(Permission $permission)
