@@ -1,9 +1,10 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { usePage } from '@inertiajs/react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -63,6 +64,24 @@ const mainNavItems: NavItem[] = [
                 href: '/roles',
                 icon: UserCheck,
                 permission: 'Ver Roles',
+            }
+        ]
+    },
+    {
+        title: 'Movimientos',
+        icon: ArrowLeftRight,
+        children: [
+            {
+                title: 'Movimientos',
+                href: '/movements',
+                icon: ListChecks,
+                permission: 'Ver Movimiento',
+            },
+            {
+                title: 'Tipos',
+                href: '/types',
+                icon: ListChecks,
+                permission: 'Ver Tipo Movimiento',
             }
         ]
     }
