@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMovementRequest;
+use App\Models\Product;
+use App\Models\Type;
 use Illuminate\Http\Request;
 use App\Models\Movement;
 use Inertia\Inertia;
@@ -54,16 +57,44 @@ class MovementController extends Controller
      */
     public function create()
     {
-        //
+        $type = Type::all();
+        $product = Product::all();
+
+        return Inertia::render('movement/Create', [
+            'types' => $type,
+            'products' => $product
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(StoreMovementRequest $request)
+{
+    $validated = $request->validated();
+
+    // Obtener el producto y tipo por ID
+    $product = Product::findOrFail($validated['product_id']);
+    $type = Type::findOrFail($validated['type_id']);
+
+    // Actualizar stock según tipo
+    if ($type->type === 'entrada') {
+        $product->stock += $validated['product_quantity'];
+    } elseif ($type->type === 'salida') {
+        if ($product->stock < $validated['product_quantity']) {
+            return redirect()->back()->withErrors(['product_quantity' => 'Stock insuficiente para realizar la salida.']);
+        }
+        $product->stock -= $validated['product_quantity'];
     }
+
+    // Guardar cambios en el producto
+    $product->save();
+
+    // Crear el movimiento
+    Movement::create($validated);
+
+    return redirect()->route('movements.index')->with('success', 'Movimiento creado y stock actualizado exitosamente.');
+}
 
     /**
      * Display the specified resource.

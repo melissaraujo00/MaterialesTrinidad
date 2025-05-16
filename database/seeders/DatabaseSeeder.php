@@ -35,7 +35,8 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             MunicipalitySeeder::class,
             DistrictSeeder::class,
-            UserRoleSeeder::class
+            UserRoleSeeder::class,
+            TypeSeeder::class,
         ]);
 
         //  Customer::factory(20)->create();
