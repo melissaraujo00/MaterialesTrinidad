@@ -73,15 +73,15 @@ export default function Products() {
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 let actions = "";
-                if (hasPermission("editar productos")) {
+                if (hasPermission("editar producto")) {
                     actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
                 }
-                if (hasPermission("eliminar productos")) {
+                if (hasPermission("eliminar producto")) {
                     actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
                 }
                 td.innerHTML = actions;
 
-                if (hasPermission("eliminar productos")) {
+                if (hasPermission("eliminar producto")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                 }
             }
@@ -95,7 +95,7 @@ export default function Products() {
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
-                    {hasPermission("crear productos") && (
+                    {hasPermission("crear producto") && (
                         <Link
                             href="/products/create"
                             className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"

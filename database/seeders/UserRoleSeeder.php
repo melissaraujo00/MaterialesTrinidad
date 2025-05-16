@@ -18,8 +18,6 @@ class UserRoleSeeder extends Seeder
     {
         // Crear el rol Administrador si no existe
         $adminRole = Role::firstOrCreate(['name' => 'Administrador']);
-        $supervisorRole = Role::firstOrCreate(['name' => 'Supervisor']);
-        $warehouseRole = Role::firstOrCreate(['name' => 'Bodega']);
 
         // Lista de permisos
         $permissions = [
@@ -62,30 +60,6 @@ class UserRoleSeeder extends Seeder
             'Eliminar Movimiento'
         ];
 
-        $warehousePermissions = [
-            'Ver Movimientos y Tipos',
-            'Ver Tipo Movimiento',
-            'Crear Tipo Movimiento',
-            'Editar Tipo Movimiento',
-            'Eliminar Tipo Movimiento',
-            'Ver Movimiento',
-            'Crear Movimiento',
-            'Editar Movimiento',
-            'Eliminar Movimiento'
-        ];
-
-        $supervisorPermissions = [
-            'Ver Movimientos y Tipos',
-            'Ver Tipo Movimiento',
-            'Crear Tipo Movimiento',
-            'Editar Tipo Movimiento',
-            'Eliminar Tipo Movimiento',
-            'Ver Movimiento',
-            'Crear Movimiento',
-            'Editar Movimiento',
-            'Eliminar Movimiento'
-        ];
-
         // Crear los permisos si no existen
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
@@ -93,26 +67,10 @@ class UserRoleSeeder extends Seeder
 
         // Asignar todos los permisos al rol Administrador
         $adminRole->syncPermissions(Permission::all());
-        $warehouseRole->syncPermissions($warehousePermissions);
-        $supervisorRole->syncPermissions($supervisorPermissions);
 
-        // Asignar el rol Administrador al usuario con ID 1
         $user = User::find(1);
         if ($user) {
             $user->assignRole($adminRole);
-        }
-
-
-        // Asignar el rol Bodega al usuario con ID 5
-        $warehouseUser = User::find(5);
-        if ($warehouseUser) {
-            $warehouseUser->assignRole($warehouseRole);
-        }
-
-        // Asignar el rol Supervisor al usuario con ID 2
-        $supervisorUser = User::find(2);
-        if ($supervisorUser) {
-            $supervisorUser->assignRole($supervisorRole);
         }
     }
 }

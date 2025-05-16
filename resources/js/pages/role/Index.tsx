@@ -35,9 +35,18 @@ export default function Roles() {
     {
       data: "permissions",
       title: "Permisos",
-      render: function (data: string[]) {
-        return data && data.length > 0 ? data.join(", ") : "-";
-      },
+      render: function(data: string[]) {
+                if (!data || data.length === 0) return "-";
+
+                return data
+                    .map(
+                        (permission) =>
+                            `<span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded">
+              ${permission}
+            </span>`
+                    )
+                    .join("");
+        },
       orderable: false,
       searchable: false,
     },
