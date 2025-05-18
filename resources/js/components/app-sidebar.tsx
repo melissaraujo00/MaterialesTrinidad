@@ -4,9 +4,9 @@ import { usePage } from '@inertiajs/react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight} from 'lucide-react';
+import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight, BusIcon, BarChart3Icon, LogInIcon, Building, Building2, NotebookIcon, Notebook, NotebookPen} from 'lucide-react';
 import AppLogo from './app-logo';
-import { permission } from 'process';
+import { permission, title } from 'process';
 
 const mainNavItems: NavItem[] = [
     {
@@ -85,7 +85,14 @@ const mainNavItems: NavItem[] = [
                 permission: 'Ver Tipo Movimiento',
             }
         ]
-    }
+    },
+    {
+        title: 'Datos de la empresa',
+        href: '/businessData',
+        icon: NotebookPen,
+        permission: 'ver datos empresa',
+    },
+    
 ];
 
 // Función recursiva para filtrar ítems según permisos
