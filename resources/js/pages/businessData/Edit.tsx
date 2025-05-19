@@ -21,15 +21,13 @@ export default function BusinessDataEdit() {
 
   const [preview, setPreview] = useState<string | null>(null);
 
-  useEffect(() => {
+ useEffect(() => {
     if (businessData.logo_path) {
-      // Asegúrate de que la URL sea absoluta (agregando el dominio si es necesario)
+      // Verificar si la ruta ya tiene el prefijo /storage o no
       if (businessData.logo_path.startsWith('/storage')) {
-        // Aquí obtenemos la URL base del sitio
-        const baseUrl = window.location.origin;
-        setPreview(baseUrl + '/storage/' + businessData.logo_path);
+        setPreview(businessData.logo_path);
       } else {
-        setPreview('/storage/' + businessData.logo_path);
+        setPreview(`/storage/${businessData.logo_path}`);
       }
     }
   }, [businessData]);
@@ -51,7 +49,8 @@ export default function BusinessDataEdit() {
       }),
   });
 
-  const handleSubmit = (values: any) => {
+
+   const handleSubmit = (values: any) => {
     const data = new FormData();
     data.append("name", values.name);
     data.append("nit", values.nit);
@@ -61,7 +60,7 @@ export default function BusinessDataEdit() {
     data.append("description", values.description || "");
 
     if (values.logo && values.logo instanceof File) {
-      data.append("logo", values.logo);
+      data.append("logo_path", values.logo); // Cambio de "logo" a "logo_path" para que coincida con el backend
     }
 
     data.append("_method", "PUT");
