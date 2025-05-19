@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\BusinessData;
 use App\Models\District;
 use App\Models\User;
 use App\Models\Customer;
@@ -37,6 +38,16 @@ class DatabaseSeeder extends Seeder
             DistrictSeeder::class,
             UserRoleSeeder::class,
             TypeSeeder::class,
+        ]);
+        
+        BusinessData::factory()->create([
+            'name' => 'Materiales Trinidad S.A. de C.V.',
+            'address' => 'Calle Principal, San Miguel',
+            'phoneNumber' => '22223333',
+            'email' => 'materialesTrinidad@materialestrinidad.com',
+            'nit' => '0614-123456-001-0',
+            'logo_path' => 'logo/logo.png', 
+            'description'=>'empresa dedicada a la venta de techos'
         ]);
 
         //  Customer::factory(20)->create();
