@@ -21,7 +21,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/users/getUsersData', [UserController::class, 'getUsersData']);
-Route::apiResource('roles', RoleApiController::class)->only('index');
+// Route::apiResource('roles', RoleApiController::class)->only('index');
 Route::get('/categories/getCategoryData', [CategoryController::class, 'getCategoryData']);
 Route::get('/customers/getCustomerData', [CustomerController::class, 'getCustomerData']);
 Route::get('/brands/getBrandData', [BrandController::class, 'getBrandData']);
