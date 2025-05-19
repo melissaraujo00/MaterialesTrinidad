@@ -123,8 +123,13 @@ class MovementController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Movement $movement)
     {
-        //
+        // Importante: La política ya se está aplicando automáticamente 
+        // gracias a $this->authorizeResource() en el constructor
+        $movement->delete();
+        
+        return redirect()->route('movements.index')
+            ->with('message', 'Movement deleted successfully');
     }
 }
