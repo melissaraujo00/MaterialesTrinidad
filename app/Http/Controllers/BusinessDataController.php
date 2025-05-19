@@ -56,32 +56,19 @@ class BusinessDataController extends Controller
     }
 
      public function update(BusinessDataUpdateRequest $request, BusinessData $businessData)
-    {
-         // Actualizar los datos de la empresa
-        $businessData->name = $request->name;
-        $businessData->nit = $request->nit;
-        $businessData->address = $request->address;
-        $businessData->phoneNumber = $request->phoneNumber;
-        $businessData->email = $request->email;
-        $businessData->description = $request->description;
-        
-        // Manejo de logo si se ha subido uno nuevo
-        if ($request->hasFile('logo')) {
-            // Si ya existe un logo, eliminarlo
-            if ($businessData->logo_path) {
-                Storage:delete('public/' . $businessData->logo_path);
-            }
-
-            // Guardar el nuevo logo
-            $path = $request->file('logo')->store('business_logos', 'public');
-            $businessData->logo_path = str_replace('public/', '', $path);
+{
+        $data = $request->validated();
+    
+        if ($request->hasFile('logo_path') && $request->file('logo_path')->isValid()) {
+            $file = $request->file('logo_path');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('logo', $filename, 'public');
+            $data['logo_path'] = $path; // Cambiado de 'image' a 'logo_path'
         }
-
-        // Guardar los cambios
-        $businessData->save();
-
-        // Redireccionar a la página de detalles con mensaje de éxito
+    
+        $businessData->update($data);
+    
         return redirect()->route('businessData.index')
             ->with('success', 'Información de la empresa actualizada correctamente');
-        }
+}
 }

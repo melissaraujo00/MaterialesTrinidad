@@ -137,7 +137,7 @@ class ProductController extends Controller
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('products', $filename, 'public');
-            $data['image'] = '/storage/' . $path; // Debe coincidir con tu campo en la migración
+            $data['image'] = '/storage/' . $path; 
         }
 
         $product->update($data);
