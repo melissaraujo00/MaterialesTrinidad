@@ -9,7 +9,7 @@ interface BusinessData {
     name: string;
     nit: string;
     address: string;
-    phoneNumber: string; 
+    phoneNumber: string;
     email: string;
     logo_path: string;
     description: string;
@@ -23,16 +23,16 @@ export default function BusinessData() {
             : [];
     const hasPermission = (perm: string) => permissions.includes(perm);
 
-  
+
     const [businessData, setBusinessData] = useState<BusinessData | null>(null);
     const [loading, setLoading] = useState(true);
 
-  
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await axios.get('/api/businessData/getBusinessData');
-                
+
                 if (response.data.data && response.data.data.length > 0) {
                     setBusinessData(response.data.data[0]);
                 }
@@ -52,7 +52,7 @@ export default function BusinessData() {
             <Toaster position="top-right" richColors />
 
             <div className="max-w-4xl p-6 bg-white text-black shadow-lg rounded-xl">{/* Quité mx-auto para alinearlo a la izquierda */}
-                
+
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="text-xl text-gray-500">Cargando datos...</div>
@@ -60,12 +60,18 @@ export default function BusinessData() {
                 ) : businessData ? (
                     <div className="flex flex-col">
                         {/* Logo centrado */}
-                        <div className="flex justify-start mb-8">{/* Cambié justify-center a justify-start */}
+                        <div className="flex justify-start mb-8">
                             {businessData.logo_path ? (
-                                <img 
-                                    src={`/storage/${businessData.logo_path}`} 
-                                    alt="Logo de la empresa" 
+                                <img
+                                    src={businessData.logo_path.startsWith('/storage')
+                                        ? businessData.logo_path
+                                        : `/storage/${businessData.logo_path}`}
+                                    alt="Logo de la empresa"
                                     className="h-32 w-auto object-contain"
+                                    onError={(e) => {
+                                        console.error("Error al cargar la imagen:", e);
+                                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Sin+Logo";
+                                    }}
                                 />
                             ) : (
                                 <div className="h-32 w-32 flex items-center justify-center bg-gray-200 rounded-full">
@@ -90,41 +96,41 @@ export default function BusinessData() {
                                         {businessData.name}
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex flex-col">
                                     <label className="text-sm font-medium text-gray-700 mb-1">NIT</label>
                                     <div className="p-2 bg-white border border-gray-300 rounded-md">
                                         {businessData.nit}
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex flex-col">
                                     <label className="text-sm font-medium text-gray-700 mb-1">Dirección</label>
                                     <div className="p-2 bg-white border border-gray-300 rounded-md">
                                         {businessData.address}
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex flex-col">
                                     <label className="text-sm font-medium text-gray-700 mb-1">Teléfono</label>
                                     <div className="p-2 bg-white border border-gray-300 rounded-md">
                                         {businessData.phoneNumber}
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex flex-col">
                                     <label className="text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                                     <div className="p-2 bg-white border border-gray-300 rounded-md">
                                         {businessData.email}
                                     </div>
                                 </div>
-                                
-                                
+
+
                             </div>
                         </div>
 
                         {/* Botones de acción */}
-                        {hasPermission('editar datos empresa' ) && (
+                        {hasPermission('editar datos empresa') && (
                             <div className="mt-6 flex justify-center">
                                 <Link
                                     href={`/businessData/${businessData.id}/edit`}
@@ -138,7 +144,7 @@ export default function BusinessData() {
                 ) : (
                     <div className="flex flex-col items-center justify-center h-64">
                         <div className="text-xl text-gray-500 mb-4">No hay información de la empresa disponible</div>
-                        
+
                     </div>
                 )}
             </div>
