@@ -27,7 +27,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('types', TypeController::class);
     Route::resource('movements', MovementController::class);
-    Route::resource('businessData',BusinessDataController::class);
+    Route::resource('businessData', BusinessDataController::class)->parameters([
+    'businessData' => 'businessData'
+]);
+
     // Ruta para el dashboard
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
