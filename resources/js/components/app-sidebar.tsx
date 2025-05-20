@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight, BusIcon, BarChart3Icon, LogInIcon, Building, Building2, NotebookIcon, Notebook, NotebookPen} from 'lucide-react';
+import { LayoutGrid, User, ListChecks, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight, BusIcon, BarChart3Icon, LogInIcon, Building, Building2, NotebookIcon, Notebook, NotebookPen, ShoppingBagIcon, ShoppingBasket, ShoppingCart} from 'lucide-react';
 import AppLogo from './app-logo';
 import { permission, title } from 'process';
 
@@ -90,8 +90,14 @@ const mainNavItems: NavItem[] = [
         title: 'Datos de la empresa',
         href: '/businessData',
         icon: NotebookPen,
-        permission: 'ver datos empresa',
+        permission: 'ver datos empresa'
     },
+    {
+        title: 'realizar cotizaciones',
+        href: '/quotes',
+        icon: ShoppingCart,
+        permission: 'realizar cotizaciones'
+    }
     
 ];
 

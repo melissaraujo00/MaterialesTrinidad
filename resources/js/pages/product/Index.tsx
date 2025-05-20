@@ -17,8 +17,11 @@ interface Product {
     id: number;
     name: string;
 }
+interface ProductsProps {
+  showOnlyAddButton?: boolean;
+}
 
-export default function Products() {
+export default function Products({ showOnlyAddButton = false }: ProductsProps) {
     // Obtener permisos del usuario autenticado
     const page = usePage();
     const permissions =
@@ -72,17 +75,27 @@ export default function Products() {
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                let actions = "";
-                if (hasPermission("editar producto")) {
-                    actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
-                }
-                if (hasPermission("eliminar producto")) {
-                    actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
-                }
-                td.innerHTML = actions;
+                if (showOnlyAddButton) {
+                    // Solo botón Agregar
+                    td.innerHTML = `<button class="add-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Agregar</button>`;
+                    td.querySelector('.add-btn')?.addEventListener('click', () => {
+                        // Aquí pones tu lógica para agregar producto a la cotización
+                        alert(`Agregar producto ID: ${rowData.id}`);
+                    });
+                } else{
 
-                if (hasPermission("eliminar producto")) {
-                    td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
+                    let actions = "";
+                    if (hasPermission("editar producto")) {
+                        actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
+                    }
+                    if (hasPermission("eliminar producto")) {
+                        actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
+                    }
+                    td.innerHTML = actions;
+    
+                    if (hasPermission("eliminar producto")) {
+                        td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
+                    }
                 }
             }
         }
