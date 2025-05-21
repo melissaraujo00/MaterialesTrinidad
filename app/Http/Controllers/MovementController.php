@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMovementRequest;
+use App\Http\Requests\UpdateMovementRequest;
 use App\Models\Product;
 use App\Models\Type;
 use Illuminate\Http\Request;
@@ -16,8 +17,8 @@ class MovementController extends Controller
         $this->authorizeResource(Movement::class, 'movement');
     }
 
-     public function getMovementData()
-     {
+    public function getMovementData()
+    {
         $data = Movement::query()
         ->with('product', 'type')
         ->get()
@@ -32,7 +33,7 @@ class MovementController extends Controller
             ];
         });
         return response()->json(['data' => $data]);
-     }
+    }
 
     /**
      * Display a listing of the resource.
@@ -107,17 +108,26 @@ class MovementController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Movement $movement)
     {
-        //
+        $product = Product::all();
+        $type = Type::all();
+
+        return Inertia::render('movement/Edit',[
+            'movement' => $movement,
+            'products' => $product,
+            'types' => $type
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateMovementRequest $request, Movement $movement)
     {
-        //
+        $movement->update($request->validated());
+
+        return redirect()->route('movements.index')->with('success', 'Movimiento actualizado exitosamente.');
     }
 
     /**
