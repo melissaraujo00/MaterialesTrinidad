@@ -73,6 +73,7 @@ class ProductController extends Controller
         return Inertia::render('product/Create', [
             'categories' => $category,
             'brands' => $brand,
+            
         ]);
     }
 
