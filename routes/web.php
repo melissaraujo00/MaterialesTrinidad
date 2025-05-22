@@ -12,6 +12,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\MovementController;
+use App\Http\Controllers\OfferController;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -27,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('types', TypeController::class);
     Route::resource('movements', MovementController::class);
+    Route::resource('offers', OfferController::class);
     Route::resource('businessData', BusinessDataController::class)->parameters([
     'businessData' => 'businessData'
 ]);

@@ -92,6 +92,12 @@ const mainNavItems: NavItem[] = [
         icon: NotebookPen,
         permission: 'ver datos empresa',
     },
+    {
+        title: 'Ofertas',
+        href: '/offers',
+        icon: NotebookPen,
+        permission: 'ver ofertas',
+    },
     
 ];
 

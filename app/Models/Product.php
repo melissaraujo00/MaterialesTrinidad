@@ -39,4 +39,9 @@ class Product extends Model
     {
         return $this->hasMany(Movement::class);
     }
+
+    public function offers():HasMany
+    {
+        return $this->hasMany(Offer::class);
+    }
 }
