@@ -12,6 +12,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\MovementController;
+use App\Http\Controllers\QuoteController;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -29,7 +30,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('movements', MovementController::class);
     Route::resource('businessData', BusinessDataController::class)->parameters([
     'businessData' => 'businessData'
-]);
+    ]);
+    Route::resource('quotes',QuoteController::class);
 
     // Ruta para el dashboard
     Route::get('dashboard', function () {

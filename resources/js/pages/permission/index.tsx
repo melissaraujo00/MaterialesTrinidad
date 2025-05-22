@@ -101,6 +101,8 @@ export default function Permissions() {
                 entityType="Permiso"
                 deleteEndpoint="/permissions"
             />
+
+           
         </AppLayout>
     );
 }

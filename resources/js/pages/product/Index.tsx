@@ -17,11 +17,9 @@ interface Product {
     id: number;
     name: string;
 }
-interface ProductsProps {
-  showOnlyAddButton?: boolean;
-}
 
-export default function Products({ showOnlyAddButton = false }: ProductsProps) {
+
+export default function Products() {
     // Obtener permisos del usuario autenticado
     const page = usePage();
     const permissions =
@@ -75,14 +73,7 @@ export default function Products({ showOnlyAddButton = false }: ProductsProps) {
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                if (showOnlyAddButton) {
-                    // Solo botón Agregar
-                    td.innerHTML = `<button class="add-btn bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Agregar</button>`;
-                    td.querySelector('.add-btn')?.addEventListener('click', () => {
-                        // Aquí pones tu lógica para agregar producto a la cotización
-                        alert(`Agregar producto ID: ${rowData.id}`);
-                    });
-                } else{
+                
 
                     let actions = "";
                     if (hasPermission("editar producto")) {
@@ -96,7 +87,7 @@ export default function Products({ showOnlyAddButton = false }: ProductsProps) {
                     if (hasPermission("eliminar producto")) {
                         td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                     }
-                }
+                
             }
         }
     ];
@@ -108,7 +99,7 @@ export default function Products({ showOnlyAddButton = false }: ProductsProps) {
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
-                    {hasPermission("crear producto") && (
+                    {hasPermission("crear producto")   &&(
                         <Link
                             href="/products/create"
                             className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"

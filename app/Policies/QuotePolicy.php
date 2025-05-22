@@ -2,24 +2,24 @@
 
 namespace App\Policies;
 
-use App\Models\Product;
+use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class ProductPolicy
+class QuotePolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('ver productos');
+        return $user->can('realizar cotizaciones');;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Product $product): bool
+    public function view(User $user, Quote $quote): bool
     {
         return false;
     }
@@ -29,29 +29,29 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('crear producto');
+        return false;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Product $product): bool
+    public function update(User $user, Quote $quote): bool
     {
-        return $user->can('editar producto');
+        return false;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Product $product): bool
+    public function delete(User $user, Quote $quote): bool
     {
-        return $user->can('eliminar producto');
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Product $product): bool
+    public function restore(User $user, Quote $quote): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class ProductPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Product $product): bool
+    public function forceDelete(User $user, Quote $quote): bool
     {
         return false;
     }

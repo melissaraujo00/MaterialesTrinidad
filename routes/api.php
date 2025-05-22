@@ -15,6 +15,7 @@ use App\Http\Controllers\MovementController;
 use App\Models\BusinessData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\QuoteController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -31,5 +32,6 @@ Route::get('/roles/getRolData', [RoleController::class, 'getRolData']);
 Route::get('/types/getTypeData', [TypeController::class, 'getTypeData']);
 Route::get('/movements/getMovementData', [MovementController::class, 'getMovementData']);
 Route::get('/businessData/getBusinessData',[BusinessDataController::class,'getBusinessData']);
+Route::get('/quotes/getQuotesDAta',[QuoteController::class,'getQoteData']);
 
 
