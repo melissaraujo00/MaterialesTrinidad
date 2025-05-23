@@ -60,7 +60,9 @@ class UserRoleSeeder extends Seeder
             'Eliminar Movimiento',
             'ver datos empresa',
             'editar datos empresa',
-            'realizar cotizaciones'
+            'realizar cotizaciones',
+            'ver ofertas',
+
         ];
 
         // Crear los permisos si no existen

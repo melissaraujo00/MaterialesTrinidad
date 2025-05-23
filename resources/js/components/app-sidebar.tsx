@@ -97,8 +97,15 @@ const mainNavItems: NavItem[] = [
         href: '/quotes',
         icon: ShoppingCart,
         permission: 'realizar cotizaciones'
-    }
-    
+    },
+    {
+        title: 'Ofertas',
+        href: '/offers',
+        icon: NotebookPen,
+        permission: 'ver ofertas',
+    },
+
+
 ];
 
 // Función recursiva para filtrar ítems según permisos
