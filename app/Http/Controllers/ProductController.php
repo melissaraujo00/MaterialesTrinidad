@@ -37,8 +37,8 @@ class ProductController extends Controller
                 'priceWithTax' => $product->priceWithTax,
                 'discountPrice' => $product->discountPrice,
                 'stock'  => $product->stock,
-                'category_id'  => $product->category->name,
-                'brand_id' => $product->brand->name,
+                'category_id'  => $product->category?->name,
+                'brand_id' => $product->brand?->name,
                 'stockMinimun' => $product->stockMinimun,
                 'image'  => $product->image,
             ];
@@ -136,7 +136,7 @@ class ProductController extends Controller
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('products', $filename, 'public');
-            $data['image'] = '/storage/' . $path; 
+            $data['image'] = '/storage/' . $path;
         }
 
         $product->update($data);

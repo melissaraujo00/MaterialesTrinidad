@@ -19,8 +19,8 @@ export default function ProductCreate() {
         price: Yup.number().positive('El precio debe ser positivo y mayor a 0').required('El precio es requerido'),
         discountPrice: Yup.number().positive('El precio con descuento debe ser positivo y mayor a 0').required('El precio con descuento es requerido'),
         description: Yup.string().max(255, 'La descripción no puede exceder los 255 caracteres'),
-        category_id: Yup.string().required('Debe seleccionar una categoría'),
-        brand_id: Yup.string().required('Debe seleccionar una marca'),
+        category_id: Yup.string(),
+        brand_id: Yup.string(),
         stock: Yup.number().integer().min(0, 'El stock debe ser un número entero').required('El stock es requerido'),
         stockMinimun: Yup.number().integer().min(0, 'El stock mínimo debe ser un número entero').required('El stock mínimo es requerido'),
         image: Yup.mixed()

@@ -29,7 +29,7 @@ class OfferPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('crear oferta');
     }
 
     /**

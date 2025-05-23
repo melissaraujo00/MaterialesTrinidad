@@ -21,8 +21,8 @@ return new class extends Migration
             $table->decimal('priceWithTax', 12, 2);
             $table->decimal('discountPrice',12,2);
             $table->integer('stock');
-            $table->foreignIdFor(Category::class)->constrained();
-            $table->foreignIdFor(Brand::class)->constrained();
+            $table->foreignIdFor(Category::class)->nullable()->constrained();
+            $table->foreignIdFor(Brand::class)->nullable()->constrained();
             $table->integer('stockMinimun');
             $table->string('image', 255)->nullable();
             $table->softDeletes();

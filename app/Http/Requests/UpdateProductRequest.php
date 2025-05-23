@@ -27,8 +27,8 @@ class UpdateProductRequest extends FormRequest
             'price' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'priceWithTax' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'discountPrice' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'brand_id' => ['required', 'exists:brands,id'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'brand_id' => ['nullable', 'exists:brands,id'],
             'stock' => ['required', 'integer', 'min:0'],
             'stockMinimun' => ['required', 'integer', 'min:0', 'lte:stock'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:1024']

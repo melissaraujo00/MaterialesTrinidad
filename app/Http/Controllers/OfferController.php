@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreOfferRequest;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Offer;
 use Inertia\Inertia;
@@ -31,7 +33,7 @@ class OfferController extends Controller
                     'product_id' => $offer->product->name,
                 ];
             });
-    
+
 
 
         return response()->json(['data' => $data]);
@@ -54,12 +56,26 @@ class OfferController extends Controller
         ]);
     }
 
+
+    public function create()
+    {
+        $offers = Offer::all();
+        $product = Product::all();
+
+        return Inertia::render('offer/Create', [
+            'offers' => $offers,
+            'products' => $product
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreOfferRequest $request)
     {
-        //
+         Offer::create($request->validated());
+
+        return redirect()->route('offers.index')->with('success', 'Offer created successfully.');
     }
 
     /**

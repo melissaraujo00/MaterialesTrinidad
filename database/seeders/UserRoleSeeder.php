@@ -62,6 +62,9 @@ class UserRoleSeeder extends Seeder
             'editar datos empresa',
             'realizar cotizaciones',
             'ver ofertas',
+            'editar oferta',
+            'eliminar oferta',
+            'crear oferta'
 
         ];
 

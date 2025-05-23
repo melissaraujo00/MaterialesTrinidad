@@ -16,7 +16,7 @@ class QuoteController extends Controller
         $this->authorizeResource(Quote::class, 'quote');
     }
 
-     public function getQoteData()
+     public function getQuoteData()
      {
 
         $data = Product::query()

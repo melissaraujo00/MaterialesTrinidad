@@ -33,7 +33,7 @@ Route::get('/roles/getRolData', [RoleController::class, 'getRolData']);
 Route::get('/types/getTypeData', [TypeController::class, 'getTypeData']);
 Route::get('/movements/getMovementData', [MovementController::class, 'getMovementData']);
 Route::get('/businessData/getBusinessData',[BusinessDataController::class,'getBusinessData']);
-Route::get('/quotes/getQuotesDAta',[QuoteController::class,'getQoteData']);
+Route::get('/quotes/getQuotesData',[QuoteController::class,'getQuoteData']);
 Route::get('/offers/getOfferData', [OfferController::class, 'getOfferData']);
 
 

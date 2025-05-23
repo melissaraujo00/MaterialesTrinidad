@@ -55,8 +55,18 @@ export default function Products() {
                 td.innerHTML = getStockBadge(rowData.stock, rowData.stockMinimun) || rowData.stock;
             }
         },
-        { data: 'category_id' },
-        { data: 'brand_id' },
+        {
+            data: 'category_id',
+            createdCell: (td: HTMLTableCellElement, cellData: any) => {
+                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin categoría</span>' : cellData;
+            }
+        },
+        {
+            data: 'brand_id',
+            createdCell: (td: HTMLTableCellElement, cellData: any) => {
+                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin marca</span>' : cellData;
+            }
+        },
         { data: 'stockMinimun' },
         {
             data: 'image',
@@ -73,7 +83,7 @@ export default function Products() {
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                
+
 
                     let actions = "";
                     if (hasPermission("editar producto")) {
@@ -83,11 +93,11 @@ export default function Products() {
                         actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
                     }
                     td.innerHTML = actions;
-    
+
                     if (hasPermission("eliminar producto")) {
                         td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                     }
-                
+
             }
         }
     ];
