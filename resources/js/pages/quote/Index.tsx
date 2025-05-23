@@ -89,7 +89,7 @@ export default function AddToCart() {
     }, [cartItems]);
 
     //funicon para eliminar un producto del array del carrito
-    const handleDeleteProduct = (id: number) => { 
+    const handleDeleteProduct = (id: number) => {
         setCartItems(prevItems => prevItems.filter(item => item.id !== id));
     };
 
@@ -109,13 +109,6 @@ export default function AddToCart() {
             return;
         }
 
-        // Verificar que no se supere el stock mínimo
-        const remainingStockAfterAdd = product.stock - quantity;
-        if (remainingStockAfterAdd < product.stockMinimun) {
-            toast.error(`No se puede agregar esta cantidad, se superaría el stock mínimo (${product.stockMinimun})`);
-            return;
-        }
-
         const price = applyDiscount && product.discountPrice ? product.discountPrice : product.price;
 
         const newItem: CartItem = {
@@ -128,6 +121,7 @@ export default function AddToCart() {
         setCartItems(prevItems => [...prevItems, newItem]);
         toast.success(`${product.name} ${applyDiscount ? 'con descuento' : 'sin descuento'} agregado al carrito`);
     };
+
 
     // Función para limpiar completamente el carrito
     const clearCart = () => {
