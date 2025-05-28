@@ -14,14 +14,14 @@ class Quote extends Model
         'date',
         'subtotal',
         'customer_id',
-        'trader_id'
+        'user_id'
     ];
 
     public function customer(){
         return $this->belongsTo(Customer::class);
     }
     
-    public function trader(){
-        return $this->belongsTo(Trader::class);
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 }

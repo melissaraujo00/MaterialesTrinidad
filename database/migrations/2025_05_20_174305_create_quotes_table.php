@@ -2,6 +2,7 @@
 
 use App\Models\Customer;
 use App\Models\Trader;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +21,7 @@ return new class extends Migration
             $table->date('date');
             $table->decimal('subtotal',12,2);
             $table->foreignIdFor(Customer::class)->constrained();
-            $table->foreignIdFor(Trader::class)->constrained();
+            $table->foreignIdFor(User::class)->constrained();
             $table->softDeletes();
             $table->timestamps();
             

@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreQuoteRequest;
+use App\Models\Customer;
+use App\Models\Department;
+use App\Models\District;
+use App\Models\Municipality;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Quote;
@@ -16,29 +21,33 @@ class QuoteController extends Controller
         $this->authorizeResource(Quote::class, 'quote');
     }
 
-     public function getQoteData()
-     {
+    public function getQoteData()
+    {
 
-        $data = Product::query()
-        ->with('category', 'brand')
-        ->get()
-        ->map( function ($product){
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'description'  => $product->description,
-                'price'  => $product->price,
-                'priceWithTax' => $product->priceWithTax,
-                'discountPrice' => $product->discountPrice,
-                'stock'  => $product->stock,
-                'category_id'  => $product->category->name,
-                'brand_id' => $product->brand->name,
-                'stockMinimun' => $product->stockMinimun,
-                'image'  => $product->image,
-            ];
-        });
+        $data = Quote::query()
+            ->with('customer', 'user')
+            ->get()
+            ->map(function ($quote) {
+                return [
+                    'id' => $quote->id,
+                    'date' => $quote->date,
+                    'total' => $quote->total,
+                    'customer' => [
+                        'id' => $quote->customer->id ?? null,
+                        'name' => $quote->customer->name ?? null,
+                    ],
+                    'user' => [
+                        'id' => $quote->user->id ?? null,
+                        'name' => $quote->user->name ?? null,
+                    ],
+
+                ];
+            });
+
         return response()->json(['data' => $data]);
-     }
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -62,15 +71,27 @@ class QuoteController extends Controller
      */
     public function create()
     {
-        //
+        $departments = Department::all();
+        $municipalities = Municipality::all();
+        $districts = District::all();
+
+        
+        return Inertia::render('quote/Create', [  
+            'departments' => $departments,
+            'municipalities' => $municipalities,
+            'districts' => $districts,
+            
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreQuoteRequest $request)
     {
-        //
+        Quote::create($request->validated());
+
+        return redirect()->route('quotes.index')->with('success', 'Category created successfully.');
     }
 
     /**

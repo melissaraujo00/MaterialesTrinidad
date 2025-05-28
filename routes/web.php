@@ -13,6 +13,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\TraderController;
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -22,6 +23,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('customers', CustomerController::class);
+    Route::post('customers/store-from-quote', [CustomerController::class, 'storeFromQuote'])->name('customers.storeFromQuote');
     Route::resource('brands', BrandController::class);
     Route::resource('products', ProductController::class);
     Route::resource('permissions', PermissionController::class);
@@ -32,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     'businessData' => 'businessData'
     ]);
     Route::resource('quotes',QuoteController::class);
+
 
     // Ruta para el dashboard
     Route::get('dashboard', function () {

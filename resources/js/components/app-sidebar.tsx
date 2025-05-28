@@ -97,7 +97,7 @@ const mainNavItems: NavItem[] = [
         href: '/quotes',
         icon: ShoppingCart,
         permission: 'realizar cotizaciones'
-    }
+    },
     
 ];
 

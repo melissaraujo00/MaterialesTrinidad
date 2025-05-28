@@ -10,6 +10,7 @@ use App\Models\Municipality;
 use App\Models\Department;
 use Inertia\Inertia;
 use App\Http\Requests\UpdateCustomerRequest;
+use Illuminate\Http\JsonResponse;
 use App\Http\Requests\UpdateUserRequest;
 
 class CustomerController extends Controller
@@ -22,22 +23,22 @@ class CustomerController extends Controller
     public function getCustomerData()
     {
         $data = Customer::query()
-        ->with('district', 'district.municipality', 'district.municipality.department')
-        ->get()
-        ->map( function ($customer){
-            return [
-                'id' => $customer->id,
-                'name' => $customer->name,
-                'email' => $customer->email,
-                'phoneNumber' => $customer->phoneNumber,
-                'nit' => $customer->nit,
-                'district' => $customer->district->municipality->department->name  .", ".$customer->district->municipality->name .", ".$customer->district->name,
-                'address'=> $customer->address,
-                'description' => $customer->description,
-                'status' => $customer->status,
-                'register' => $customer->created_at->format('d-m-Y'),
-            ];
-        });
+            ->with('district', 'district.municipality', 'district.municipality.department')
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'email' => $customer->email,
+                    'phoneNumber' => $customer->phoneNumber,
+                    'nit' => $customer->nit,
+                    'district' => $customer->district->municipality->department->name  . ", " . $customer->district->municipality->name . ", " . $customer->district->name,
+                    'address' => $customer->address,
+                    'description' => $customer->description,
+                    'status' => $customer->status,
+                    'register' => $customer->created_at->format('d-m-Y'),
+                ];
+            });
         return response()->json(['data' => $data]);
     }
 
@@ -85,6 +86,18 @@ class CustomerController extends Controller
         return redirect()->route('customers.index')->with('success', 'Customer created successfully');
     }
 
+
+
+    public function storeFromQuote(StoreCustomer $request)
+    {
+        $customer = Customer::create($request->validated());
+
+        return redirect()->back()->with([
+            'success' => 'Cliente creado con éxito.',
+            'customer_id' => $customer->id,
+        ]);
+    }
+
     /**
      * Display the specified resource.
      */
@@ -127,6 +140,6 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         $customer->delete();
-        return redirect()->route('customers.index')->with('success','cliente eliminado correctamente');
+        return redirect()->route('customers.index')->with('success', 'cliente eliminado correctamente');
     }
 }
