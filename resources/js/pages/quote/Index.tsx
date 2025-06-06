@@ -8,15 +8,17 @@ import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
 import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import jszip from 'jszip';
-import DeleteEntityModal from "../../components/DeleteEntityModal";
+import DeleteQuoteModal from "../../components/DeleteQuoteModal";
 
 window.JSZip = jszip;
 DataTable.use(DT);
 
-interface Quote {
-    id: number;
-    name: string;
-    total: number;
+interface Quote{
+    id:number;
+    total:number;
+    date:Date;
+    status:string;
+   
 }
 
 export default function Quotes() {
@@ -115,11 +117,10 @@ export default function Quotes() {
                 </DataTable>
             </div>
 
-            <DeleteEntityModal
+            <DeleteQuoteModal
                 isOpen={isDeleteModalOpen}
                 closeModal={() => setIsDeleteModalOpen(false)}
-                entity={selectedQuote}
-                entityType="cotización"
+                quote={selectedQuote}
                 deleteEndpoint="/quotes"
             />
         </AppLayout>

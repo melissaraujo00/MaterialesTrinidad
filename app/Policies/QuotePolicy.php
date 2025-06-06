@@ -45,7 +45,7 @@ class QuotePolicy
      */
     public function delete(User $user, Quote $quote): bool
     {
-        return false;
+         return $user->can('realizar cotizaciones');;
     }
 
     /**

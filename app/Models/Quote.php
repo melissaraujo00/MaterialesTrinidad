@@ -14,7 +14,8 @@ class Quote extends Model
         'date',
         'subtotal',
         'customer_id',
-        'user_id'
+        'user_id',
+        'status'
     ];
 
     public function customer(){

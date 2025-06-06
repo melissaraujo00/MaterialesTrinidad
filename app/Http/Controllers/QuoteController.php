@@ -40,6 +40,7 @@ class QuoteController extends Controller
                         'id' => $quote->user->id ?? null,
                         'name' => $quote->user->name ?? null,
                     ],
+                    'status' => $quote->status,
 
                 ];
             });
@@ -121,8 +122,11 @@ class QuoteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Quote $quote)
     {
-        //
+        $quote->delete();
+
+        return redirect()->route('quotes.index')->with('success', 'cotizacion eliminada correctamente.');
+        
     }
 }
