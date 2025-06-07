@@ -25,4 +25,9 @@ class Quote extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+     public function quoteDetails()
+    {
+        return $this->hasMany(QuoteDetail::class);
+    }
 }

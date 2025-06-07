@@ -5,12 +5,10 @@ import { toast, Toaster } from "sonner";
 import CustomerList from "./CustomersList";
 import CustomerListButton from "../../components/CustomerListButton";
 import ProductList from "./ProducList";
-import { router } from "@inertiajs/react"; // Importar el nuevo componente
+import { router } from "@inertiajs/react";
 import CreateCustomertButton from "@/components/CreateCustomerButton";
 import CreateCustomerModal from "./CreateCustomer";
 import { useEffect } from "react";
-
-
 
 interface Customer {
     id: number;
@@ -45,23 +43,25 @@ interface CartItem extends Product {
 
 export default function CreateQuote() {
     const page = usePage() as any;
-    const clienteCreated=page.props.customer
-    const { departments, municipalities, districts } = usePage<{
+    const clienteCreated = page.props.customer
+    const { departments, municipalities, districts,  } = usePage<{
         departments: { id: number; name: string }[];
         municipalities: { id: number; name: string; department_id: number }[];
         districts: { id: number; name: string; municipality_id: number }[];
+        
     }>().props;
 
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const userId = page.props.auth?.user?.id;
     const userName = page.props.auth?.user?.name;
 
-
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [openCustomerList, setOpenCustomerList] = useState(false);
     const [openCustomerCreate, setOpenCustomerCreate] = useState(false);
+
 
     const openCustomerListModal = () => {
         setOpenCustomerList(true);
@@ -85,18 +85,20 @@ export default function CreateQuote() {
     };
 
     useEffect(() => {
-    if (clienteCreated) {
-        setSelectedCustomer(clienteCreated);
-        toast.success(`Cliente ${clienteCreated.name} creado y seleccionado`);
-    }
-}, [clienteCreated]);
+        if (clienteCreated) {
+            setSelectedCustomer(clienteCreated);
+            toast.success(`Cliente ${clienteCreated.name} creado y seleccionado`);
+        }
+    }, [clienteCreated]);
 
     const handleSelectProduct = (productWithDetails: Product & { quantity: number; applyDiscount: boolean }) => {
-        // Verificar si el producto ya existe en el carrito
         const productExistsInCart = cart.some(item => item.id === productWithDetails.id);
 
+        if (productExistsInCart) {
+            toast.error('Este producto ya está en la cotización');
+            return;
+        }
 
-        // Calcular el precio según si se aplica descuento o no
         const price = productWithDetails.applyDiscount && productWithDetails.discountPrice
             ? productWithDetails.discountPrice
             : productWithDetails.priceWithTax;
@@ -168,26 +170,49 @@ export default function CreateQuote() {
             return;
         }
 
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+
+        const details = cart.map((item) => {
+            const price = item.applyDiscount && item.discountPrice
+                ? item.discountPrice
+                : item.priceWithTax;
+
+            return {
+                amount: item.quantity,
+                price: price,
+                subtotal: price * item.quantity,
+                quote_id: 1,
+                product_id: item.id,
+            };
+        });
+
         const quotationData = {
             total: getTotalCart(),
             date: currentDate,
             subtotal: getSubtotal(),
             customer_id: selectedCustomer.id,
             user_id: userId,
-
+            details
         };
 
         router.post("/quotes", quotationData, {
-            onSuccess: () => {
+            onSuccess: (response: any) => {
                 toast.success("Cotización guardada exitosamente.");
-                clearCart();
-                setSelectedCustomer(null);
+
             },
             onError: (errors) => {
                 toast.error("Ocurrió un error al guardar la cotización.");
                 console.error(errors);
+                setIsSubmitting(false);
             }
         });
+
+        
+
+
+
     };
 
     return (
@@ -198,14 +223,12 @@ export default function CreateQuote() {
             <div className="p-6 bg-white rounded-xl shadow dark:bg-black/10 text-black dark:text-white space-y-6">
                 <h1 className="text-2xl font-bold">Nueva Cotización</h1>
                 <h1 className="text-md font-bold">Vendedor: {userName}</h1>
-         
-                
 
                 {/* Información del cliente seleccionado */}
                 {selectedCustomer && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 w-100">
                         <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Cliente Seleccionado:</h3>
-                        <div className="grid grid-cols-[auto,1fr] gap-4  text-blue-800 dark:text-blue-200 text-sm">
+                        <div className="grid grid-cols-[auto,1fr] gap-4 text-blue-800 dark:text-blue-200 text-sm">
                             <div>
                                 <p className="font-medium">{selectedCustomer.name}</p>
                                 <p>{selectedCustomer.email}</p>
@@ -221,7 +244,7 @@ export default function CreateQuote() {
                 {/* Botones de acción */}
                 <div className="flex gap-4 flex-wrap">
                     <CustomerListButton openModal={openCustomerListModal} />
-                    <CreateCustomertButton openModal={openCustomerCreatetModal}></CreateCustomertButton>
+                    <CreateCustomertButton openModal={openCustomerCreatetModal} />
 
                     <button
                         onClick={() => setIsProductModalOpen(true)}
@@ -269,20 +292,16 @@ export default function CreateQuote() {
                                             <td className="p-3 border border-gray-200 dark:border-gray-700">
                                                 <div>
                                                     <div className="font-medium">{item.name}</div>
-
                                                 </div>
                                             </td>
                                             <td className="p-3 border border-gray-200 dark:border-gray-700">
                                                 <div>
                                                     <div className="font-medium">{item.category_id}</div>
-
                                                 </div>
                                             </td>
                                             <td className="p-3 text-center border border-gray-200 dark:border-gray-700">
                                                 <div className="flex items-center justify-center space-x-2">
-
                                                     <span className="w-8 text-center font-medium">{item.quantity}</span>
-
                                                 </div>
                                             </td>
                                             <td className="p-3 text-right border border-gray-200 dark:border-gray-700">
@@ -339,7 +358,6 @@ export default function CreateQuote() {
                                         <td colSpan={2} className="p-3 text-center text-lg font-bold border border-gray-200 dark:border-gray-700">
                                             ${getSubtotal()}
                                         </td>
-
                                     </tr>
                                     <tr>
                                         <td colSpan={6} className="p-3 text-right font-semibold border border-gray-200 dark:border-gray-700">
@@ -348,7 +366,6 @@ export default function CreateQuote() {
                                         <td colSpan={2} className="p-3 text-center text-lg font-bold border border-gray-200 dark:border-gray-700">
                                             ${getTotalDiscount().toFixed(2)}
                                         </td>
-
                                     </tr>
                                     <tr>
                                         <td colSpan={6} className="p-3 text-right font-semibold border border-gray-200 dark:border-gray-700">
@@ -357,7 +374,6 @@ export default function CreateQuote() {
                                         <td colSpan={2} className="p-3 text-center text-lg font-bold border border-gray-200 dark:border-gray-700">
                                             ${getTotalCart().toFixed(2)}
                                         </td>
-
                                     </tr>
                                 </tfoot>
                             </table>
@@ -371,9 +387,9 @@ export default function CreateQuote() {
                         <button
                             onClick={saveQuotation}
                             className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                            disabled={!selectedCustomer || cart.length === 0}
+                            disabled={!selectedCustomer || cart.length === 0 || isSubmitting}
                         >
-                            Guardar Cotización
+                            {isSubmitting ? 'Guardando...' : 'Guardar Cotización'}
                         </button>
 
                         {(!selectedCustomer || cart.length === 0) && (
@@ -397,8 +413,6 @@ export default function CreateQuote() {
                 onSelectCustomer={handleSelectCustomer}
             />
 
-
-
             <ProductList
                 items={cart}
                 isOpen={isProductModalOpen}
@@ -406,16 +420,13 @@ export default function CreateQuote() {
                 onSelectProduct={handleSelectProduct}
             />
 
-
-         <CreateCustomerModal
-         isOpen={openCustomerCreate}
-         onClose={closeCustomerCreatetModal}
-         departments={departments}
-         municipalities={municipalities}
-         districts={districts}
-
-         />
-
+            <CreateCustomerModal
+                isOpen={openCustomerCreate}
+                onClose={closeCustomerCreatetModal}
+                departments={departments}
+                municipalities={municipalities}
+                districts={districts}
+            />
         </AppLayout>
     );
 }

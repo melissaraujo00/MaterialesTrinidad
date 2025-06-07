@@ -13,6 +13,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\QuoteDetailController;
 use App\Http\Controllers\TraderController;
 
 Route::get('/', function () {
@@ -34,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
     'businessData' => 'businessData'
     ]);
     Route::resource('quotes',QuoteController::class);
+    Route::resource('quoteDetails',QuoteDetailController::class);
 
 
     // Ruta para el dashboard

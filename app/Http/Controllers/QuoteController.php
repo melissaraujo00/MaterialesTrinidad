@@ -10,8 +10,10 @@ use App\Models\Municipality;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Quote;
+use App\Models\QuoteDetail;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class QuoteController extends Controller
 {
@@ -76,24 +78,63 @@ class QuoteController extends Controller
         $municipalities = Municipality::all();
         $districts = District::all();
 
-        
-        return Inertia::render('quote/Create', [  
+
+        return Inertia::render('quote/Create', [
             'departments' => $departments,
             'municipalities' => $municipalities,
             'districts' => $districts,
-            
+
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreQuoteRequest $request)
+    public function store(Request $request)
     {
-        Quote::create($request->validated());
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'user_id' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'subtotal' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'details' => 'required|array',
+            'details.*.amount' => 'required|integer|min:1',
+            'details.*.price' => 'required|numeric|min:0',
+            'details.*.subtotal' => 'required|numeric|min:0',
+            'details.*.product_id' => 'required|exists:products,id',
+        ]);
 
-        return redirect()->route('quotes.index')->with('success', 'Category created successfully.');
+        DB::beginTransaction();
+
+        try {
+            // 1. Crear la cotización
+            $quote = Quote::create([
+                'customer_id' => $validated['customer_id'],
+                'user_id' => $validated['user_id'],
+                'date' => $validated['date'],
+                'subtotal' => $validated['subtotal'],
+                'total' => $validated['total'],
+            ]);
+
+            // 2. Crear los detalles con el ID de la cotización
+            foreach ($validated['details'] as $detail) {
+                $detail['quote_id'] = $quote->id;
+                QuoteDetail::create($detail);
+            }
+
+            DB::commit();
+
+            return redirect()->route('quotes.create')->with([
+                'success' => 'Cotización y detalles creados exitosamente.',
+                'quote' => $quote
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors('Error al crear la cotización: ' . $e->getMessage());
+        }
     }
+
 
     /**
      * Display the specified resource.
@@ -127,6 +168,5 @@ class QuoteController extends Controller
         $quote->delete();
 
         return redirect()->route('quotes.index')->with('success', 'cotizacion eliminada correctamente.');
-        
     }
 }
