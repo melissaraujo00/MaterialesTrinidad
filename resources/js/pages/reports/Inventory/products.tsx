@@ -8,7 +8,10 @@ import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
 import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import jszip from 'jszip';
-import DeleteEntityModal from "../../components/DeleteEntityModal";
+import { Formik, Form, Field } from 'formik';
+import { useRef } from 'react';
+import { router } from '@inertiajs/react';
+
 
 window.JSZip = jszip;
 DataTable.use(DT);
@@ -20,16 +23,16 @@ interface Product {
 
 
 export default function Products() {
-    // Obtener permisos del usuario autenticado
-    const page = usePage();
-    const permissions =
-        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-            ? page.props.auth.user.permissions
-            : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
 
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const tableRef = useRef<any>(null);
+
+    const { categories, products, selectedCategory } = usePage().props;
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        router.get(route('products.index'), {
+            category: e.target.value,
+        });
+    };
 
     const getStockBadge = (stock: number, stockMinimun: number) => {
         if (stock <= stockMinimun) {
@@ -38,16 +41,6 @@ export default function Products() {
         return '';
     };
 
-    const openDeleteModal = (product: Product) => {
-        setSelectedProduct(product);
-        setIsDeleteModalOpen(true);
-    };
-    const handleReporte = () => {
-        const params = new URLSearchParams();
-        params.append('search', dataTableSearchValue); // Obtén el valor actual de búsqueda
-        // Agrega otros filtros si los tienes
-        window.open(`/inventoryReport?${params.toString()}`, '_blank');
-    };
 
     const columns = [
         { data: 'name' },
@@ -83,28 +76,6 @@ export default function Products() {
                     td.innerHTML = `<span class="text-gray-500 italic">Sin imagen</span>`;
                 }
             }
-        },
-        {
-            data: null,
-            orderable: false,
-            searchable: false,
-            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-
-
-                    let actions = "";
-                    if (hasPermission("editar producto")) {
-                        actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
-                    }
-                    if (hasPermission("eliminar producto")) {
-                        actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
-                    }
-                    td.innerHTML = actions;
-
-                    if (hasPermission("eliminar producto")) {
-                        td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
-                    }
-
-            }
         }
     ];
 
@@ -115,28 +86,43 @@ export default function Products() {
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
-                    {hasPermission("crear producto")   &&(
-                        <Link
-                            href="/products/create"
-                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
-                        >
-                            Agregar Producto
-                        </Link>
-                    )}
                     <a href="inventoryReport" className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition">
                         Reporte
                     </a>
+                    <div>
+                        <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
+                        {/* <select
+                            id="category_id"
+                            name="category"
+                            //value={selectedCategory || ''}
+                            onChange={handleFilterChange}
+                            className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                        >
+                            <option value="">Todas las Categorías</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select> */}
+                    </div>
 
                 </div>
 
-                <DataTable ajax="/api/products/getProductData" options={{
-                    language: languageES,
-                    responsive: true,
-                    dom: 'lBrtip',
-                    layout: {
-                        topStart: ['pageLength'],
-                    },
-                }} columns={columns} className="display">
+                <DataTable
+                    ref={tableRef}
+                    //ajax={/api/products/getProductData}
+                    options={{
+                        language: languageES,
+                        responsive: true,
+                        dom: 'lBrtip',
+                        layout: {
+                            topStart: ['pageLength'],
+                        },
+                    }}
+                    columns={columns}
+                    className="display"
+                >
                     <thead>
                         <tr>
                             <th>Producto</th>
@@ -149,18 +135,10 @@ export default function Products() {
                             <th>Marca</th>
                             <th>stock minimo</th>
                             <th>Imagen</th>
-                            <th>Acciones</th>
                         </tr>
                     </thead>
                 </DataTable>
             </div>
-            <DeleteEntityModal
-                isOpen={isDeleteModalOpen}
-                closeModal={() => setIsDeleteModalOpen(false)}
-                entity={selectedProduct}
-                entityType="producto"
-                deleteEndpoint="/products"
-            />
         </AppLayout>
     );
 }
