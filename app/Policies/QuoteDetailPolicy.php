@@ -37,7 +37,7 @@ class QuoteDetailPolicy
      */
     public function update(User $user, QuoteDetail $quoteDetail): bool
     {
-        return false;
+         return $user->can('realizar cotizaciones');;
     }
 
     /**

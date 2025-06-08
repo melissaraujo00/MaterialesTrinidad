@@ -13,12 +13,11 @@ import DeleteQuoteModal from "../../components/DeleteQuoteModal";
 window.JSZip = jszip;
 DataTable.use(DT);
 
-interface Quote{
-    id:number;
-    total:number;
-    date:Date;
-    status:string;
-   
+interface Quote {
+    id: number;
+    total: number;
+    date: Date;
+    status: string;
 }
 
 export default function Quotes() {
@@ -50,11 +49,11 @@ export default function Quotes() {
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 let actions = "";
 
-                // Ver detalles
+                // Ver detalles - Usar Link de Inertia para navegación
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
-                // Enviar (puedes personalizar la acción real del botón)
-                actions += `<button class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-indigo-600 ml-2">Enviar</button>`;
+                // Enviar
+                actions += `<button class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Enviar</button>`;
 
                 // Eliminar
                 if (hasPermission("realizar cotizaciones")) {
@@ -63,16 +62,14 @@ export default function Quotes() {
 
                 td.innerHTML = actions;
 
-                // Eliminar
+                // Event listeners
+                td.querySelector('.send-btn')?.addEventListener('click', () => {
+                    alert(`Aquí se enviaría la cotización #${rowData.id}`);
+                });
+
                 if (hasPermission("realizar cotizaciones")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                 }
-
-              
-                td.querySelector('.send-btn')?.addEventListener('click', () => {
-                    alert(`aqui se enviaria la cotizacion`);
-                    
-                });
             }
         }
     ];
@@ -83,13 +80,14 @@ export default function Quotes() {
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold">Gestión de Cotizaciones</h1>
                     {hasPermission("realizar cotizaciones") && (
                         <Link
                             href="/quotes/create"
-                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+                            className="bg-green-600 text-white rounded px-4 py-2 text-sm hover:bg-green-700 transition"
                         >
-                            realizar Cotización
+                            Nueva Cotización
                         </Link>
                     )}
                 </div>
@@ -101,9 +99,12 @@ export default function Quotes() {
                         responsive: true,
                         dom: 'lBrtip',
                         layout: { topStart: ['pageLength'] },
+                        pageLength: 10,
+                        lengthMenu: [5, 10, 25, 50],
+                        order: [[2, 'desc']], // Ordenar por fecha descendente
                     }}
                     columns={columns}
-                    className="display"
+                    className="display stripe hover"
                 >
                     <thead>
                         <tr>

@@ -125,7 +125,7 @@ class QuoteController extends Controller
 
             DB::commit();
 
-            return redirect()->route('quotes.create')->with([
+            return redirect()->route('quotes.index')->with([
                 'success' => 'Cotización y detalles creados exitosamente.',
                 'quote' => $quote
             ]);
@@ -139,9 +139,54 @@ class QuoteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Quote $quote)
     {
-        //
+        try {
+      
+            $quote->load(['customer', 'user', 'details.product']);
+
+       
+            if (!$quote) {
+                return redirect()->route('quotes.index')->with('error', 'Cotización no encontrada.');
+            }
+
+    
+            $details = $quote->details->map(function ($detail) {
+                return [
+                    'product_name' => $detail->product->name ?? 'Producto eliminado',
+                    'amount' => (int) $detail->amount,
+                    'price' => (float) $detail->price,
+                    'subtotal' => (float) $detail->subtotal,
+                ];
+            });
+
+            $quoteData = [
+                'id' => $quote->id,
+                'date' => $quote->date,
+                'subtotal' => (float) $quote->subtotal,
+                'total' => (float) $quote->total,
+                'status' => $quote->status ?? 'Pendiente',
+                'customer' => [
+                    'id' => $quote->customer->id ?? null,
+                    'name' => $quote->customer->name ?? 'Cliente eliminado',
+                ],
+                'user' => [
+                    'id' => $quote->user->id ?? null,
+                    'name' => $quote->user->name ?? 'Usuario eliminado',
+                ],
+            ];
+
+            
+            return Inertia::render('quote/ShowDetails', [
+                'quote' => $quoteData,
+                'details' => $details->toArray(),
+            ]);
+
+        } catch (\Exception $e) {
+            
+            
+            return redirect()->route('quotes.index')->with('error', 'Error al cargar la cotización: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreQuoteDetailsRequest;
 use App\Models\QuoteDetail;
 use Illuminate\Http\Request;
+use League\CommonMark\Extension\SmartPunct\Quote;
 use PHPUnit\Event\TestSuite\Sorted;
+use Inertia\Inertia;
 
 class QuoteDetailController extends Controller
 {
@@ -29,37 +31,25 @@ class QuoteDetailController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'details' => 'required|array',
-            'details.*.amount' => 'required|integer|min:1',
-            'details.*.price' => 'required|numeric|min:0',
-            'details.*.subtotal' => 'required|numeric|min:0',
-            'details.*.quote_id' => 'required|exists:quotes,id',
-            'details.*.product_id' => 'required|exists:products,id',
-        ]);
-
-        $createdDetails = [];
-
-        foreach ($request->details as $detail) {
-            $quoteDetail = QuoteDetail::create($detail);
-            $createdDetails[] = $quoteDetail;
-        }
-
-        return redirect()->back()->with([
-            'message' => 'Detalles de cotización creados exitosamente.',
-            'details' => $createdDetails
-        ]);
-    }
+    public function store(Request $request) {}
 
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
+    public function show(Quote $quote)
+    { {
+            // Cargar detalles con los productos relacionados
+            $quote->load('details.product');
+
+            // Extraer solo los productos de los detalles
+            $products = $quote->details->pluck('product')->filter()->values();
+
+            // Retornar como array (para Inertia)
+            return Inertia::render('Quotes/Show', [
+                'products' => $products,
+            ]);
+        }
     }
 
     /**

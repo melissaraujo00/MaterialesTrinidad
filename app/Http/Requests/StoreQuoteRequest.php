@@ -31,23 +31,17 @@ class StoreQuoteRequest extends FormRequest
     }
     public function messages(): array
     {
-        return [
-            'total.required' => 'El campo total es obligatorio.',
-            'total.numeric' => 'El total debe ser un número.',
-            'total.min' => 'El total no puede ser negativo.',
-
-            'date.required' => 'La fecha es obligatoria.',
-            'date.date' => 'Debe ingresar una fecha válida.',
-
-            'subtotal.required' => 'El campo subtotal es obligatorio.',
-            'subtotal.numeric' => 'El subtotal debe ser un número.',
-            'subtotal.min' => 'El subtotal no puede ser negativo.',
-
-            'customer_id.required' => 'Debe seleccionar un cliente.',
-            'customer_id.exists' => 'El cliente seleccionado no existe.',
-
-            'user_id.required' => 'Debe seleccionar un vendedor.',
-            'user_id.exists' => 'El vendedor seleccionado no existe.',
+       return [
+            'customer_id' => 'required|exists:customers,id',
+            'user_id' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'subtotal' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'details' => 'required|array',
+            'details.*.amount' => 'required|integer|min:1',
+            'details.*.price' => 'required|numeric|min:0',
+            'details.*.subtotal' => 'required|numeric|min:0',
+            'details.*.product_id' => 'required|exists:products,id',
         ];
     }
 }
