@@ -24,7 +24,6 @@ class UpdateProductRequest extends FormRequest
         $rules = [
            'name' => ['required', 'string', 'max:45'],
             'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'priceWithTax' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'discountPrice' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'category_id' => ['nullable', 'exists:categories,id'],
@@ -48,10 +47,6 @@ class UpdateProductRequest extends FormRequest
         'name.max' => 'El nombre no debe exceder los 45 caracteres.',
 
         'description.string' => 'La descripción debe ser una cadena de texto.',
-
-        'price.required' => 'El precio es obligatorio.',
-        'price.numeric' => 'El precio debe ser un valor numérico.',
-        'price.regex' => 'El formato del precio no es válido. Ejemplo válido: 12345.67',
 
         'priceWithTax.required' => 'El precio con impuesto es obligatorio.',
         'priceWithTax.numeric' => 'El precio con impuesto debe ser numérico.',

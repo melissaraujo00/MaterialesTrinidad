@@ -16,8 +16,8 @@ export default function ProductCreate() {
 
     const validationSchema = Yup.object({
         name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido'),
-        price: Yup.number().positive('El precio debe ser positivo y mayor a 0').required('El precio es requerido'),
-        discountPrice: Yup.number().positive('El precio con descuento debe ser positivo y mayor a 0').required('El precio con descuento es requerido'),
+        priceWithTax: Yup.number().typeError('El precio es requerido').positive('El precio debe ser positivo y mayor a 0').required('El precio es requerido'),
+        discountPrice: Yup.number().typeError('El precio con descuento es requerido').positive('El precio con descuento debe ser positivo y mayor a 0').required('El precio con descuento es requerido'),
         description: Yup.string().max(255, 'La descripción no puede exceder los 255 caracteres'),
         category_id: Yup.string(),
         brand_id: Yup.string(),
@@ -40,13 +40,12 @@ export default function ProductCreate() {
         const data = new FormData();
         data.append("name", values.name);
         data.append("description", values.description || "");
-        data.append("price", values.price.toString());
-        data.append("priceWithTax", (values.price + values.price * 0.13).toFixed(2));
-        data.append("discountPrice", values.discountPrice);
+        data.append("priceWithTax", String(values.priceWithTax));
+        data.append("discountPrice", String(values.discountPrice));
         data.append("category_id", values.category_id);
         data.append("brand_id", values.brand_id);
-        data.append("stock", values.stock);
-        data.append("stockMinimun", values.stockMinimun)
+        data.append("stock", String(values.stock));
+        data.append("stockMinimun", String(values.stockMinimun));
 
         if (values.image) {
             data.append("image", values.image);
@@ -80,7 +79,7 @@ export default function ProductCreate() {
                     initialValues={{
                         name: "",
                         description: "",
-                        price: "",
+                        priceWithTax: "",
                         discountPrice: "",
                         category_id: "",
                         brand_id: "",
@@ -127,23 +126,19 @@ export default function ProductCreate() {
 
                             {/* Price */}
                             <div>
-                                <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
+                                <label htmlFor="priceWithTax" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
                                 <Field
                                     type="number"
                                     step="0.01"
-                                    id="price"
-                                    name="price"
+                                    id="priceWithTax"
+                                    name="priceWithTax"
                                     placeholder="Ej: 12.50"
-                                    value={values.price}
-                                    onChange={(event) => {
-                                        const price = parseFloat(event.target.value) || 0;
-                                        setFieldValue("price", price);
-                                        setFieldValue("priceWithTax", parseFloat((price + price * 0.13).toFixed(2))); // Calcula automáticamente el precio con IVA
-                                    }}
+                                    value={values.priceWithTax}
+                                    onChange={handleChange}
                                     onBlur={handleBlur}
                                     className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                                 />
-                                {touched.price && errors.price && <small className="text-red-500">{errors.price}</small>}
+                                {touched.priceWithTax && errors.priceWithTax && <small className="text-red-500">{errors.priceWithTax}</small>}
                             </div>
                             {/* Discount Price */}
                             <div>
@@ -164,7 +159,7 @@ export default function ProductCreate() {
 
                             {/* Category */}
                             <div>
-                                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
+                                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría (Opcional)</label>
                                 <Field
                                     as="select"
                                     id="category_id"
@@ -184,7 +179,7 @@ export default function ProductCreate() {
 
                             {/* Brand */}
                             <div>
-                                <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
+                                <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</label>
                                 <Field
                                     as="select"
                                     id="brand_id"
@@ -262,7 +257,7 @@ export default function ProductCreate() {
                             )}
 
                             {/* Buttons */}
-                            <div className="flex justify-start">
+                            <div className="flex justify-start gap-2">
                                 <button
                                     type="button"
                                     onClick={() => window.history.back()}

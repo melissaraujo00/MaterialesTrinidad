@@ -25,7 +25,6 @@ interface Customer {
 interface Product {
     id: number;
     name: string;
-    price: number;
     priceWithTax: number;
     discountPrice: number | null;
     brand_id: string;
@@ -48,7 +47,7 @@ export default function CreateQuote() {
         departments: { id: number; name: string }[];
         municipalities: { id: number; name: string; department_id: number }[];
         districts: { id: number; name: string; municipality_id: number }[];
-        
+
     }>().props;
 
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -209,7 +208,7 @@ export default function CreateQuote() {
             }
         });
 
-        
+
 
 
 

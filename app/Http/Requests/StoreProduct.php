@@ -24,7 +24,6 @@ class StoreProduct extends FormRequest
         return [
             'name' => ['required', 'string', 'max:45'],
             'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'priceWithTax' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'discountPrice' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
             'category_id' => ['nullable', 'exists:categories,id'],
@@ -44,10 +43,6 @@ class StoreProduct extends FormRequest
 
             'description.string' => 'La descripción debe ser una cadena de texto.',
 
-            'price.required' => 'El precio es obligatorio.',
-            'price.numeric' => 'El precio debe ser un valor numérico.',
-            'price.regex' => 'El formato del precio no es válido. Ejemplo válido: 12345.67',
-
             'priceWithTax.required' => 'El precio con impuesto es obligatorio.',
             'priceWithTax.numeric' => 'El precio con impuesto debe ser numérico.',
             'priceWithTax.regex' => 'El formato del precio con impuesto no es válido. Ejemplo válido: 12345.67',
@@ -56,10 +51,8 @@ class StoreProduct extends FormRequest
             'discountPrice.numeric' => 'El precio con descuento debe ser numérico.',
             'discountPrice.regex' => 'El formato del precio con descuento no es válido. Ejemplo válido: 12345.67',
 
-            'category_id.required' => 'La categoría es obligatoria.',
             'category_id.exists' => 'La categoría seleccionada no existe.',
 
-            'brand_id.required' => 'La marca es obligatoria.',
             'brand_id.exists' => 'La marca seleccionada no existe.',
 
             'stock.required' => 'El stock es obligatorio.',

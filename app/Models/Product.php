@@ -10,12 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Product extends Model
 {
     use Softdeletes;
-    
+
     protected $fillable =
     [
         'name',
         'description',
-        'price',
         'priceWithTax',
         'discountPrice',
         'stock',
@@ -33,7 +32,7 @@ class Product extends Model
     public function brand():BelongsTo
     {
         return $this->belongsTo(Brand::class)->withTrashed();
-    }  
+    }
 
     public function movements():HasMany
     {

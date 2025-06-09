@@ -49,7 +49,7 @@ export default function Products() {
     const columns = [
         { data: 'name', title: 'Producto', responsivePriority: 1 },
         { data: 'description', title: 'Descripción', responsivePriority: 7 },
-        { data: 'price', title: 'Precio', responsivePriority: 1 },
+        { data: 'priceWithTax', title: 'Precio', responsivePriority: 1 },
         { data: 'discountPrice', title: 'Precio con descuento',responsivePriority: 6 },
         {
             data: 'stock',
