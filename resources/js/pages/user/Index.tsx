@@ -29,7 +29,7 @@ export default function Users() {
     };
 
     const columns = [
-        { data: 'name', title: 'Usuario', responsivePriority: 8 },
+        { data: 'name', title: 'Usuario', responsivePriority: 7 },
         { data: 'firstName', responsivePriority: 7, title: 'Primer Nombre' },
         { data: 'lastName', responsivePriority: 7, title: 'Apellido' },
         { data: 'email', responsivePriority: 7,  title: 'Correo Electrónico' },
