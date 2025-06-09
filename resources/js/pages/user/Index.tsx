@@ -101,10 +101,10 @@ export default function Users() {
                             { extend: 'csv', text: 'CSV' },
                             { extend: 'print', text: 'Imprimir' }
                         ],
-                        
+
                     }}
                     columns={columns}
-                    className="display w-full"
+                    className="display nowrap w-full"
                 />
             </div>
 
