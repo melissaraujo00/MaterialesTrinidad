@@ -51,7 +51,7 @@ const mainNavItems: NavItem[] = [
         ]
     },
     {
-        title: 'Roles y Permisos',
+        title: 'Accesos',
         icon: UserRoundCog,
         children: [
             {

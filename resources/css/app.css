@@ -1,5 +1,8 @@
 @import 'datatables.net-dt';
 @import 'tailwindcss';
+@import 'datatables.net-responsive-dt';
+@import 'datatables.net-buttons-dt';
+
 
 @plugin 'tailwindcss-animate';
 
@@ -7,6 +10,11 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+
+.dataTables_filter {
+    float: right !important;
+    text-align: right !important;
+}
 
 @theme {
     --font-sans:
