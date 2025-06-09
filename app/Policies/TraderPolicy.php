@@ -2,26 +2,26 @@
 
 namespace App\Policies;
 
-use App\Models\Quote;
+use App\Models\Trader;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class QuotePolicy
+class TraderPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('realizar cotizaciones');
+         return $user->can('ver usuarios');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Quote $quote): bool
+    public function view(User $user, Trader $trader): bool
     {
-        return $user->can('realizar cotizaciones');;
+        return false;
     }
 
     /**
@@ -29,13 +29,13 @@ class QuotePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('realizar cotizaciones');;
+        return false;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Quote $quote): bool
+    public function update(User $user, Trader $trader): bool
     {
         return false;
     }
@@ -43,15 +43,15 @@ class QuotePolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Quote $quote): bool
+    public function delete(User $user, Trader $trader): bool
     {
-         return $user->can('realizar cotizaciones');;
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Quote $quote): bool
+    public function restore(User $user, Trader $trader): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class QuotePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Quote $quote): bool
+    public function forceDelete(User $user, Trader $trader): bool
     {
         return false;
     }

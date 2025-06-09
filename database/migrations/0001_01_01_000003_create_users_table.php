@@ -1,4 +1,4 @@
-<?php
+t<?php
 
 use App\Models\Role;
 use Illuminate\Database\Migrations\Migration;

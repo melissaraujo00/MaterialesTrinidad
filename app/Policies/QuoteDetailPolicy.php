@@ -2,24 +2,24 @@
 
 namespace App\Policies;
 
-use App\Models\Quote;
+use App\Models\QuoteDetail;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class QuotePolicy
+class QuoteDetailPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('realizar cotizaciones');
+       return $user->can('realizar cotizaciones');;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Quote $quote): bool
+    public function view(User $user, QuoteDetail $quoteDetail): bool
     {
         return $user->can('realizar cotizaciones');;
     }
@@ -35,23 +35,23 @@ class QuotePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Quote $quote): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Quote $quote): bool
+    public function update(User $user, QuoteDetail $quoteDetail): bool
     {
          return $user->can('realizar cotizaciones');;
     }
 
     /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, QuoteDetail $quoteDetail): bool
+    {
+        return false;
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Quote $quote): bool
+    public function restore(User $user, QuoteDetail $quoteDetail): bool
     {
         return false;
     }
@@ -59,7 +59,7 @@ class QuotePolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Quote $quote): bool
+    public function forceDelete(User $user, QuoteDetail $quoteDetail): bool
     {
         return false;
     }

@@ -14,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes;
     use HasRoles;
 
 
@@ -31,7 +31,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'birthdate',
         'phoneNumber',
         'password',
-        // 'role_id'
     ];
 
     /**
@@ -57,21 +56,21 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    public function role():BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
 
-     public function getAllPermissions()
- {
-     return $this->permissions
-         ->merge($this->getPermissionsViaRoles())
-         ->sort()
-         ->values();
- }
+    public function getAllPermissions()
+    {
+        return $this->permissions
+            ->merge($this->getPermissionsViaRoles())
+            ->sort()
+            ->values();
+    }
 
- public function traders(){
-    return $this->hasMany(Trader::class);
- }
-
+    public function quotes()
+    {
+        return $this->hasMany(Quote::class);
+    }
 }

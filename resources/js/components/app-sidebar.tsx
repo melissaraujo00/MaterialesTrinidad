@@ -62,7 +62,7 @@ const mainNavItems: NavItem[] = [
         ]
     },
     {
-        title: 'Roles y Permisos',
+        title: 'Accesos',
         icon: UserRoundCog,
         children: [
             {
@@ -115,7 +115,6 @@ const mainNavItems: NavItem[] = [
         icon: NotebookPen,
         permission: 'ver ofertas',
     },
-
 
 ];
 
