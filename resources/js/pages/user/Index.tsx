@@ -25,7 +25,7 @@ export default function Users() {
         setSelectedUser(user);
         setIsDeleteModalOpen(true);
     };
-    console.log("Permisos del usuario:", permissions);
+    
 
 
     const columns = [

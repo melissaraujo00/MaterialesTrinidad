@@ -37,12 +37,7 @@ Route::middleware(['auth'])->group(function () {
     'businessData' => 'businessData'
     ]);
     Route::resource('quotes',QuoteController::class);
-<<<<<<< HEAD
-    Route::resource('offers', OfferController::class);
-=======
     Route::resource('quoteDetails',QuoteDetailController::class);
-
->>>>>>> quotes
 
     // Ruta para el dashboard
     Route::get('dashboard', function () {

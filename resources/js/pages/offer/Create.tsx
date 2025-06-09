@@ -8,7 +8,7 @@ import { Formik, Form, Field } from 'formik';
 export default function PromotionCreate() {
     // Asegura que products siempre sea un array
     const { products = [] } = usePage<{ products?: { id: number; name: string }[] }>().props;
-    console.log("Products:", products);
+    
 
 
     const validationSchema = Yup.object({
