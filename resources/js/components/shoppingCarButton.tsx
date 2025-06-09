@@ -23,7 +23,7 @@ interface Props {
 export default function ShoppingCarButton({ Products,openModal }: Props) {
     return (
         <button
-            className="bg-green-600 text-white rounded px-2 py-1 text-sm hover:bg-green-700 transition flex items-center gap-1  absolute right-50 top-20 "
+            className="bg-green-600 text-white rounded px-2 py-1 text-sm hover:bg-green-700 transition flex items-center gap-1   "
             onClick={openModal}
             >
            <ShoppingCart className="w-4 h-4" />

@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreQuoteRequest;
+use App\Models\Customer;
+use App\Models\Department;
+use App\Models\District;
+use App\Models\Municipality;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Quote;
+use App\Models\QuoteDetail;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class QuoteController extends Controller
 {
@@ -16,29 +23,34 @@ class QuoteController extends Controller
         $this->authorizeResource(Quote::class, 'quote');
     }
 
-     public function getQuoteData()
-     {
+    public function getQoteData()
+    {
 
-        $data = Product::query()
-        ->with('category', 'brand')
-        ->get()
-        ->map( function ($product){
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'description'  => $product->description,
-                'price'  => $product->price,
-                'priceWithTax' => $product->priceWithTax,
-                'discountPrice' => $product->discountPrice,
-                'stock'  => $product->stock,
-                'category_id'  => $product->category->name,
-                'brand_id' => $product->brand->name,
-                'stockMinimun' => $product->stockMinimun,
-                'image'  => $product->image,
-            ];
-        });
+        $data = Quote::query()
+            ->with('customer', 'user')
+            ->get()
+            ->map(function ($quote) {
+                return [
+                    'id' => $quote->id,
+                    'date' => $quote->date,
+                    'total' => $quote->total,
+                    'customer' => [
+                        'id' => $quote->customer->id ?? null,
+                        'name' => $quote->customer->name ?? null,
+                    ],
+                    'user' => [
+                        'id' => $quote->user->id ?? null,
+                        'name' => $quote->user->name ?? null,
+                    ],
+                    'status' => $quote->status,
+
+                ];
+            });
+
         return response()->json(['data' => $data]);
-     }
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -62,7 +74,17 @@ class QuoteController extends Controller
      */
     public function create()
     {
-        //
+        $departments = Department::all();
+        $municipalities = Municipality::all();
+        $districts = District::all();
+
+
+        return Inertia::render('quote/Create', [
+            'departments' => $departments,
+            'municipalities' => $municipalities,
+            'districts' => $districts,
+
+        ]);
     }
 
     /**
@@ -70,15 +92,101 @@ class QuoteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'user_id' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'subtotal' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0',
+            'details' => 'required|array',
+            'details.*.amount' => 'required|integer|min:1',
+            'details.*.price' => 'required|numeric|min:0',
+            'details.*.subtotal' => 'required|numeric|min:0',
+            'details.*.product_id' => 'required|exists:products,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Crear la cotización
+            $quote = Quote::create([
+                'customer_id' => $validated['customer_id'],
+                'user_id' => $validated['user_id'],
+                'date' => $validated['date'],
+                'subtotal' => $validated['subtotal'],
+                'total' => $validated['total'],
+            ]);
+
+            // 2. Crear los detalles con el ID de la cotización
+            foreach ($validated['details'] as $detail) {
+                $detail['quote_id'] = $quote->id;
+                QuoteDetail::create($detail);
+            }
+
+            DB::commit();
+
+            return redirect()->route('quotes.index')->with([
+                'success' => 'Cotización y detalles creados exitosamente.',
+                'quote' => $quote
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors('Error al crear la cotización: ' . $e->getMessage());
+        }
     }
+
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Quote $quote)
     {
-        //
+        try {
+
+            $quote->load(['customer', 'user', 'details.product']);
+
+
+            if (!$quote) {
+                return redirect()->route('quotes.index')->with('error', 'Cotización no encontrada.');
+            }
+
+
+            $details = $quote->details->map(function ($detail) {
+                return [
+                    'product_name' => $detail->product->name ?? 'Producto eliminado',
+                    'amount' => (int) $detail->amount,
+                    'price' => (float) $detail->price,
+                    'subtotal' => (float) $detail->subtotal,
+                ];
+            });
+
+            $quoteData = [
+                'id' => $quote->id,
+                'date' => $quote->date,
+                'subtotal' => (float) $quote->subtotal,
+                'total' => (float) $quote->total,
+                'status' => $quote->status ?? 'Pendiente',
+                'customer' => [
+                    'id' => $quote->customer->id ?? null,
+                    'name' => $quote->customer->name ?? 'Cliente eliminado',
+                ],
+                'user' => [
+                    'id' => $quote->user->id ?? null,
+                    'name' => $quote->user->name ?? 'Usuario eliminado',
+                ],
+            ];
+
+
+            return Inertia::render('quote/ShowDetails', [
+                'quote' => $quoteData,
+                'details' => $details->toArray(),
+            ]);
+
+        } catch (\Exception $e) {
+
+
+            return redirect()->route('quotes.index')->with('error', 'Error al cargar la cotización: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -100,8 +208,10 @@ class QuoteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Quote $quote)
     {
-        //
+        $quote->delete();
+
+        return redirect()->route('quotes.index')->with('success', 'cotizacion eliminada correctamente.');
     }
 }

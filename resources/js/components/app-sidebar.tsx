@@ -105,7 +105,6 @@ const mainNavItems: NavItem[] = [
         permission: 'ver ofertas',
     },
 
-
 ];
 
 // Función recursiva para filtrar ítems según permisos
