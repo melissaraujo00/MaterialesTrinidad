@@ -56,12 +56,6 @@ class UpdateProductRequest extends FormRequest
         'discountPrice.numeric' => 'El precio con descuento debe ser numérico.',
         'discountPrice.regex' => 'El formato del precio con descuento no es válido. Ejemplo válido: 12345.67',
 
-        'category_id.required' => 'La categoría es obligatoria.',
-        'category_id.exists' => 'La categoría seleccionada no existe.',
-
-        'brand_id.required' => 'La marca es obligatoria.',
-        'brand_id.exists' => 'La marca seleccionada no existe.',
-
         'stock.required' => 'El stock es obligatorio.',
         'stock.integer' => 'El stock debe ser un número entero.',
         'stock.min' => 'El stock no puede ser menor que 0.',

@@ -27,7 +27,6 @@ class OfferController extends Controller
                     'startDate' => $offer->startDate,
                     'endDate' => $offer->endDate,
                     'description' => $offer->description,
-                    'type' => $offer->type,
                     'priceNormal' => $offer->priceNormal,
                     'priceOffers' => $offer->priceOffers,
                     'product_id' => $offer->product->name,

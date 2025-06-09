@@ -10,7 +10,6 @@ class Offer extends Model
         'startDate',
         'endDate',
         'description',
-        'type',
         'priceNormal',
         'priceOffers',
         'product_id'

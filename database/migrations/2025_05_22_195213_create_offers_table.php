@@ -17,7 +17,6 @@ return new class extends Migration
             $table->date('startDate');
             $table->date('endDate');
             $table->string('description');
-            $table->string('type');
             $table->decimal('priceNormal', 12, 2);
             $table->decimal('priceOffers', 12, 2);
             $table->foreignIdFor(Product::class)

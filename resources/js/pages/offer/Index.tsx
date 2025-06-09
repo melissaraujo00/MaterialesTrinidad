@@ -18,7 +18,6 @@ interface Offer {
     startDate: string;
     endDate: string;
     description: string;
-    type: string;
     priceNormal: string;
     priceOffers: string;
     product_id: number;
@@ -38,7 +37,7 @@ export default function OffersIndex() {
     const hasPermission = (perm: string) => permissions.includes(perm);
 
     const [selectedOffer, setSelectedOffer] = useState<OfferForModal | null>(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); 
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const openDeleteModal = (offer: Offer) => {
         const modalData: OfferForModal = {
@@ -53,7 +52,6 @@ export default function OffersIndex() {
         { data: 'startDate' },
         { data: 'endDate' },
         { data: 'description' },
-        { data: 'type' },
         { data: 'priceNormal' },
         { data: 'priceOffers' },
         { data: 'product_id' },
@@ -108,7 +106,6 @@ export default function OffersIndex() {
                             <th>Inicio</th>
                             <th>Fin</th>
                             <th>Descripción</th>
-                            <th>Tipo</th>
                             <th>Precio Normal</th>
                             <th>Precio Oferta</th>
                             <th>Producto</th>

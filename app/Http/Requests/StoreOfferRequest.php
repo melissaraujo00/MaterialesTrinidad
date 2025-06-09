@@ -23,12 +23,11 @@ class StoreOfferRequest extends FormRequest
     {
         return [
             'startDate'=> ['required', 'date'],
-        'endDate' => ['required', 'date'],
-        'description'=> ['required', 'string'],
-        'type'=> ['required', 'string'],
-        'priceNormal' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
-        'priceOffers' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
-        'product_id' => ['required', 'exists:products,id'],
+            'endDate' => ['required', 'date'],
+            'description'=> ['required', 'string'],
+            'priceNormal' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
+            'priceOffers' => ['required', 'numeric', 'regex:/^\d{1,10}(\.\d{1,2})?$/'],
+            'product_id' => ['required', 'exists:products,id'],
         ];
     }
 }

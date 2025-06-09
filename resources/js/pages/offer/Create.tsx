@@ -6,27 +6,49 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 
 export default function PromotionCreate() {
-    // Asegura que products siempre sea un array
-    const { products = [] } = usePage<{ products?: { id: number; name: string }[] }>().props;
-    
-
+    const { products = [] } = usePage<{ products?: { id: number; name: string; priceWithTax: number }[] }>().props;
 
     const validationSchema = Yup.object({
-        startDate: Yup.date().required('Campo requerido'),
-        endDate: Yup.date().required('Campo requerido'),
-        description: Yup.string().required('Campo requerido'),
-        type: Yup.string().required('Campo requerido'),
-        priceNormal: Yup.number().typeError('Debe ser un número').positive('Debe ser un número positivo').required('Campo requerido'),
-        priceOffers: Yup.number().typeError('Debe ser un número').positive('Debe ser un número positivo').required('Campo requerido'),
-        product_id: Yup.number().required('El producto es requerido'),
-    });
+    startDate: Yup.date().required('Campo requerido'),
+    endDate: Yup.date().required('Campo requerido'),
+    description: Yup.string().required('Campo requerido'),
+    priceNormal: Yup.number()
+        .typeError('Debe ser un número')
+        .positive('Debe ser un número positivo')
+        .required('Campo requerido')
+        .moreThan(0, 'El precio de oferta debe ser mayor a 0')
+        .test(
+            'match-priceWithTax',
+            'El precio normal debe ser igual al precio del producto seleccionado',
+            function (value) {
+                const { product_id } = this.parent;
+                if (!product_id || !value) return true; // si no hay producto o valor, no falla aquí (otro validador lo hará)
+
+                // Buscar producto en el array
+                const product = products.find(p => p.id === Number(product_id));
+
+                if (!product) return false; // no encontró producto, falla
+
+                // Asumiendo que el atributo es priceWithTax (corrige si se llama distinto)
+                return Number(value) === Number(product.priceWithTax);
+            }
+        ),
+    priceOffers: Yup.number()
+        .typeError('Debe ser un número')
+        .positive('Debe ser un número positivo')
+        .moreThan(0, 'El precio de oferta debe ser mayor a 0')
+        .required('Campo requerido'),
+    product_id: Yup.number()
+        .typeError('Debe seleccionar un producto')
+        .required('El producto es requerido'),
+});
+
 
     const handleSubmit = (values: any) => {
         const data = new FormData();
         data.append("startDate", values.startDate);
         data.append("endDate", values.endDate);
         data.append("description", values.description);
-        data.append("type", values.type);
         data.append("priceNormal", values.priceNormal);
         data.append("priceOffers", values.priceOffers);
         data.append("product_id", values.product_id);
@@ -41,8 +63,7 @@ export default function PromotionCreate() {
                 }, 1000);
                 router.reload();
             },
-            onError: (err) => {
-                console.error("Error al crear Oferta:", err);
+            onError: () => {
                 toast.error("Ocurrió un error al crear la Oferta.");
             },
         });
@@ -61,7 +82,6 @@ export default function PromotionCreate() {
                         startDate: "",
                         endDate: "",
                         description: "",
-                        type: "",
                         priceNormal: "",
                         priceOffers: "",
                         product_id: "",
@@ -71,7 +91,7 @@ export default function PromotionCreate() {
                 >
                     {({ values, handleChange, handleBlur, touched, errors }) => (
                         <Form className="space-y-4">
-                            {/* Campo: Fecha de Inicio */}
+                            {/* Fecha de Inicio */}
                             <div>
                                 <label htmlFor="startDate" className="block text-sm font-medium">Fecha de Inicio</label>
                                 <Field
@@ -86,7 +106,7 @@ export default function PromotionCreate() {
                                 {touched.startDate && errors.startDate && <small className="text-red-500">{errors.startDate}</small>}
                             </div>
 
-                            {/* Campo: Fecha de Fin */}
+                            {/* Fecha de Fin */}
                             <div>
                                 <label htmlFor="endDate" className="block text-sm font-medium">Fecha de Fin</label>
                                 <Field
@@ -101,7 +121,7 @@ export default function PromotionCreate() {
                                 {touched.endDate && errors.endDate && <small className="text-red-500">{errors.endDate}</small>}
                             </div>
 
-                            {/* Campo: Descripción */}
+                            {/* Descripción */}
                             <div>
                                 <label htmlFor="description" className="block text-sm font-medium">Descripción</label>
                                 <Field
@@ -117,23 +137,7 @@ export default function PromotionCreate() {
                                 {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
                             </div>
 
-                            {/* Campo: Tipo */}
-                            <div>
-                                <label htmlFor="type" className="block text-sm font-medium">Tipo</label>
-                                <Field
-                                    type="text"
-                                    id="type"
-                                    name="type"
-                                    placeholder="Ej: Oferta, Promoción Especial..."
-                                    value={values.type}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md bg-white text-black dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.type && errors.type && <small className="text-red-500">{errors.type}</small>}
-                            </div>
-
-                            {/* Campo: Precio Normal */}
+                            {/* Precio Normal */}
                             <div>
                                 <label htmlFor="priceNormal" className="block text-sm font-medium">Precio Normal</label>
                                 <Field
@@ -148,7 +152,7 @@ export default function PromotionCreate() {
                                 {touched.priceNormal && errors.priceNormal && <small className="text-red-500">{errors.priceNormal}</small>}
                             </div>
 
-                            {/* Campo: Precio Oferta */}
+                            {/* Precio de Oferta */}
                             <div>
                                 <label htmlFor="priceOffers" className="block text-sm font-medium">Precio de Oferta</label>
                                 <Field
@@ -163,9 +167,9 @@ export default function PromotionCreate() {
                                 {touched.priceOffers && errors.priceOffers && <small className="text-red-500">{errors.priceOffers}</small>}
                             </div>
 
-                            {/* Campo: Producto */}
+                            {/* Producto */}
                             <div>
-                                <label htmlFor="product_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Producto</label>
+                                <label htmlFor="product_id" className="block text-sm font-medium">Producto</label>
                                 <Field
                                     as="select"
                                     id="product_id"
@@ -176,9 +180,11 @@ export default function PromotionCreate() {
                                     className="mt-1 p-2 w-3/4 max-w-md border rounded-md bg-white text-black dark:bg-gray-800 dark:text-white"
                                 >
                                     <option value="" disabled>Seleccione un Producto</option>
-                                    {Array.isArray(products) && products.length > 0 ? (
+                                    {products.length > 0 ? (
                                         products.map((product) => (
-                                            <option key={product.id} value={product.id}>{product.name}</option>
+                                            <option key={product.id} value={product.id}>
+                                                {product.name}
+                                            </option>
                                         ))
                                     ) : (
                                         <option value="" disabled>No hay productos disponibles</option>

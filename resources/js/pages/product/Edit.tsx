@@ -50,8 +50,6 @@ export default function ProductEdit() {
       .required("Requerido"),
     discountPrice: Yup.number().positive("Debe ser positivo").required("Requerido"),
     description: Yup.string().max(255, "Máximo 255 caracteres").nullable(),
-    category_id: Yup.string(),
-    brand_id: Yup.string(),
     stock: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
     stockMinimun: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
     image: Yup.mixed()
