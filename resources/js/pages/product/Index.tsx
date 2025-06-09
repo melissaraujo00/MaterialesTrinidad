@@ -42,13 +42,7 @@ export default function Products() {
         setSelectedProduct(product);
         setIsDeleteModalOpen(true);
     };
-    const handleReporte = () => {
-        const params = new URLSearchParams();
-        params.append('search', dataTableSearchValue); // Obtén el valor actual de búsqueda
-        // Agrega otros filtros si los tienes
-        window.open(`/inventoryReport?${params.toString()}`, '_blank');
-    };
-
+    
     const columns = [
         { data: 'name' },
         { data: 'description' },
@@ -123,10 +117,6 @@ export default function Products() {
                             Agregar Producto
                         </Link>
                     )}
-                    <a href="inventoryReport" className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition">
-                        Reporte
-                    </a>
-
                 </div>
 
                 <DataTable ajax="/api/products/getProductData" options={{

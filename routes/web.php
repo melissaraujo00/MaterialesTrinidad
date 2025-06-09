@@ -44,8 +44,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas para descargar PDF
     Route::get('/inventoryIndex', [InventoryReport::class, 'index'])->name('inventoryIndex');
-    Route::get('/inventoryReport', [InventoryReport::class, 'inventory'])->name('inventoryReport');
-
+    Route::get('/inventoryReport', [InventoryReport::class, 'inventoryReport'])->name('inventoryReport');
 
 });
 

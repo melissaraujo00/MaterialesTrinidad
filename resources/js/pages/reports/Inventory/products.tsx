@@ -9,29 +9,27 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import jszip from 'jszip';
 import { Formik, Form, Field } from 'formik';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { router } from '@inertiajs/react';
-
 
 window.JSZip = jszip;
 DataTable.use(DT);
 
-interface Product {
+
+interface Category {
     id: number;
     name: string;
 }
-
-
 export default function Products() {
-
     const tableRef = useRef<any>(null);
+    const { selectedCategory: initialCategory, categories: rawCategories } = usePage().props;
+    const categories = rawCategories as Category[];
+    const [selectedCategory, setSelectedCategory] = useState(initialCategory ?? '');
+    const dtInstanceRef = useRef<any>(null);
+    const [tableKey, setTableKey] = useState(0);
 
-    const { categories, products, selectedCategory } = usePage().props;
-
-    const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        router.get(route('products.index'), {
-            category: e.target.value,
-        });
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedCategory(e.target.value);
     };
 
     const getStockBadge = (stock: number, stockMinimun: number) => {
@@ -41,6 +39,27 @@ export default function Products() {
         return '';
     };
 
+
+    const createAjaxFunction = () => {
+        return (data: any, callback: any) => {
+            const categoryParam = selectedCategory || '';
+            console.log("Fetching with category_id =", categoryParam);
+            fetch(`/api/inventory/getInventoryData?category_id=${categoryParam}`)
+                .then((res) => res.json())
+                .then((json) => {
+                    callback(json);
+                })
+                .catch((error) => {
+                    console.error('Error fetching data:', error);
+                    callback({ data: [] });
+                });
+        };
+    };
+
+
+    useEffect(() => {
+        setTableKey(prev => prev + 1);
+    }, [selectedCategory]);
 
     const columns = [
         { data: 'name' },
@@ -57,7 +76,12 @@ export default function Products() {
         {
             data: 'category_id',
             createdCell: (td: HTMLTableCellElement, cellData: any) => {
-                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin categoría</span>' : cellData;
+                if (cellData == null) {
+                    td.innerHTML = '<span class="text-gray-500 italic">Sin categoría</span>';
+                } else {
+                    const category = categories.find(cat => cat.id === Number(cellData));
+                    td.innerHTML = category ? category.name : cellData;
+                }
             }
         },
         {
@@ -83,41 +107,46 @@ export default function Products() {
         <AppLayout>
             <Head title="Products" />
             <Toaster position="top-right" richColors />
-
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <div className="flex justify-end">
-                    <a href="inventoryReport" className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition">
-                        Reporte
-                    </a>
+                <div className="flex justify-between items-center mb-4">
+                    <form action={route('inventoryReport')} method="GET" className="inline">
+                        <input type="hidden" name="category" value={selectedCategory?.toString() ?? ""}  />
+                        <button
+                            type="submit"
+                            className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition"
+                        >
+                            Reporte
+                        </button>
+                    </form>
                     <div>
                         <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
-                        {/* <select
+                        <select
                             id="category_id"
                             name="category"
-                            //value={selectedCategory || ''}
-                            onChange={handleFilterChange}
+                            value={selectedCategory?.toString() ?? ""}
+                            onChange={handleCategoryChange}
                             className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                         >
                             <option value="">Todas las Categorías</option>
-                            {categories.map((category) => (
+                            {categories.map((category: { id: number; name: string }) => (
                                 <option key={category.id} value={category.id}>
                                     {category.name}
                                 </option>
                             ))}
-                        </select> */}
+                        </select>
                     </div>
-
                 </div>
-
                 <DataTable
+                    key={tableKey}
                     ref={tableRef}
-                    //ajax={/api/products/getProductData}
+                    ajax={createAjaxFunction()}
                     options={{
                         language: languageES,
+                        processing: true,
                         responsive: true,
                         dom: 'lBrtip',
-                        layout: {
-                            topStart: ['pageLength'],
+                        initComplete: function(this: any) {
+                            dtInstanceRef.current = this.api();
                         },
                     }}
                     columns={columns}
