@@ -9,6 +9,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Requests\UpdateProductRequest;
+use Carbon\Carbon;
 
 use function Termwind\render;
 
@@ -22,28 +23,66 @@ class ProductController extends Controller
         $this->authorizeResource(Product::class, 'product');
     }
 
-     public function getProductData()
-     {
+    public function getProductData()
+    {
+        $currentDate = Carbon::now();
 
         $data = Product::query()
-        ->with('category', 'brand')
-        ->get()
-        ->map( function ($product){
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'description'  => $product->description,
-                'priceWithTax' => $product->priceWithTax,
-                'discountPrice' => $product->discountPrice,
-                'stock'  => $product->stock,
-                'category_id'  => $product->category?->name,
-                'brand_id' => $product->brand?->name,
-                'stockMinimun' => $product->stockMinimun,
-                'image'  => $product->image,
-            ];
-        });
+            ->with(['category', 'brand', 'offers' => function ($query) use ($currentDate) {
+                // Cargar todas las ofertas (activas e inactivas) para mostrar en el select
+                $query->orderBy('startDate', 'desc');
+            }])
+            ->get()
+            ->map(function ($product) use ($currentDate) {
+                // Filtrar ofertas activas
+                $activeOffers = $product->offers->filter(function ($offer) use ($currentDate) {
+                    return $offer->startDate <= $currentDate && $offer->endDate >= $currentDate;
+                });
+
+                // Buscar la mejor oferta activa para este producto
+                $activeOffer = $activeOffers->first();
+
+                // Preparar todas las ofertas para el select (activas e inactivas)
+                $allOffers = $product->offers->map(function ($offer) use ($currentDate) {
+                    $isActive = $offer->startDate <= $currentDate && $offer->endDate >= $currentDate;
+                    return [
+                        'id' => $offer->id,
+                        'description' => $offer->description,
+                        'startDate' => $offer->startDate,
+                        'endDate' => $offer->endDate,
+                        'priceOffers' => $offer->priceOffers,
+                    ];
+                });
+
+
+
+                if ($activeOffer) {
+                    $offerInfo = [
+                        'id' => $activeOffer->id,
+                        'description' => $activeOffer->description,
+                        'startDate' => $activeOffer->startDate,
+                        'endDate' => $activeOffer->endDate,
+                        'priceOffers' => $activeOffer->priceOffers,
+                    ];
+                }
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'priceWithTax' => $product->priceWithTax,
+                    'discountPrice' => $product->discountPrice,
+                    'stock' => $product->stock,
+                    'category_id' => $product->category?->name,
+                    'brand_id' => $product->brand?->name,
+                    'stockMinimun' => $product->stockMinimun,
+                    'image' => $product->image,
+                    'allOffers' => $allOffers->toArray(), // Todas las ofertas para el select
+                ];
+            });
+
         return response()->json(['data' => $data]);
-     }
+    }
 
     public function index()
     {
@@ -81,7 +120,7 @@ class ProductController extends Controller
     public function store(StoreProduct $request)
     {
 
-         // Obtener datos validados
+        // Obtener datos validados
         $data = $request->validated();
 
         // Procesar la imagen si se envió
@@ -116,9 +155,9 @@ class ProductController extends Controller
         $category = Category::all();
 
         return Inertia::render('product/Edit', [
-        'product' => $product,
-        'brands' => $brand,
-        'categories' => $category,
+            'product' => $product,
+            'brands' => $brand,
+            'categories' => $category,
         ]);
     }
 
@@ -130,7 +169,7 @@ class ProductController extends Controller
 
         $data = $request->validated();
 
-    // Procesar la imagen si se envió
+        // Procesar la imagen si se envió
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -149,6 +188,6 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('products.index')->with('success','producto eliminado correctamente');
+        return redirect()->route('products.index')->with('success', 'producto eliminado correctamente');
     }
 }

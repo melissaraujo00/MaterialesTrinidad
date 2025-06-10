@@ -9,39 +9,39 @@ export default function PromotionCreate() {
     const { products = [] } = usePage<{ products?: { id: number; name: string; priceWithTax: number }[] }>().props;
 
     const validationSchema = Yup.object({
-    startDate: Yup.date().required('Campo requerido'),
-    endDate: Yup.date().required('Campo requerido'),
-    description: Yup.string().required('Campo requerido'),
-    priceNormal: Yup.number()
-        .typeError('Debe ser un número')
-        .positive('Debe ser un número positivo')
-        .required('Campo requerido')
-        .moreThan(0, 'El precio de oferta debe ser mayor a 0')
-        .test(
-            'match-priceWithTax',
-            'El precio normal debe ser igual al precio del producto seleccionado',
-            function (value) {
-                const { product_id } = this.parent;
-                if (!product_id || !value) return true; // si no hay producto o valor, no falla aquí (otro validador lo hará)
+        startDate: Yup.date().required('Campo requerido'),
+        endDate: Yup.date().required('Campo requerido'),
+        description: Yup.string().required('Campo requerido'),
+        priceNormal: Yup.number()
+            .typeError('Debe ser un número')
+            .positive('Debe ser un número positivo')
+            .required('Campo requerido')
+            .moreThan(0, 'El precio de oferta debe ser mayor a 0')
+            .test(
+                'match-priceWithTax',
+                'El precio normal debe ser igual al precio del producto seleccionado',
+                function (value) {
+                    const { product_id } = this.parent;
+                    if (!product_id || !value) return true; // si no hay producto o valor, no falla aquí (otro validador lo hará)
 
-                // Buscar producto en el array
-                const product = products.find(p => p.id === Number(product_id));
+                    // Buscar producto en el array
+                    const product = products.find(p => p.id === Number(product_id));
 
-                if (!product) return false; // no encontró producto, falla
+                    if (!product) return false; // no encontró producto, falla
 
-                // Asumiendo que el atributo es priceWithTax (corrige si se llama distinto)
-                return Number(value) === Number(product.priceWithTax);
-            }
-        ),
-    priceOffers: Yup.number()
-        .typeError('Debe ser un número')
-        .positive('Debe ser un número positivo')
-        .moreThan(0, 'El precio de oferta debe ser mayor a 0')
-        .required('Campo requerido'),
-    product_id: Yup.number()
-        .typeError('Debe seleccionar un producto')
-        .required('El producto es requerido'),
-});
+                    // Asumiendo que el atributo es priceWithTax (corrige si se llama distinto)
+                    return Number(value) === Number(product.priceWithTax);
+                }
+            ),
+        priceOffers: Yup.number()
+            .typeError('Debe ser un número')
+            .positive('Debe ser un número positivo')
+            .moreThan(0, 'El precio de oferta debe ser mayor a 0')
+            .required('Campo requerido'),
+        product_id: Yup.number()
+            .typeError('Debe seleccionar un producto')
+            .required('El producto es requerido'),
+    });
 
 
     const handleSubmit = (values: any) => {
@@ -89,7 +89,7 @@ export default function PromotionCreate() {
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
                 >
-                    {({ values, handleChange, handleBlur, touched, errors }) => (
+                    {({ values, handleChange, handleBlur, touched, errors, setFieldValue }) => (
                         <Form className="space-y-4">
                             {/* Fecha de Inicio */}
                             <div>
@@ -137,6 +137,45 @@ export default function PromotionCreate() {
                                 {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
                             </div>
 
+                            {/* Producto */}
+                            <div>
+                                <label htmlFor="product_id" className="block text-sm font-medium">Producto</label>
+                                <Field
+                                    as="select"
+                                    id="product_id"
+                                    name="product_id"
+                                    value={values.product_id}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                        const productId = e.target.value;
+                                        handleChange(e); 
+
+                                        // Buscar el producto seleccionado
+                                        const selectedProduct = products.find(p => p.id === Number(productId));
+                                        if (selectedProduct) {
+                                            // Actualizar priceNormal con el precio del producto
+                                            setFieldValue('priceNormal', selectedProduct.priceWithTax);
+                                        } else {
+                                            // Si no hay producto seleccionado, limpiar priceNormal
+                                            setFieldValue('priceNormal', '');
+                                        }
+                                    }}
+                                    onBlur={handleBlur}
+                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md bg-white text-black dark:bg-gray-800 dark:text-white"
+                                >
+                                    <option value="" disabled>Seleccione un Producto</option>
+                                    {products.length > 0 ? (
+                                        products.map((product) => (
+                                            <option key={product.id} value={product.id}>
+                                                {product.name}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="" disabled>No hay productos disponibles</option>
+                                    )}
+                                </Field>
+                                {touched.product_id && errors.product_id && <small className="text-red-500">{errors.product_id}</small>}
+                            </div>
+
                             {/* Precio Normal */}
                             <div>
                                 <label htmlFor="priceNormal" className="block text-sm font-medium">Precio Normal</label>
@@ -165,32 +204,6 @@ export default function PromotionCreate() {
                                     className="mt-1 p-2 w-3/4 max-w-md border rounded-md bg-white text-black dark:bg-gray-800 dark:text-white"
                                 />
                                 {touched.priceOffers && errors.priceOffers && <small className="text-red-500">{errors.priceOffers}</small>}
-                            </div>
-
-                            {/* Producto */}
-                            <div>
-                                <label htmlFor="product_id" className="block text-sm font-medium">Producto</label>
-                                <Field
-                                    as="select"
-                                    id="product_id"
-                                    name="product_id"
-                                    value={values.product_id}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md bg-white text-black dark:bg-gray-800 dark:text-white"
-                                >
-                                    <option value="" disabled>Seleccione un Producto</option>
-                                    {products.length > 0 ? (
-                                        products.map((product) => (
-                                            <option key={product.id} value={product.id}>
-                                                {product.name}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="" disabled>No hay productos disponibles</option>
-                                    )}
-                                </Field>
-                                {touched.product_id && errors.product_id && <small className="text-red-500">{errors.product_id}</small>}
                             </div>
 
                             {/* Botones */}

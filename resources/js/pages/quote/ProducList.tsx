@@ -10,6 +10,14 @@ import { Item } from "@radix-ui/react-navigation-menu";
 
 DataTable.use(DT);
 
+interface OfferInfo {
+    id: number;
+    description: string;
+    startDate: string;
+    endDate: string;
+    priceOffers: number;
+}
+
 interface Product {
     id: number;
     name: string;
@@ -21,6 +29,7 @@ interface Product {
     image: string;
     stock: number;
     stockMinimun: number;
+    allOffers: OfferInfo[];
 }
 
 interface CartItem extends Product {
@@ -144,6 +153,7 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
                 }
             }
         },
+        //cantidad
         {
             data: null,
             orderable: false,
@@ -166,24 +176,79 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
                 `;
             }
         },
+        //descuento/oferta
+        // Reemplaza la columna de descuento/oferta (índice 7) en tu array de columns con este código:
+
         {
             data: null,
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: Product) => {
                 const formId = `product-${rowData.id}`;
-                if (rowData.discountPrice) {
-                    td.innerHTML = `
-                        <div class="flex flex-col items-center">
-                            <input type="checkbox" id="${formId}-discount" class="rounded">
-                            <label for="${formId}-discount" class="text-xs font-medium text-center">
-                                (-$${((rowData.priceWithTax - rowData.discountPrice)).toFixed(2)})
-                            </label>
-                        </div>
-                    `;
+
+                // Limpiar la celda primero
+                td.innerHTML = '';
+
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center space-y-2 min-w-[150px]';
+
+                // Verificar si hay ofertas disponibles
+                if (rowData.allOffers && rowData.allOffers.length > 0) {
+                    // Crear select para ofertas
+                    const selectContainer = document.createElement('div');
+                    selectContainer.className = 'w-full';
+
+                    const select = document.createElement('select');
+                    select.id = `${formId}-offer-select`;
+                    select.className = 'w-full text-xs rounded border border-gray-300 p-1';
+
+                    // Opción por defecto (sin oferta)
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Sin oferta';
+                    select.appendChild(defaultOption);
+
+                    // Agregar opciones de ofertas
+                    rowData.allOffers.forEach((offer: OfferInfo) => {
+                        const option = document.createElement('option');
+                        option.value = offer.id.toString();
+                        option.textContent = `${offer.description} (-$${((rowData.priceWithTax - offer.priceOffers)).toFixed(2)})`;
+                        option.setAttribute('data-price', offer.priceOffers.toString());
+                        select.appendChild(option);
+                    });
+
+                    selectContainer.appendChild(select);
+                    container.appendChild(selectContainer);
+
+                    // Evento para manejar cambio de oferta
+                    select.addEventListener('change', (e) => {
+                        const target = e.target as HTMLSelectElement;
+                        console.log('Oferta seleccionada:', target.value);
+                        // Aquí puedes agregar lógica adicional si necesitas
+                    });
+
+                } else if (rowData.discountPrice && rowData.discountPrice > 0) {
+                    // Si no hay ofertas pero sí hay precio con descuento, mostrar checkbox
+                    const checkboxContainer = document.createElement('div');
+                    checkboxContainer.className = 'flex flex-col items-center';
+
+                    checkboxContainer.innerHTML = `
+                <input type="checkbox" id="${formId}-discount" class="rounded">
+                <label for="${formId}-discount" class="text-xs font-medium text-center">
+                    Descuento (-$${((rowData.priceWithTax - rowData.discountPrice)).toFixed(2)})
+                </label>
+            `;
+
+                    container.appendChild(checkboxContainer);
                 } else {
-                    td.innerHTML = `<span class="text-xs text-gray-500 italic">No disponible</span>`;
+                    // No hay ofertas ni descuentos disponibles
+                    const noOfferSpan = document.createElement('span');
+                    noOfferSpan.className = 'text-xs text-gray-500 italic';
+                    noOfferSpan.textContent = 'No disponible';
+                    container.appendChild(noOfferSpan);
                 }
+
+                td.appendChild(container);
             }
         },
         {
@@ -212,10 +277,10 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
                 }
 
                 else if (productExistsInCart) {
-                        button.disabled = true;
-                        button.innerText = 'En Carrito';
-                        button.className = 'bg-gray-400 text-white rounded px-3 py-2 text-xs cursor-not-allowed';
-                    }
+                    button.disabled = true;
+                    button.innerText = 'En Carrito';
+                    button.className = 'bg-gray-400 text-white rounded px-3 py-2 text-xs cursor-not-allowed';
+                }
                 else {
                     // Agregar evento click al botón solo si hay stock
                     button.addEventListener('click', () => {

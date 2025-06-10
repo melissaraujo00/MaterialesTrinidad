@@ -31,11 +31,19 @@ export default function Quotes() {
     const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-     const user = page.props.auth?.user;
+    const user = page.props.auth?.user;
 
     const openDeleteModal = (quote: Quote) => {
         setSelectedQuote(quote);
         setIsDeleteModalOpen(true);
+    };
+
+    const statusColor = (status: string) => {
+        if (status.toLowerCase() === 'pendiente') {
+            return `<span class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-red-900 dark:text-red-300">${status}</span>`;
+        } else {
+            return `<span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300">${status}</span>`;
+        }
     };
 
     const columns = [
@@ -43,6 +51,14 @@ export default function Quotes() {
         { data: 'user.name', title: 'Vendedor' },
         { data: 'date', title: 'Fecha' },
         { data: 'total', title: 'Total ($)' },
+        {
+            data: 'status',
+            title: 'estado',
+            responsivePriority: 6,
+            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
+                td.innerHTML = statusColor(cellData);
+            }
+        },
         {
             data: null,
             orderable: false,
@@ -55,7 +71,7 @@ export default function Quotes() {
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
                 // Enviar
-                actions += `<button class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Enviar</button>`;
+                actions += `<button class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Confirmar</button>`;
 
                 // Eliminar
                 if (hasPermission("realizar cotizaciones")) {
@@ -95,7 +111,7 @@ export default function Quotes() {
                 </div>
 
                 <DataTable
-                    ajax={`/api/quotes/getQuotesData/${user.id}`} 
+                    ajax={`/api/quotes/getQuotesData/${user.id}`}
                     options={{
                         language: languageES,
                         responsive: true,
@@ -119,6 +135,7 @@ export default function Quotes() {
                     </thead>
                 </DataTable>
             </div>
+
 
             <DeleteQuoteModal
                 isOpen={isDeleteModalOpen}

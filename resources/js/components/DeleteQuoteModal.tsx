@@ -24,7 +24,7 @@ export default function DeleteEntityModal({ isOpen, closeModal, quote, deleteEnd
             toast.error("No se puede eliminar la entidad.");
             return;
         }
-        else if (quote.status === "completed") {
+        else if (quote.status != "pendiente") {
             toast.error("No se puede eliminar una cotización enviada.");
         }
         else{
@@ -52,7 +52,7 @@ export default function DeleteEntityModal({ isOpen, closeModal, quote, deleteEnd
                 <p className="mb-6 text-gray-700 dark:text-gray-300">
                     ¿Estás seguro que deseas eliminar esta cotizacion, <span className="font-bold"></span>?
                     <br />
-                    Esta acción no se puede deshacer {quote.status}.
+                    
                 </p>
                 <div className="flex justify-end gap-2">
                     <button

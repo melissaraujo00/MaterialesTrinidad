@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('subtotal',12,2);
             $table->foreignIdFor(Customer::class)->constrained();
             $table->foreignIdFor(User::class)->constrained();
-            $table->ENUM('status', ['draft', 'pending', 'completed',])->default('draft');
+            $table->ENUM('status', ['pendiente', 'confirmada',])->default('pendiente');
             $table->softDeletes();
             $table->timestamps();
             
