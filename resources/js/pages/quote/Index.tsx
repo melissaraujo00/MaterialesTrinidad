@@ -31,6 +31,8 @@ export default function Quotes() {
     const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+     const user = page.props.auth?.user;
+
     const openDeleteModal = (quote: Quote) => {
         setSelectedQuote(quote);
         setIsDeleteModalOpen(true);
@@ -93,7 +95,7 @@ export default function Quotes() {
                 </div>
 
                 <DataTable
-                    ajax="/api/quotes/getQuotesData"
+                    ajax={`/api/quotes/getQuotesData/${user.id}`} 
                     options={{
                         language: languageES,
                         responsive: true,

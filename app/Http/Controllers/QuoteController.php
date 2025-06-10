@@ -23,27 +23,28 @@ class QuoteController extends Controller
         $this->authorizeResource(Quote::class, 'quote');
     }
 
-    public function getQoteData()
+    public function getQuoteData($user_id)
     {
 
         $data = Quote::query()
             ->with('customer', 'user')
+            ->where('user_id', $user_id)  // Filtrar por usuario autenticado
+            ->orderBy('date', 'desc') // Ordenar por fecha descendente
             ->get()
             ->map(function ($quote) {
                 return [
                     'id' => $quote->id,
                     'date' => $quote->date,
-                    'total' => $quote->total,
+                    'total' => number_format($quote->total, 2), // Formatear el total
                     'customer' => [
                         'id' => $quote->customer->id ?? null,
-                        'name' => $quote->customer->name ?? null,
+                        'name' => $quote->customer->name ?? 'Cliente eliminado',
                     ],
                     'user' => [
                         'id' => $quote->user->id ?? null,
-                        'name' => $quote->user->name ?? null,
+                        'name' => $quote->user->name ?? 'Usuario eliminado',
                     ],
-                    'status' => $quote->status,
-
+                    'status' => $quote->status ?? 'Pendiente',
                 ];
             });
 
