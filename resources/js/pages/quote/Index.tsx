@@ -53,7 +53,7 @@ export default function Quotes() {
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
                 // Enviar
-                actions += `<button class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Enviar</button>`;
+                actions += `<a href="/quotesReport/${rowData.id}" class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Enviar</a>`;
 
                 // Eliminar
                 if (hasPermission("realizar cotizaciones")) {
@@ -61,11 +61,6 @@ export default function Quotes() {
                 }
 
                 td.innerHTML = actions;
-
-                // Event listeners
-                td.querySelector('.send-btn')?.addEventListener('click', () => {
-                    alert(`Aquí se enviaría la cotización #${rowData.id}`);
-                });
 
                 if (hasPermission("realizar cotizaciones")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));

@@ -14,7 +14,9 @@ use App\Http\Controllers\TypeController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\QuoteDetailController;
+use App\Http\Controllers\QuoteReportController;
 use App\Http\Controllers\TraderController;
+
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -42,6 +44,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
+    // Route::get('/quotesReport', [QuoteReportController::class, 'envio'])->name('quoteReport.envio');
 
 });
 
