@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     'businessData' => 'businessData'
     ]);
     Route::resource('quotes',QuoteController::class);
+    Route::get('quotes-confirmed', [QuoteController::class, 'confirmedQuotes'])->name('quotes.confirmed');
     Route::resource('quoteDetails',QuoteDetailController::class);
 
     // Ruta para el dashboard

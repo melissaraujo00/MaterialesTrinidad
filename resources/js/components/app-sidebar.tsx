@@ -104,6 +104,12 @@ const mainNavItems: NavItem[] = [
         icon: NotebookPen,
         permission: 'ver ofertas',
     },
+    {
+        title: 'Cotizaciones confirmadas',
+        href: '/quotes-confirmed',
+        icon: NotebookPen,
+        permission: 'ver ofertas',
+    },
 
 ];
 

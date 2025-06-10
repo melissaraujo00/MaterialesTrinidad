@@ -35,6 +35,7 @@ Route::get('/types/getTypeData', [TypeController::class, 'getTypeData']);
 Route::get('/movements/getMovementData', [MovementController::class, 'getMovementData']);
 Route::get('/businessData/getBusinessData',[BusinessDataController::class,'getBusinessData']);
 Route::get('/quotes/getQuotesData/{user_id}', [QuoteController::class, 'getQuoteData']);
+Route::get('/quotes/getConfirmQuotesData/{user_id}', [QuoteController::class, 'getConfirmQuoteData']);
 Route::get('/offers/getOfferData', [OfferController::class, 'getOfferData']);
 
 

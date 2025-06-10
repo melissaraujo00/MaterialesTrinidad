@@ -1,6 +1,6 @@
-import { Head, usePage, Link, router } from "@inertiajs/react";
+import { Head, usePage, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
-import { Toaster, toast } from "sonner";
+import { Toaster } from "sonner";
 import { useState } from "react";
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
@@ -20,7 +20,7 @@ interface Quote {
     status: string;
 }
 
-export default function Quotes() {
+export default function ConfirmedQuotes() {
     const page = usePage() as any;
     const permissions =
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
@@ -41,26 +41,11 @@ export default function Quotes() {
     const statusColor = (status: string) => {
         if (status.toLowerCase() === 'pendiente') {
             return `<span class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-red-900 dark:text-red-300">${status}</span>`;
+        } else if (status.toLowerCase() === 'confirmada') {
+            return `<span class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300">${status}</span>`;
         } else {
             return `<span class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300">${status}</span>`;
         }
-    };
-
-    const confirmQuote = (quoteId: number) => {
-        router.put(`/quotes/${quoteId}`, 
-            { status: 'confirmada' },
-            {
-                onSuccess: () => {
-                    toast.success('Cotización confirmada exitosamente');
-                    // Recargar la tabla
-                    window.location.reload();
-                },
-                onError: (errors) => {
-                    toast.error('Error al confirmar la cotización');
-                    console.error(errors);
-                }
-            }
-        );
     };
 
     const columns = [
@@ -70,7 +55,7 @@ export default function Quotes() {
         { data: 'total', title: 'Total ($)' },
         {
             data: 'status',
-            title: 'estado',
+            title: 'Estado',
             responsivePriority: 6,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 td.innerHTML = statusColor(cellData);
@@ -87,12 +72,10 @@ export default function Quotes() {
                 // Ver detalles - Usar Link de Inertia para navegación
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
-                // Confirmar - Solo mostrar si el status es pendiente
-                if (rowData.status.toLowerCase() === 'pendiente') {
-                    actions += `<button class="confirm-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Confirmar</button>`;
-                }
+                // Generar factura o reporte
+                actions += `<button class="invoice-btn bg-purple-600 text-sm text-white px-3 py-1 rounded hover:bg-purple-700 ml-2">Generar Factura</button>`;
 
-                // Eliminar
+                // Eliminar (solo si tiene permisos)
                 if (hasPermission("realizar cotizaciones")) {
                     actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600 ml-2">Eliminar</button>`;
                 }
@@ -100,14 +83,9 @@ export default function Quotes() {
                 td.innerHTML = actions;
 
                 // Event listeners
-                const confirmBtn = td.querySelector('.confirm-btn');
-                if (confirmBtn) {
-                    confirmBtn.addEventListener('click', () => {
-                        if (confirm(`¿Estás seguro de que quieres confirmar la cotización #${rowData.id}?`)) {
-                            confirmQuote(rowData.id);
-                        }
-                    });
-                }
+                td.querySelector('.invoice-btn')?.addEventListener('click', () => {
+                    alert(`Aquí se generaría la factura para la cotización #${rowData.id}`);
+                });
 
                 if (hasPermission("realizar cotizaciones")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
@@ -118,24 +96,32 @@ export default function Quotes() {
 
     return (
         <AppLayout>
-            <Head title="Cotizaciones" />
+            <Head title="Cotizaciones Confirmadas" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Gestión de Cotizaciones</h1>
-                    {hasPermission("realizar cotizaciones") && (
+                    <h1 className="text-2xl font-bold">Cotizaciones Confirmadas</h1>
+                    <div className="flex gap-2">
                         <Link
-                            href="/quotes/create"
-                            className="bg-green-600 text-white rounded px-4 py-2 text-sm hover:bg-green-700 transition"
+                            href="/quotes"
+                            className="bg-gray-600 text-white rounded px-4 py-2 text-sm hover:bg-gray-700 transition"
                         >
-                            Nueva Cotización
+                            Ver Pendientes
                         </Link>
-                    )}
+                        {hasPermission("realizar cotizaciones") && (
+                            <Link
+                                href="/quotes/create"
+                                className="bg-green-600 text-white rounded px-4 py-2 text-sm hover:bg-green-700 transition"
+                            >
+                                Nueva Cotización
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
                 <DataTable
-                    ajax={`/api/quotes/getQuotesData/${user.id}`}
+                    ajax={`/api/quotes/getConfirmQuotesData/${user.id}`}
                     options={{
                         language: languageES,
                         responsive: true,
@@ -153,7 +139,7 @@ export default function Quotes() {
                             <th>Cliente</th>
                             <th>Vendedor</th>
                             <th>Fecha</th>
-                            <th>Total</th>
+                            <th>Total ($)</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
