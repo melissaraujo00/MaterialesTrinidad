@@ -8,6 +8,7 @@ use App\Models\Product;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Brand;
 
 
 class InventoryReport extends Controller
@@ -21,15 +22,26 @@ class InventoryReport extends Controller
             $query->where('category_id', $request->category_id);
         }
 
+        if ($request->filled('brand_id')) {
+            $query->where('brand_id', $request->brand_id);
+        }
         return response()->json(['data' => $query->get()]);
     }
 
     public function inventoryReport(Request $request)
     {
+        $selectedCategory = null;
+        $selectedBrand = null;
         $query = Product::with('brand', 'category');
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
+            $selectedCategory = Category::find($request->category);
+        }
+
+        if ($request->filled('brand')) {
+            $query->where('brand_id', $request->brand);
+            $selectedBrand = Brand::find($request->brand);
         }
 
         $products = $query->get();
@@ -44,7 +56,9 @@ class InventoryReport extends Controller
             'productsCountByCategory' => $productsCountByCategory,
             'totalProducts' => $totalProducts,
             'outOfStockProducts' => $outOfStockProducts,
-            'user' => $user
+            'user' => $user,
+            'selectedCategory' => $selectedCategory,
+            'selectedBrand' => $selectedBrand
         ]);
 
         return $pdf->stream('reporte_inventario.pdf');
@@ -54,7 +68,9 @@ class InventoryReport extends Controller
     {
         return Inertia::render('reports/Inventory/products', [
             'categories' => Category::select('id', 'name')->get(),
+            'brands' => Brand::select('id', 'name')->get(),
             'selectedCategory' => $request->input('category', ''),
+            'selectedBrand' => $request->input('brand', '')
         ]);
     }
 }

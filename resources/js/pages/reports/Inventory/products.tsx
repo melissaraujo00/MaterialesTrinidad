@@ -22,15 +22,25 @@ interface Category {
 }
 export default function Products() {
     const tableRef = useRef<any>(null);
-    const { selectedCategory: initialCategory, categories: rawCategories } = usePage().props;
+    const { selectedCategory: initialCategory, selectedBrand: initialBrand, categories: rawCategories, brands: rawBrands } = usePage().props;
+
     const categories = rawCategories as Category[];
+    const brands = rawBrands as Category[];
+
     const [selectedCategory, setSelectedCategory] = useState(initialCategory ?? '');
+    const [selectedBrand, setSelectedBrand] = useState(initialBrand ?? '');
+
     const dtInstanceRef = useRef<any>(null);
     const [tableKey, setTableKey] = useState(0);
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedCategory(e.target.value);
     };
+
+    const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedBrand(e.target.value);
+    };
+
 
     const getStockBadge = (stock: number, stockMinimun: number) => {
         if (stock <= stockMinimun) {
@@ -42,9 +52,11 @@ export default function Products() {
 
     const createAjaxFunction = () => {
         return (data: any, callback: any) => {
-            const categoryParam = selectedCategory || '';
-            console.log("Fetching with category_id =", categoryParam);
-            fetch(`/api/inventory/getInventoryData?category_id=${categoryParam}`)
+            const params = new URLSearchParams({
+                category_id: selectedCategory?.toString() || '',
+                brand_id: selectedBrand?.toString() || ''
+            });
+            fetch(`/api/inventory/getInventoryData?${params.toString()}`)
                 .then((res) => res.json())
                 .then((json) => {
                     callback(json);
@@ -59,7 +71,7 @@ export default function Products() {
 
     useEffect(() => {
         setTableKey(prev => prev + 1);
-    }, [selectedCategory]);
+    }, [selectedCategory, selectedBrand])
 
     const columns = [
         { data: 'name' },
@@ -87,7 +99,12 @@ export default function Products() {
         {
             data: 'brand_id',
             createdCell: (td: HTMLTableCellElement, cellData: any) => {
-                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin marca</span>' : cellData;
+                if (cellData == null) {
+                    td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin marca</span>' : cellData;
+                } else {
+                    const category = categories.find(cat => cat.id === Number(cellData));
+                    td.innerHTML = category ? category.name : cellData;
+                }
             }
         },
         { data: 'stockMinimun' },
@@ -110,31 +127,55 @@ export default function Products() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center mb-4">
                     <form action={route('inventoryReport')} method="GET" className="inline">
-                        <input type="hidden" name="category" value={selectedCategory?.toString() ?? ""}  />
-                        <button
-                            type="submit"
-                            className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition"
-                        >
+                        <input type="hidden" name="category" value={selectedCategory?.toString() ?? ""} />
+                        <input type="hidden" name="brand" value={selectedBrand?.toString() ?? ""} />
+                        <button type="submit" className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition">
                             Reporte
                         </button>
                     </form>
-                    <div>
-                        <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
-                        <select
-                            id="category_id"
-                            name="category"
-                            value={selectedCategory?.toString() ?? ""}
-                            onChange={handleCategoryChange}
-                            className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                        >
-                            <option value="">Todas las Categorías</option>
-                            {categories.map((category: { id: number; name: string }) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
+
+                    <div className="flex flex-wrap gap-4">
+                        <div className="flex-1 min-w-[150px]">
+                            <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Categoría
+                            </label>
+                            <select
+                                id="category_id"
+                                name="category"
+                                value={selectedCategory?.toString() ?? ""}
+                                onChange={handleCategoryChange}
+                                className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800 dark:text-white"
+                            >
+                                <option value="">Categorías</option>
+                                {categories.map((category: { id: number; name: string }) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex-1 min-w-[150px]">
+                            <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Marca
+                            </label>
+                            <select
+                                id="brand_id"
+                                name="brand"
+                                value={selectedBrand?.toString() ?? ""}
+                                onChange={handleBrandChange}
+                                className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800 dark:text-white"
+                            >
+                                <option value="">Marcas</option>
+                                {brands.map((brand: { id: number; name: string }) => (
+                                    <option key={brand.id} value={brand.id}>
+                                        {brand.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
+
                 </div>
                 <DataTable
                     key={tableKey}
@@ -145,7 +186,7 @@ export default function Products() {
                         processing: true,
                         responsive: true,
                         dom: 'lBrtip',
-                        initComplete: function(this: any) {
+                        initComplete: function (this: any) {
                             dtInstanceRef.current = this.api();
                         },
                     }}

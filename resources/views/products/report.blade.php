@@ -113,7 +113,8 @@
       <div class="subtitulo">Reporte de Inventario</div>
     </div>
     <div class="fecha">
-      Fecha: {{ date('d/m/Y') }} Generado por: {{ $user->name }}
+      <p>Fecha: {{ date('d/m/Y') }} Generado por: {{ $user->name }}</p>
+      <p>Filtrado por Categoría: {{ $selectedCategory ? $selectedCategory->name : 'Todas' }} Marca: {{ $selectedBrand ? $selectedBrand->name : 'Todas' }}</p>
     </div>
   </header>
 
