@@ -29,22 +29,21 @@ class ProductController extends Controller
 
         $data = Product::query()
             ->with(['category', 'brand', 'offers' => function ($query) use ($currentDate) {
-                // Cargar todas las ofertas (activas e inactivas) para mostrar en el select
-                $query->orderBy('startDate', 'desc');
+                // Cargar solo las ofertas activas
+                $query->where('startDate', '<=', $currentDate)
+                    ->where('endDate', '>=', $currentDate)
+                    ->orderBy('startDate', 'desc');
             }])
             ->get()
             ->map(function ($product) use ($currentDate) {
-                // Filtrar ofertas activas
-                $activeOffers = $product->offers->filter(function ($offer) use ($currentDate) {
-                    return $offer->startDate <= $currentDate && $offer->endDate >= $currentDate;
-                });
+                // Las ofertas ya vienen filtradas desde la query
+                $activeOffers = $product->offers;
 
                 // Buscar la mejor oferta activa para este producto
                 $activeOffer = $activeOffers->first();
 
-                // Preparar todas las ofertas para el select (activas e inactivas)
-                $allOffers = $product->offers->map(function ($offer) use ($currentDate) {
-                    $isActive = $offer->startDate <= $currentDate && $offer->endDate >= $currentDate;
+                // Preparar solo las ofertas ACTIVAS para el select
+                $allOffers = $activeOffers->map(function ($offer) {
                     return [
                         'id' => $offer->id,
                         'description' => $offer->description,
@@ -53,8 +52,6 @@ class ProductController extends Controller
                         'priceOffers' => $offer->priceOffers,
                     ];
                 });
-
-
 
                 if ($activeOffer) {
                     $offerInfo = [
@@ -77,7 +74,7 @@ class ProductController extends Controller
                     'brand_id' => $product->brand?->name,
                     'stockMinimun' => $product->stockMinimun,
                     'image' => $product->image,
-                    'allOffers' => $allOffers->toArray(), // Todas las ofertas para el select
+                    'allOffers' => $allOffers->toArray(), // Solo ofertas activas para el select
                 ];
             });
 
