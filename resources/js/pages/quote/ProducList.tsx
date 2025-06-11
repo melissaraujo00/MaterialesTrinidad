@@ -65,9 +65,9 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
         const formId = `product-${product.id}`;
         const quantityInput = document.getElementById(`${formId}-quantity`) as HTMLInputElement;
         const discountCheckbox = document.getElementById(`${formId}-discount`) as HTMLInputElement;
+        const offerSelect = document.getElementById(`${formId}-offer-select`) as HTMLSelectElement;
 
         const quantity = parseInt(quantityInput?.value) || 1;
-        const applyDiscount = discountCheckbox ? discountCheckbox.checked : false;
 
         // Verificar que la cantidad no exceda el stock disponible
         if (quantity > product.stock) {
@@ -76,32 +76,64 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
         }
 
         // Verificar stock mínimo
-        if (product.stock == 0) {
+        if (product.stock === 0) {
             toast.error(`El producto ${product.name} no tiene stock suficiente`);
             return;
         }
 
-        //verificar que el producto no se haya agregado al carrito 
+        // Verificar que el producto no se haya agregado al carrito 
         const productExistsInCart = items.some(item => item.id === product.id);
         if (productExistsInCart) {
-            toast.error(`${product.name} ya se agrego a la tabla. No se pueden agregar más unidades.`);
+            toast.error(`${product.name} ya se agregó a la tabla. No se pueden agregar más unidades.`);
             return;
         }
 
-        const price = applyDiscount && product.discountPrice ? product.discountPrice : product.price;
+        // LÓGICA CORREGIDA PARA DETERMINAR EL PRECIO
+        let finalPrice: number;
+        let applyDiscount: boolean = false;
+        let discountType: string = 'none';
+
+        // 1. Prioridad: Verificar si hay una oferta seleccionada
+        if (offerSelect && offerSelect.value !== '') {
+            const selectedOption = offerSelect.options[offerSelect.selectedIndex];
+            const priceAttr = selectedOption.getAttribute('data-price');
+            if (priceAttr) {
+                finalPrice = parseFloat(priceAttr);
+                applyDiscount = true;
+                discountType = 'offer';
+                // Actualizar el producto para incluir el precio de oferta
+                product.discountPrice = finalPrice;
+            } else {
+                finalPrice = product.priceWithTax;
+            }
+        }
+        // 2. Si no hay oferta, verificar si hay descuento manual aplicado
+        else if (discountCheckbox && discountCheckbox.checked && product.discountPrice) {
+            finalPrice = product.discountPrice;
+            applyDiscount = true;
+            discountType = 'discount';
+        }
+        // 3. Si no hay ni oferta ni descuento, usar precio normal
+        else {
+            finalPrice = product.priceWithTax;
+            applyDiscount = false;
+            discountType = 'none';
+        }
 
         const productWithDetails: CartItem = {
             ...product,
             quantity,
-            applyDiscount: applyDiscount && product.discountPrice !== null,
-            totalPrice: price * quantity
+            applyDiscount,
+            totalPrice: finalPrice * quantity,
+            // Asegurar que discountPrice refleje el precio final si hay descuento
+            discountPrice: applyDiscount ? finalPrice : product.discountPrice
         };
 
+        
+        toast.success(`${product.name} agregado al carrito`);
         onSelectProduct(productWithDetails);
-
-        // Opcional: cerrar el modal después de agregar
-        // closeModal();
     };
+
 
 
     const updateButtons = () => {

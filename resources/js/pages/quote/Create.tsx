@@ -43,7 +43,7 @@ interface CartItem extends Product {
 export default function CreateQuote() {
     const page = usePage() as any;
     const clienteCreated = page.props.customer
-    const { departments, municipalities, districts,  } = usePage<{
+    const { departments, municipalities, districts, } = usePage<{
         departments: { id: number; name: string }[];
         municipalities: { id: number; name: string; department_id: number }[];
         districts: { id: number; name: string; municipality_id: number }[];
@@ -98,6 +98,7 @@ export default function CreateQuote() {
             return;
         }
 
+        // LÓGICA CORREGIDA: Usar el precio que ya viene calculado desde ProducList
         const price = productWithDetails.applyDiscount && productWithDetails.discountPrice
             ? productWithDetails.discountPrice
             : productWithDetails.priceWithTax;
@@ -109,8 +110,7 @@ export default function CreateQuote() {
 
         setCart(prev => [...prev, newItem]);
 
-        const discountText = productWithDetails.applyDiscount ? ' con descuento' : ' sin descuento';
-        toast.success(`${productWithDetails.name}${discountText} agregado a la cotización`);
+        // El mensaje ya viene desde ProducList, no necesitamos duplicarlo aquí
     };
 
     const removeProductFromCart = (id: number) => {
