@@ -16,6 +16,7 @@ use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\QuoteDetailController;
 use App\Http\Controllers\QuoteReportController;
 use App\Http\Controllers\TraderController;
+use App\Http\Controllers\OfferController;
 
 
 Route::get('/', function () {
@@ -33,12 +34,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('types', TypeController::class);
     Route::resource('movements', MovementController::class);
+    Route::resource('offers', OfferController::class);
     Route::resource('businessData', BusinessDataController::class)->parameters([
     'businessData' => 'businessData'
     ]);
     Route::resource('quotes',QuoteController::class);
+    Route::get('quotes-confirmed', [QuoteController::class, 'confirmedQuotes'])->name('quotes.confirmed');
     Route::resource('quoteDetails',QuoteDetailController::class);
-
 
     // Ruta para el dashboard
     Route::get('dashboard', function () {

@@ -23,27 +23,58 @@ class QuoteController extends Controller
         $this->authorizeResource(Quote::class, 'quote');
     }
 
-    public function getQoteData()
+    public function getQuoteData($user_id)
     {
 
         $data = Quote::query()
             ->with('customer', 'user')
+            ->where('user_id', $user_id)  // Filtrar por usuario autenticado
+            ->where('status', 'pendiente')
+            ->orderBy('date', 'desc') // Ordenar por fecha descendente
             ->get()
             ->map(function ($quote) {
                 return [
                     'id' => $quote->id,
                     'date' => $quote->date,
-                    'total' => $quote->total,
+                    'total' => number_format($quote->total, 2), // Formatear el total
                     'customer' => [
                         'id' => $quote->customer->id ?? null,
-                        'name' => $quote->customer->name ?? null,
+                        'name' => $quote->customer->name ?? 'Cliente eliminado',
                     ],
                     'user' => [
                         'id' => $quote->user->id ?? null,
-                        'name' => $quote->user->name ?? null,
+                        'name' => $quote->user->name ?? 'Usuario eliminado',
                     ],
-                    'status' => $quote->status,
+                    'status' => $quote->status ?? 'Pendiente',
+                ];
+            });
 
+        return response()->json(['data' => $data]);
+    }
+
+    public function getConfirmQuoteData($user_id)
+    {
+
+        $data = Quote::query()
+            ->with('customer', 'user')
+            ->where('user_id', $user_id)  // Filtrar por usuario autenticado
+            ->where('status', 'confirmada') // Filtrar por cotizaciones confirmadas
+            ->orderBy('date', 'desc') // Ordenar por fecha descendente
+            ->get()
+            ->map(function ($quote) {
+                return [
+                    'id' => $quote->id,
+                    'date' => $quote->date,
+                    'total' => number_format($quote->total, 2), // Formatear el total
+                    'customer' => [
+                        'id' => $quote->customer->id ?? null,
+                        'name' => $quote->customer->name ?? 'Cliente eliminado',
+                    ],
+                    'user' => [
+                        'id' => $quote->user->id ?? null,
+                        'name' => $quote->user->name ?? 'Usuario eliminado',
+                    ],
+                    'status' => $quote->status ?? 'Pendiente',
                 ];
             });
 
@@ -58,6 +89,21 @@ class QuoteController extends Controller
     {
         $user = auth()->user();
         return Inertia::render('quote/Index', [
+            'permissions' => Permission::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
+        ]);
+    }
+
+    public function confirmedQuotes()
+    {
+        $user = auth()->user();
+        return Inertia::render('quote/confirmedQuotes', [
             'permissions' => Permission::all(),
             'auth' => [
                 'user' => [
@@ -142,15 +188,15 @@ class QuoteController extends Controller
     public function show(Quote $quote)
     {
         try {
-      
+
             $quote->load(['customer', 'user', 'details.product']);
 
-       
+
             if (!$quote) {
                 return redirect()->route('quotes.index')->with('error', 'Cotización no encontrada.');
             }
 
-    
+
             $details = $quote->details->map(function ($detail) {
                 return [
                     'product_name' => $detail->product->name ?? 'Producto eliminado',
@@ -176,15 +222,15 @@ class QuoteController extends Controller
                 ],
             ];
 
-            
+
             return Inertia::render('quote/ShowDetails', [
                 'quote' => $quoteData,
                 'details' => $details->toArray(),
             ]);
 
         } catch (\Exception $e) {
-            
-            
+
+
             return redirect()->route('quotes.index')->with('error', 'Error al cargar la cotización: ' . $e->getMessage());
         }
     }
@@ -200,10 +246,28 @@ class QuoteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Quote $quote)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'status' => 'required|string|in:pendiente,confirmada,cancelada',
+            ]);
+
+            $quote->update($validated);
+
+            return redirect()->route('quotes.index')->with([
+                'success' => 'Cotización y detalles creados exitosamente.',
+                'quote' => $quote
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la cotización: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.

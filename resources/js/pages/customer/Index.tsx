@@ -6,14 +6,15 @@ import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
 import 'datatables.net-buttons-dt';
-import 'datatables.net-responsive-dt';
-import "datatables.net-buttons/js/buttons.html5";
-import "datatables.net-buttons/js/buttons.print";
+import 'datatables.net-buttons/js/buttons.html5.js';
+import 'datatables.net-buttons/js/buttons.print.js';
+import responsive from 'datatables.net-responsive-dt';
 import jszip from 'jszip';
 import DeleteEntityModal from "../../components/DeleteEntityModal";
+import { title } from "process";
 
 window.JSZip = jszip;
-DataTable.use(DT);
+DataTable.use(DT, responsive);
 
 interface Customer {
     id: number;
@@ -38,19 +39,21 @@ export default function Customers() {
     };
 
     const columns = [
-        { data: 'name' },
-        { data: 'email' },
-        { data: 'register' },
-        { data: 'phoneNumber' },
-        { data: 'nit' },
-        { data: 'district' },
-        { data: 'address' },
-        { data: 'description' },
-        { data: 'status' },
+        { data: 'name', title: 'Nombre',responsivePriority: 1 },
+        { data: 'email', title: 'Correo',responsivePriority: 7 },
+        { data: 'register', title: 'Fecha de Registro', responsivePriority: 7 },
+        { data: 'phoneNumber', title: 'Teléfono', responsivePriority: 7 },
+        { data: 'nit', title: 'NIT', responsivePriority: 7 },
+        { data: 'district', title: 'Distrito', responsivePriority: 7 },
+        { data: 'address', title: 'Dirección', responsivePriority: 7 },
+        { data: 'description', title: 'Descripción', responsivePriority: 7 },
+        { data: 'status', title: 'Estado', responsivePriority: 7,},
         {
             data: null,
             orderable: false,
             searchable: false,
+            responsivePriority: 1,
+            title: 'Acciones',
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 let actions = "";
                 if (hasPermission("editar clientes")) {
@@ -85,28 +88,23 @@ export default function Customers() {
                     )}
                 </div>
 
-                <DataTable ajax="/api/customers/getCustomerData" options={{
-                    language: languageES,
-                    responsive: true,
-                    layout: {
-                        topStart: ['pageLength'],
-                    },
-                }} columns={columns} className="display">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Correo Electonico</th>
-                            <th>Fecha de Registro</th>
-                            <th>Telefono</th>
-                            <th>NIT</th>
-                            <th>Distrito</th>
-                            <th>Direccion</th>
-                            <th>Descripcion</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                </DataTable>
+                <DataTable ajax="/api/customers/getCustomerData"
+                options={{
+                        language: languageES,
+                        responsive: true,
+                        dom: 'lBfrtip',
+                        layout: {
+                            topStart: ['pageLength'],
+                            topEnd: ['search'], // Esto pone el buscador a la derecha
+                        },
+                        buttons: [
+                            { extend: 'copy', text: 'Copiar' },
+                            { extend: 'excel', text: 'Excel' },
+                            { extend: 'csv', text: 'CSV' },
+                            { extend: 'print', text: 'Imprimir' }
+                        ],
+                    }} columns={columns} className="display nowrap w-full"
+                />
             </div>
             <DeleteEntityModal
                 isOpen={isDeleteModalOpen}

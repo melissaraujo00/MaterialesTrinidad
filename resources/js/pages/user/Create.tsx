@@ -42,7 +42,7 @@ export default function UserCreate() {
     data.append("phoneNumber", values.phoneNumber);
     data.append("password", values.password);
     data.append("role", values.role);
-    console.log(data);
+    
 
 
 

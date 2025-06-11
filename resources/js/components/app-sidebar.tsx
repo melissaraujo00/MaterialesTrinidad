@@ -51,7 +51,7 @@ const mainNavItems: NavItem[] = [
         ]
     },
     {
-        title: 'Roles y Permisos',
+        title: 'Accesos',
         icon: UserRoundCog,
         children: [
             {
@@ -98,7 +98,19 @@ const mainNavItems: NavItem[] = [
         icon: ShoppingCart,
         permission: 'realizar cotizaciones'
     },
-    
+    {
+        title: 'Ofertas',
+        href: '/offers',
+        icon: NotebookPen,
+        permission: 'ver ofertas',
+    },
+    {
+        title: 'Cotizaciones confirmadas',
+        href: '/quotes-confirmed',
+        icon: NotebookPen,
+        permission: 'ver ofertas',
+    },
+
 ];
 
 // Función recursiva para filtrar ítems según permisos

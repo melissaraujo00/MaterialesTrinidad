@@ -6,12 +6,15 @@ import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
 import 'datatables.net-buttons-dt';
-import 'datatables.net-responsive-dt';
+import 'datatables.net-buttons/js/buttons.html5.js';
+import 'datatables.net-buttons/js/buttons.print.js';
+import responsive from 'datatables.net-responsive-dt';
 import jszip from 'jszip';
 import DeleteEntityModal from "../../components/DeleteEntityModal";
+import { title } from "process";
 
 window.JSZip = jszip;
-DataTable.use(DT);
+DataTable.use(DT, responsive);
 
 interface Product {
     id: number;
@@ -44,22 +47,39 @@ export default function Products() {
     };
 
     const columns = [
-        { data: 'name' },
-        { data: 'description' },
-        { data: 'price' },
-        { data: 'priceWithTax' },
-        { data: 'discountPrice' },
+        { data: 'name', title: 'Producto', responsivePriority: 1 },
+        { data: 'description', title: 'Descripción', responsivePriority: 7 },
+        { data: 'priceWithTax', title: 'Precio', responsivePriority: 1 },
+        { data: 'discountPrice', title: 'Precio con descuento',responsivePriority: 6 },
         {
             data: 'stock',
+            title: 'Stock',
+            responsivePriority: 6,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 td.innerHTML = getStockBadge(rowData.stock, rowData.stockMinimun) || rowData.stock;
             }
         },
-        { data: 'category_id' },
-        { data: 'brand_id' },
-        { data: 'stockMinimun' },
+        {
+            data: 'category_id',
+            title: 'Categoría',
+            responsivePriority: 6,
+            createdCell: (td: HTMLTableCellElement, cellData: any) => {
+                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin categoría</span>' : cellData;
+            }
+        },
+        {
+            data: 'brand_id',
+            title: 'Marca',
+            responsivePriority: 6,
+            createdCell: (td: HTMLTableCellElement, cellData: any) => {
+                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin marca</span>' : cellData;
+            }
+        },
+        { data: 'stockMinimun', title: 'Stock mínimo', responsivePriority: 6 },
         {
             data: 'image',
+            title: 'Imagen',
+            responsivePriority: 8,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 if (cellData) {
                     td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="200" height="200" class="object-cover rounded shadow-md transition-transform duration-200 hover:scale-110"/>`;
@@ -70,10 +90,12 @@ export default function Products() {
         },
         {
             data: null,
+            title: 'Acciones',
+            responsivePriority: 1,
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                
+
 
                     let actions = "";
                     if (hasPermission("editar producto")) {
@@ -83,11 +105,11 @@ export default function Products() {
                         actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
                     }
                     td.innerHTML = actions;
-    
+
                     if (hasPermission("eliminar producto")) {
                         td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                     }
-                
+
             }
         }
     ];
@@ -110,29 +132,22 @@ export default function Products() {
                 </div>
 
                 <DataTable ajax="/api/products/getProductData" options={{
-                    language: languageES,
-                    responsive: true,
-                    dom: 'lBrtip',
-                    layout: {
-                        topStart: ['pageLength'],
-                    },
-                }} columns={columns} className="display">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Descripcion</th>
-                            <th>Precio</th>
-                            <th>Precio con IVA</th>
-                            <th>Precio con descuento</th>
-                            <th>Stock</th>
-                            <th>Categoria</th>
-                            <th>Marca</th>
-                            <th>stock minimo</th>
-                            <th>Imagen</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                </DataTable>
+                            language: languageES,
+                            responsive: true,
+                            dom: 'lBfrtip',
+                            layout: {
+                                topStart: ['pageLength'],
+                                topEnd: ['search'], // Esto pone el buscador a la derecha
+                            },
+                            buttons: [
+                                { extend: 'copy', text: 'Copiar' },
+                                { extend: 'excel', text: 'Excel' },
+                                { extend: 'csv', text: 'CSV' },
+                                { extend: 'print', text: 'Imprimir' }
+                            ],
+
+                        }}columns={columns} className="display nowrap w-full"
+            />
             </div>
             <DeleteEntityModal
                 isOpen={isDeleteModalOpen}

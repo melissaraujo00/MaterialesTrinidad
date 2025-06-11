@@ -1,4 +1,4 @@
-import { SidebarInset } from '@/components/ui/sidebar';
+//import { SidebarInset } from '@/components/ui/sidebar';
 import * as React from 'react';
 
 interface AppContentProps extends React.ComponentProps<'main'> {
@@ -7,7 +7,11 @@ interface AppContentProps extends React.ComponentProps<'main'> {
 
 export function AppContent({ variant = 'header', children, ...props }: AppContentProps) {
     if (variant === 'sidebar') {
-        return <SidebarInset {...props}>{children}</SidebarInset>;
+        return (
+            <div className="w-full overflow-x-auto px-4 py-6" {...props}>
+                {children}
+            </div>
+        );
     }
 
     return (
@@ -16,3 +20,4 @@ export function AppContent({ variant = 'header', children, ...props }: AppConten
         </main>
     );
 }
+

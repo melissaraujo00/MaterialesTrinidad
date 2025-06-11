@@ -44,14 +44,12 @@ export default function ProductEdit() {
 
   const validationSchema = Yup.object({
     name: Yup.string().min(2, "Debe tener al menos 2 caracteres").required("Requerido"),
-    price: Yup.number()
+    priceWithTax: Yup.number()
       .typeError("Por favor ingresa un valor numérico válido")  // Este es el mensaje personalizado
       .positive("Debe ser positivo")
       .required("Requerido"),
     discountPrice: Yup.number().positive("Debe ser positivo").required("Requerido"),
     description: Yup.string().max(255, "Máximo 255 caracteres").nullable(),
-    category_id: Yup.string().required("Seleccione una categoría"),
-    brand_id: Yup.string().required("Seleccione una marca"),
     stock: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
     stockMinimun: Yup.number().integer().min(0, "Debe ser número entero").required("Requerido"),
     image: Yup.mixed()
@@ -68,7 +66,6 @@ export default function ProductEdit() {
     const data = new FormData();
     data.append("name", values.name);
     data.append("description", values.description || "");
-    data.append("price", values.price.toString());
     data.append("priceWithTax", values.priceWithTax.toString());
     data.append("discountPrice", values.discountPrice.toString());
     data.append("category_id", values.category_id.toString());
@@ -107,7 +104,6 @@ export default function ProductEdit() {
           initialValues={{
             name: product.name,
             description: product.description,
-            price: product.price,
             discountPrice: product.discountPrice,
             priceWithTax: product.priceWithTax,
             category_id: product.category_id,
@@ -155,23 +151,19 @@ export default function ProductEdit() {
 
               {/* Price */}
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
+                <label htmlFor="priceWithTax" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
                 <Field
                   type="number"
                   step="0.01"
-                  id="price"
+                  id="priceWithTax"
                   name="price"
                   placeholder="Ej: 12.50"
-                  value={values.price}
-                  onChange={(event) => {
-                    const price = parseFloat(event.target.value);
-                    setFieldValue("price", price);
-                    setFieldValue("priceWithTax", parseFloat((price + price * 0.13).toFixed(2))); // Calcula automáticamente el precio con IVA
-                  }}
+                  value={values.priceWithTax}
+                  onChange={handleChange}
                   onBlur={handleBlur}
                   className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
                 />
-                {touched.price && errors.price && <small className="text-red-500">{errors.price}</small>}
+                {touched.priceWithTax && errors.priceWithTax && <small className="text-red-500">{errors.priceWithTax}</small>}
               </div>
               {/* Discount Price */}
               <div>
@@ -192,7 +184,7 @@ export default function ProductEdit() {
 
               {/* Category */}
               <div>
-                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
+                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría (Opcional)</label>
                 <Field
                   as="select"
                   id="category_id"
@@ -212,7 +204,7 @@ export default function ProductEdit() {
 
               {/* Brand */}
               <div>
-                <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
+                <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</label>
                 <Field
                   as="select"
                   id="brand_id"
@@ -264,7 +256,7 @@ export default function ProductEdit() {
 
               {/* Image Upload */}
               <div>
-                <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen</label>
+                <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen (Opcional)</label>
                 <input
                   id="image"
                   name="image"

@@ -12,10 +12,6 @@ export default function CreateMovement() {
     products: { id: number; name: string }[];
     }>().props;
 
-    console.log("Types:", types);
-
-
-
     const [preview, setPreview] = useState<string | null>(null);
 
     const validationSchema = Yup.object().shape({

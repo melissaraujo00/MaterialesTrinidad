@@ -46,15 +46,17 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user()
                     ? array_merge(
-                        $request->user()->only(['id', 'name', 'email']),
+                        $request->user()->toArray(), // <-- todos los campos del usuario
                         ['permissions' => $request->user()->getAllPermissions()->pluck('name')->toArray()]
                     )
                     : null,
             ],
+
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ]
         ];
     }
+
 }

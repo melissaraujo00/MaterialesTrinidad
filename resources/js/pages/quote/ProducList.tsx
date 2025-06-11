@@ -10,6 +10,14 @@ import { Item } from "@radix-ui/react-navigation-menu";
 
 DataTable.use(DT);
 
+interface OfferInfo {
+    id: number;
+    description: string;
+    startDate: string;
+    endDate: string;
+    priceOffers: number;
+}
+
 interface Product {
     id: number;
     name: string;
@@ -21,6 +29,7 @@ interface Product {
     image: string;
     stock: number;
     stockMinimun: number;
+    allOffers: OfferInfo[];
 }
 
 interface CartItem extends Product {
@@ -56,9 +65,9 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
         const formId = `product-${product.id}`;
         const quantityInput = document.getElementById(`${formId}-quantity`) as HTMLInputElement;
         const discountCheckbox = document.getElementById(`${formId}-discount`) as HTMLInputElement;
+        const offerSelect = document.getElementById(`${formId}-offer-select`) as HTMLSelectElement;
 
         const quantity = parseInt(quantityInput?.value) || 1;
-        const applyDiscount = discountCheckbox ? discountCheckbox.checked : false;
 
         // Verificar que la cantidad no exceda el stock disponible
         if (quantity > product.stock) {
@@ -67,32 +76,64 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
         }
 
         // Verificar stock mínimo
-        if (product.stock == 0) {
+        if (product.stock === 0) {
             toast.error(`El producto ${product.name} no tiene stock suficiente`);
             return;
         }
 
-        //verificar que el producto no se haya agregado al carrito 
+        // Verificar que el producto no se haya agregado al carrito 
         const productExistsInCart = items.some(item => item.id === product.id);
         if (productExistsInCart) {
-            toast.error(`${product.name} ya se agrego a la tabla. No se pueden agregar más unidades.`);
+            toast.error(`${product.name} ya se agregó a la tabla. No se pueden agregar más unidades.`);
             return;
         }
 
-        const price = applyDiscount && product.discountPrice ? product.discountPrice : product.price;
+        // LÓGICA CORREGIDA PARA DETERMINAR EL PRECIO
+        let finalPrice: number;
+        let applyDiscount: boolean = false;
+        let discountType: string = 'none';
+
+        // 1. Prioridad: Verificar si hay una oferta seleccionada
+        if (offerSelect && offerSelect.value !== '') {
+            const selectedOption = offerSelect.options[offerSelect.selectedIndex];
+            const priceAttr = selectedOption.getAttribute('data-price');
+            if (priceAttr) {
+                finalPrice = parseFloat(priceAttr);
+                applyDiscount = true;
+                discountType = 'offer';
+                // Actualizar el producto para incluir el precio de oferta
+                product.discountPrice = finalPrice;
+            } else {
+                finalPrice = product.priceWithTax;
+            }
+        }
+        // 2. Si no hay oferta, verificar si hay descuento manual aplicado
+        else if (discountCheckbox && discountCheckbox.checked && product.discountPrice) {
+            finalPrice = product.discountPrice;
+            applyDiscount = true;
+            discountType = 'discount';
+        }
+        // 3. Si no hay ni oferta ni descuento, usar precio normal
+        else {
+            finalPrice = product.priceWithTax;
+            applyDiscount = false;
+            discountType = 'none';
+        }
 
         const productWithDetails: CartItem = {
             ...product,
             quantity,
-            applyDiscount: applyDiscount && product.discountPrice !== null,
-            totalPrice: price * quantity
+            applyDiscount,
+            totalPrice: finalPrice * quantity,
+            // Asegurar que discountPrice refleje el precio final si hay descuento
+            discountPrice: applyDiscount ? finalPrice : product.discountPrice
         };
 
+        
+        toast.success(`${product.name} agregado al carrito`);
         onSelectProduct(productWithDetails);
-
-        // Opcional: cerrar el modal después de agregar
-        // closeModal();
     };
+
 
 
     const updateButtons = () => {
@@ -144,6 +185,7 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
                 }
             }
         },
+        //cantidad
         {
             data: null,
             orderable: false,
@@ -166,24 +208,79 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
                 `;
             }
         },
+        //descuento/oferta
+        // Reemplaza la columna de descuento/oferta (índice 7) en tu array de columns con este código:
+
         {
             data: null,
             orderable: false,
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: Product) => {
                 const formId = `product-${rowData.id}`;
-                if (rowData.discountPrice) {
-                    td.innerHTML = `
-                        <div class="flex flex-col items-center">
-                            <input type="checkbox" id="${formId}-discount" class="rounded">
-                            <label for="${formId}-discount" class="text-xs font-medium text-center">
-                                (-$${((rowData.priceWithTax - rowData.discountPrice)).toFixed(2)})
-                            </label>
-                        </div>
-                    `;
+
+                // Limpiar la celda primero
+                td.innerHTML = '';
+
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center space-y-2 min-w-[150px]';
+
+                // Verificar si hay ofertas disponibles
+                if (rowData.allOffers && rowData.allOffers.length > 0) {
+                    // Crear select para ofertas
+                    const selectContainer = document.createElement('div');
+                    selectContainer.className = 'w-full';
+
+                    const select = document.createElement('select');
+                    select.id = `${formId}-offer-select`;
+                    select.className = 'w-full text-xs rounded border border-gray-300 p-1';
+
+                    // Opción por defecto (sin oferta)
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Sin oferta';
+                    select.appendChild(defaultOption);
+
+                    // Agregar opciones de ofertas
+                    rowData.allOffers.forEach((offer: OfferInfo) => {
+                        const option = document.createElement('option');
+                        option.value = offer.id.toString();
+                        option.textContent = `${offer.description} (-$${((rowData.priceWithTax - offer.priceOffers)).toFixed(2)})`;
+                        option.setAttribute('data-price', offer.priceOffers.toString());
+                        select.appendChild(option);
+                    });
+
+                    selectContainer.appendChild(select);
+                    container.appendChild(selectContainer);
+
+                    // Evento para manejar cambio de oferta
+                    select.addEventListener('change', (e) => {
+                        const target = e.target as HTMLSelectElement;
+                        console.log('Oferta seleccionada:', target.value);
+                        // Aquí puedes agregar lógica adicional si necesitas
+                    });
+
+                } else if (rowData.discountPrice && rowData.discountPrice > 0) {
+                    // Si no hay ofertas pero sí hay precio con descuento, mostrar checkbox
+                    const checkboxContainer = document.createElement('div');
+                    checkboxContainer.className = 'flex flex-col items-center';
+
+                    checkboxContainer.innerHTML = `
+                <input type="checkbox" id="${formId}-discount" class="rounded">
+                <label for="${formId}-discount" class="text-xs font-medium text-center">
+                    Descuento (-$${((rowData.priceWithTax - rowData.discountPrice)).toFixed(2)})
+                </label>
+            `;
+
+                    container.appendChild(checkboxContainer);
                 } else {
-                    td.innerHTML = `<span class="text-xs text-gray-500 italic">No disponible</span>`;
+                    // No hay ofertas ni descuentos disponibles
+                    const noOfferSpan = document.createElement('span');
+                    noOfferSpan.className = 'text-xs text-gray-500 italic';
+                    noOfferSpan.textContent = 'No disponible';
+                    container.appendChild(noOfferSpan);
                 }
+
+                td.appendChild(container);
             }
         },
         {
@@ -212,10 +309,10 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
                 }
 
                 else if (productExistsInCart) {
-                        button.disabled = true;
-                        button.innerText = 'En Carrito';
-                        button.className = 'bg-gray-400 text-white rounded px-3 py-2 text-xs cursor-not-allowed';
-                    }
+                    button.disabled = true;
+                    button.innerText = 'En Carrito';
+                    button.className = 'bg-gray-400 text-white rounded px-3 py-2 text-xs cursor-not-allowed';
+                }
                 else {
                     // Agregar evento click al botón solo si hay stock
                     button.addEventListener('click', () => {
