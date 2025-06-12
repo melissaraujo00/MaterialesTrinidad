@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="es">
 
     <head>
@@ -60,7 +60,7 @@
         th,
         td {
         padding: 12px 15px;
-        text-align: left;
+        text-align: center;
         font-weight: 400;
         border-bottom: 1px solid #ddd;
         }
@@ -123,25 +123,28 @@
         <tr>
             <th>Producto</th>
             <th>Categoría</th>
-            <th>Marca</th>
             <th>Precio</th>
             <th>SubTotal</th>
         </tr>
         </thead>
         <tbody>
             @foreach($quote->details as $details)
-            {{-- @foreach ($details as )
-
-            @endforeach --}}
             <tr>
                 <td>{{ $details->product->name }}</td>
                 <td>{{ $details->product->category->name ?? '-' }}</td>
-                <td>{{ $details->product->brand->name ?? '-' }}</td>
-                <td>${{ number_format($details->product->price, 2) }}</td>
-                {{-- <td>{{ $details->product->total}}</td> --}}
+                <td>${{ number_format($details->price, 2) }}</td>
+                <td>${{ number_format($details->subtotal ?? $details->price * $details->amount, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" style="text-align: right; font-weight: bold;">Total:</td>
+                <td style="font-weight: bold;">
+                    ${{ number_format($quote->total ?? $quote->details->sum(function($d) { return $d->subtotal ?? $d->price * $d->amount; }), 2) }}
+                </td>
+            </tr>
+        </tfoot>
     </table>
 
 
