@@ -108,13 +108,16 @@
     <body>
 
     <header>
-        <div>
-        <h1>Materiales Trinidad S. A. de C.V.</h1>
-        <div class="subtitulo">Cotizacion</div>
-        </div>
-        <div class="fecha">
-        Fecha: {{ date('d/m/Y') }}
-        </div>
+            <div>
+                <h1>Materiales Trinidad S. A. de C.V.</h1>
+                <div class="subtitulo">Cotizacion</div>
+            </div>
+            <div class="fecha">
+                Fecha: {{ date('d/m/Y') }}
+            </div>
+            <div class="cliente">
+                Cliente: {{ $quote->customer->name ?? '-' }}
+            </div>
     </header>
 
     <h2>Detalles de la Cotización</h2>
@@ -122,7 +125,7 @@
         <thead>
         <tr>
             <th>Producto</th>
-            <th>Categoría</th>
+            <th>Cantidad</th>
             <th>Precio</th>
             <th>SubTotal</th>
         </tr>
@@ -131,7 +134,7 @@
             @foreach($quote->details as $details)
             <tr>
                 <td>{{ $details->product->name }}</td>
-                <td>{{ $details->product->category->name ?? '-' }}</td>
+                <td>{{ $details->amount}}</td>
                 <td>${{ number_format($details->price, 2) }}</td>
                 <td>${{ number_format($details->subtotal ?? $details->price * $details->amount, 2) }}</td>
             </tr>

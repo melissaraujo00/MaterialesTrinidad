@@ -48,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
-    // Route::get('/quotesReport', [QuoteReportController::class, 'envio'])->name('quoteReport.envio');
+    Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteByWhatsapp'])->name('quotes.sendWhatsapp');
 
 });
 
