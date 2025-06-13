@@ -15,8 +15,10 @@ use App\Http\Controllers\TypeController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\QuoteDetailController;
+use App\Http\Controllers\QuoteReportController;
 use App\Http\Controllers\TraderController;
 use App\Http\Controllers\OfferController;
+
 
 Route::get('/', function () {
     return Inertia::render('auth/login');
@@ -49,6 +51,8 @@ Route::middleware(['auth'])->group(function () {
     // Rutas para descargar PDF
     Route::get('/inventoryIndex', [InventoryReport::class, 'index'])->name('inventoryIndex');
     Route::get('/inventoryReport', [InventoryReport::class, 'inventoryReport'])->name('inventoryReport');
+     Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
+    Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteByWhatsapp'])->name('quotes.sendWhatsapp');
 
 });
 

@@ -103,6 +103,8 @@ export default function Quotes() {
                 // Ver detalles - Usar Link de Inertia para navegación
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
+                // Enviar
+                //actions += `<a href="/quotesReport/${rowData.id}" class="send-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Enviar</a>`;
                 // Confirmar - Solo mostrar si el status es pendiente
                 if (rowData.status.toLowerCase() === 'pendiente') {
                     actions += `<button class="confirm-btn bg-green-700 text-sm text-white px-3 py-1 rounded hover:bg-green-800 ml-2">Confirmar</button>`;

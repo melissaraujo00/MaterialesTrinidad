@@ -28,8 +28,7 @@ interface Quote {
 
 export default function QuoteShow() {
     const pageProps = usePage().props as any;
-    
-    
+
     const quote = pageProps.quote as Quote;
     const details = pageProps.details as QuoteDetail[];
 
@@ -89,14 +88,37 @@ export default function QuoteShow() {
                             Cotización #{quote.id}
                         </h1>
                     </div>
-                    
+
                     <div className="flex gap-2">
                         <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
                             Generar PDF
                         </button>
-                        <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                            Enviar por email
+                        <a href={`/quotesReport/${quote.id}`} target="_blank" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition ">
+                            <button
+                            onClick={async () => {
+                                try {
+                                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                    const response = await fetch(`/quotes/send-whatsapp/${quote.id}`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': csrfToken || '',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+                                    const data = await response.json();
+                                    if (data.ultramsg_response) {
+                                        alert('¡Cotización enviada por WhatsApp!');
+                                    } else {
+                                        alert('Ocurrió un error al enviar la cotización.');
+                                    }
+                                } catch (error) {
+                                    alert('Error de red o del servidor.');
+                                }
+                            }}
+                        >
+                            Enviar por WhatsApp
                         </button>
+                        </a>
                     </div>
                 </div>
 
@@ -105,7 +127,7 @@ export default function QuoteShow() {
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">
                         Información de la Cotización
                     </h2>
-                    
+
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
@@ -115,7 +137,7 @@ export default function QuoteShow() {
                                     <p className="font-medium text-gray-800">{quote.customer?.name || 'Cliente no disponible'}</p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center gap-3">
                                 <Calendar className="w-5 h-5 text-blue-600" />
                                 <div>
@@ -124,7 +146,7 @@ export default function QuoteShow() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <User className="w-5 h-5 text-blue-600" />
@@ -133,7 +155,7 @@ export default function QuoteShow() {
                                     <p className="font-medium text-gray-800">{quote.user?.name || 'Vendedor no disponible'}</p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center gap-3">
                                 <DollarSign className="w-5 h-5 text-green-600" />
                                 <div>
@@ -153,7 +175,7 @@ export default function QuoteShow() {
                             Detalles de la Cotización
                         </h2>
                     </div>
-                    
+
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-gray-100">
@@ -208,12 +230,11 @@ export default function QuoteShow() {
                             </tbody>
                         </table>
                     </div>
-                    
+
                     {/* Total summary */}
                     <div className="px-6 py-4 bg-gray-50 border-t">
                         <div className="flex justify-end">
                             <div className="w-64 space-y-2">
-                                
                                 <div className="flex justify-between text-lg font-bold border-t pt-2">
                                     <span>Total:</span>
                                     <span className="text-green-600">{formatCurrency(quote.total)}</span>
