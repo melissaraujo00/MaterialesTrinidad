@@ -6,11 +6,10 @@ use App\Http\Requests\StoreProduct;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Requests\UpdateProductRequest;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-
 use function Termwind\render;
 
 class ProductController extends Controller
@@ -23,8 +22,10 @@ class ProductController extends Controller
         $this->authorizeResource(Product::class, 'product');
     }
 
-    public function getProductData()
-    {
+
+
+     public function getProductData()
+     {
         $currentDate = Carbon::now();
 
         $data = Product::query()

@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\BusinessDataController;
+use App\Http\Controllers\InventoryReport;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -44,6 +45,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    // Rutas para descargar PDF
+    Route::get('/inventoryIndex', [InventoryReport::class, 'index'])->name('inventoryIndex');
+    Route::get('/inventoryReport', [InventoryReport::class, 'inventoryReport'])->name('inventoryReport');
 
 });
 

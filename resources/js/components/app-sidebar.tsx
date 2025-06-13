@@ -51,6 +51,17 @@ const mainNavItems: NavItem[] = [
         ]
     },
     {
+        title: 'Reportes',
+        icon: Box,
+        children: [
+            {
+                title: 'Inventario',
+                href: '/inventoryIndex',
+                icon: ListChecks,
+            }
+        ]
+    },
+    {
         title: 'Accesos',
         icon: UserRoundCog,
         children: [

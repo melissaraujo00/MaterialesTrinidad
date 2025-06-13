@@ -45,7 +45,7 @@ export default function Products() {
         setSelectedProduct(product);
         setIsDeleteModalOpen(true);
     };
-
+    
     const columns = [
         { data: 'name', title: 'Producto', responsivePriority: 1 },
         { data: 'description', title: 'Descripción', responsivePriority: 7 },

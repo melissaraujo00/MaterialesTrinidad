@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\BusinessDataController;
+use App\Http\Controllers\InventoryReport;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\TraderController;
 
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -29,6 +31,7 @@ Route::get('/categories/getCategoryData', [CategoryController::class, 'getCatego
 Route::get('/customers/getCustomerData', [CustomerController::class, 'getCustomerData']);
 Route::get('/brands/getBrandData', [BrandController::class, 'getBrandData']);
 Route::get('/products/getProductData', [ProductController::class, 'getProductData']);
+Route::get('/inventory/getInventoryData', [InventoryReport::class, 'getInventoryData']);
 Route::get('/permissions/getPermissionData', [PermissionController::class, 'getPermissionData']);
 Route::get('/roles/getRolData', [RoleController::class, 'getRolData']);
 Route::get('/types/getTypeData', [TypeController::class, 'getTypeData']);
