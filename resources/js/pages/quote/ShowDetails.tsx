@@ -93,8 +93,7 @@ export default function QuoteShow() {
                         <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
                             Generar PDF
                         </button>
-                        <a href={`/quotesReport/${quote.id}`} target="_blank" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition ">
-                            <button
+                            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition "
                             onClick={async () => {
                                 try {
                                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
@@ -118,7 +117,6 @@ export default function QuoteShow() {
                         >
                             Enviar por WhatsApp
                         </button>
-                        </a>
                     </div>
                 </div>
 

@@ -9,48 +9,48 @@ use Illuminate\Support\Facades\Http;
 
 class QuoteReportController extends Controller
 {
-    public function QuoteReport(Quote $quote)
+    // public function QuoteReport(Quote $quote)
+    // {
+    //     $quote->load(['details']);
+
+    //     $pdf = Pdf::loadView('quotes.report', [
+    //         'quote' => $quote
+    //     ]);
+
+    //     return $pdf->stream('reporte_cotizacion.pdf');
+    // }
+
+    public function sendQuoteTextByWhatsapp($id)
     {
+        $quote = Quote::with(['customer', 'user', 'details.product'])->findOrFail($id);
 
-        $quote->load(['details']);
+        // Construir el mensaje de texto
+        $mensaje = "==============================\n";
+        $mensaje .= "Materiales Trinidad S. A. de C.V.\n";
+        $mensaje .= "==============================\n";
+        $mensaje .= "Cotización #{$quote->id}\n";
+        $mensaje .= "Cliente: {$quote->customer->name}\n";
+        $mensaje .= "Fecha: " . ($quote->date ? \Carbon\Carbon::parse($quote->date)->format('d/m/Y') : date('d/m/Y')) . "\n";
+        $mensaje .= "------------------------------\n";
+        $mensaje .= "Productos:\n";
+        foreach ($quote->details as $details) {
+            $mensaje .= "- {$details->product->name} x{$details->amount} = $" . number_format($details->subtotal ?? $details->price * $details->amount, 2) . "\n";
+        }
+        $mensaje .= "------------------------------\n";
+        $mensaje .= "Total: $" . number_format($quote->total, 2) . "\n";
+        $mensaje .= "==============================";
 
-        $pdf = Pdf::loadView('quotes.report', [
-            'quote' => $quote
-        ]);
-
-        return $pdf->stream('reporte_cotizacion.pdf');
-    }
-
-    public function sendQuoteByWhatsapp($id)
-    {
-        $quote = Quote::with(['customer', 'user', 'details.product.category', 'details.product.brand'])->findOrFail($id);
-
-        // Generar PDF y guardarlo temporalmente
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('quotes.report', compact('quote'));
-        $pdfPath = storage_path("app/public/cotizacion_{$quote->id}.pdf");
-        $pdf->save($pdfPath);
-
-        // Convertir PDF a base64
-        $pdfBase64 = base64_encode(file_get_contents($pdfPath));
-
-        $quote = Quote::with(['customer'])->findOrFail($id);
-
+        // Número del cliente en formato internacional
         $numeroCliente = $quote->customer->phoneNumber;
         $numeroCliente = (strpos($numeroCliente, '+') === 0) ? $numeroCliente : '+503' . ltrim($numeroCliente, '0');
 
-        $numeroVendedor = $quote->user->phoneNumber;
-        $numeroVendedor = (strpos($numeroVendedor, '+') === 0) ? $numeroVendedor : '+503' . ltrim($numeroVendedor, '0');
-
-        // Enviar mensaje usando UltraMsg
-        $response = Http::asForm()->post("https://api.ultramsg.com/".env('ULTRAMSG_INSTANCE_ID')."/messages/document", [
+        // Enviar mensaje de texto usando UltraMsg
+        $response = Http::asForm()->post("https://api.ultramsg.com/".env('ULTRAMSG_INSTANCE_ID')."/messages/chat", [
             'token' => env('ULTRAMSG_TOKEN'),
             'to' => $numeroCliente,
-            'filename' => "cotizacion.pdf",
-            'document' => $pdfBase64,
-            'caption' => 'Reporte de Cotizacion'
+            'body' => $mensaje
         ]);
 
         return response()->json(['ultramsg_response' => $response->body()]);
     }
-
 }
