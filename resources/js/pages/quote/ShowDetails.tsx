@@ -3,6 +3,7 @@ import AppLayout from "@/layouts/app-layout";
 import { Toaster, toast } from "sonner";
 import { ArrowLeft, Calendar, User, Building2, DollarSign, Package, Edit3, Save, X, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import ProductList from "./ProducList";
 
 interface QuoteDetail {
     id?: number;
@@ -29,6 +30,24 @@ interface Quote {
     };
 }
 
+interface Product {
+    id: number;
+    name: string;
+    priceWithTax: number;
+    discountPrice: number | null;
+    brand_id: string;
+    category_id: string;
+    image: string;
+    stock: number;
+    stockMinimun: number;
+}
+
+interface CartItem extends Product {
+    quantity: number;
+    applyDiscount: boolean;
+    totalPrice: number;
+}
+
 export default function QuoteShow() {
     const pageProps = usePage().props as any;
 
@@ -45,6 +64,11 @@ export default function QuoteShow() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedDetails, setEditedDetails] = useState<QuoteDetail[]>(initialDetails || []);
     const [loading, setLoading] = useState(false);
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    
+    // SEPARAR LOS ESTADOS: uno para el carrito principal y otro para productos ya en la cotización
+    const [cart, setCart] = useState<CartItem[]>([]); // Para nuevos productos
+    const [existingProductIds, setExistingProductIds] = useState<number[]>([]);
 
     // Recalcular totales cuando cambien los detalles
     const [calculatedTotals, setCalculatedTotals] = useState({
@@ -52,11 +76,21 @@ export default function QuoteShow() {
         total: quote?.total || 0
     });
 
+    // Inicializar la lista de productos existentes cuando se inicia la edición
+    useEffect(() => {
+        if (isEditing && editedDetails) {
+            const productIds = editedDetails
+                .map(detail => detail.product_id)
+                .filter((id): id is number => id !== undefined);
+            setExistingProductIds(productIds);
+        }
+    }, [isEditing, editedDetails]);
+
     useEffect(() => {
         const newSubtotal = editedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
         setCalculatedTotals({
             subtotal: newSubtotal,
-            total: newSubtotal // Asumiendo que no hay impuestos, ajusta según tu lógica
+            total: newSubtotal
         });
     }, [editedDetails]);
 
@@ -106,9 +140,128 @@ export default function QuoteShow() {
     };
 
     const handleRemoveProduct = (index: number) => {
+        const productToRemove = editedDetails[index];
         const updatedDetails = editedDetails.filter((_, i) => i !== index);
+        
         setEditedDetails(updatedDetails);
+        
+        // Si el producto removido tenía product_id, quitarlo de la lista de existentes
+        if (productToRemove.product_id) {
+            setExistingProductIds(prev => prev.filter(id => id !== productToRemove.product_id));
+        }
+        
         toast.success('Producto eliminado de la cotización');
+    };
+
+    // NUEVA FUNCIÓN: Crear lista combinada para el modal
+    const getCombinedCartForModal = (): CartItem[] => {
+        // Convertir productos existentes en la cotización a formato CartItem
+        const existingAsCartItems: CartItem[] = editedDetails
+            .filter(detail => detail.product_id)
+            .map(detail => ({
+                id: detail.product_id!,
+                name: detail.product_name,
+                priceWithTax: detail.price,
+                discountPrice: null,
+                brand_id: '',
+                category_id: '',
+                image: '',
+                stock: 999, // Valor placeholder
+                stockMinimun: 0,
+                quantity: detail.amount,
+                applyDiscount: false,
+                totalPrice: detail.subtotal
+            }));
+
+        // Combinar con nuevos productos del carrito
+        return [...existingAsCartItems, ...cart];
+    };
+
+    const handleSelectProduct = (productWithDetails: CartItem) => {
+        // Verificar si el producto ya existe en la cotización (editedDetails) o en el carrito
+        const existsInQuote = editedDetails.some(detail => detail.product_id === productWithDetails.id);
+        const existsInCart = cart.some(item => item.id === productWithDetails.id);
+
+        if (existsInQuote || existsInCart) {
+            toast.error('Este producto ya está en la cotización');
+            return;
+        }
+
+        // Calcular precio final
+        const finalPrice = productWithDetails.applyDiscard && productWithDetails.discountPrice
+            ? productWithDetails.discountPrice
+            : productWithDetails.priceWithTax;
+
+        // Agregar al carrito temporal
+        const newCartItem: CartItem = {
+            ...productWithDetails,
+            totalPrice: finalPrice * productWithDetails.quantity
+        };
+
+        setCart(prev => [...prev, newCartItem]);
+
+        // Agregar también a editedDetails inmediatamente
+        const newQuoteDetail: QuoteDetail = {
+            product_id: productWithDetails.id,
+            product_name: productWithDetails.name,
+            amount: productWithDetails.quantity,
+            price: finalPrice,
+            subtotal: finalPrice * productWithDetails.quantity
+        };
+
+        setEditedDetails(prev => [...prev, newQuoteDetail]);
+        setExistingProductIds(prev => [...prev, productWithDetails.id]);
+
+        toast.success(`${productWithDetails.name} agregado a la cotización`);
+    };
+
+    const removeProductFromCart = (id: number) => {
+        // Remover del carrito temporal
+        setCart(prev => prev.filter(p => p.id !== id));
+        
+        // Remover también de editedDetails si no tenía ID original (era nuevo)
+        setEditedDetails(prev => prev.filter(detail => 
+            !(detail.product_id === id && !detail.id)
+        ));
+        
+        // Remover de la lista de productos existentes
+        setExistingProductIds(prev => prev.filter(existingId => existingId !== id));
+        
+        toast.success('Producto eliminado de la cotización');
+    };
+
+    const updateProductQuantity = (id: number, quantity: number) => {
+        if (quantity <= 0) {
+            removeProductFromCart(id);
+            return;
+        }
+
+        // Actualizar en carrito temporal
+        setCart(prev => prev.map(item => {
+            if (item.id === id) {
+                const price = item.applyDiscount && item.discountPrice
+                    ? item.discountPrice
+                    : item.priceWithTax;
+                return {
+                    ...item,
+                    quantity,
+                    totalPrice: price * quantity
+                };
+            }
+            return item;
+        }));
+
+        // Actualizar también en editedDetails
+        setEditedDetails(prev => prev.map(detail => {
+            if (detail.product_id === id) {
+                return {
+                    ...detail,
+                    amount: quantity,
+                    subtotal: detail.price * quantity
+                };
+            }
+            return detail;
+        }));
     };
 
     const handleSaveChanges = async () => {
@@ -136,6 +289,8 @@ export default function QuoteShow() {
                 onSuccess: () => {
                     toast.success('Cotización actualizada exitosamente');
                     setIsEditing(false);
+                    setCart([]); // Limpiar carrito temporal
+                    setExistingProductIds([]);
                 },
                 onError: (errors) => {
                     console.error('Error al actualizar:', errors);
@@ -152,13 +307,20 @@ export default function QuoteShow() {
 
     const handleCancelEdit = () => {
         setEditedDetails(initialDetails);
+        setCart([]); // Limpiar carrito temporal
+        setExistingProductIds([]);
         setIsEditing(false);
         toast.info('Cambios cancelados');
     };
 
+    const handleStartEdit = () => {
+        setIsEditing(true);
+        setCart([]); // Asegurar que el carrito esté limpio al iniciar edición
+    };
+
     return (
         <AppLayout>
-            <Head title="Cotizaciónes" />
+            <Head title="Cotizaciones" />
             <Toaster position="top-right" richColors />
 
             <div className="space-y-6 p-6">
@@ -188,7 +350,7 @@ export default function QuoteShow() {
                             <>
                                 {hasPermission("realizar ventas") && (
                                     <button
-                                        onClick={() => setIsEditing(true)}
+                                        onClick={handleStartEdit}
                                         className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition flex items-center gap-2"
                                     >
                                         Editar
@@ -232,14 +394,18 @@ export default function QuoteShow() {
                                     disabled={loading}
                                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
                                 >
-
                                     {loading ? 'Guardando...' : 'Guardar'}
+                                </button>
+                                <button
+                                    onClick={() => setIsProductModalOpen(true)}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                                >
+                                    Agregar Productos
                                 </button>
                                 <button
                                     onClick={handleCancelEdit}
                                     className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition flex items-center gap-2"
                                 >
-
                                     Cancelar
                                 </button>
                             </>
@@ -334,51 +500,59 @@ export default function QuoteShow() {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {editedDetails && editedDetails.length > 0 ? (
-                                    editedDetails.map((detail, index) => (
-                                        <tr key={index} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {detail.product_name || 'Producto no disponible'}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                {isEditing ? (
-                                                    <input
-                                                        type="number"
-                                                        min="1"
-                                                        value={detail.amount}
-                                                        onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 1)}
-                                                        className="w-20 px-2 py-1 text-sm border rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm text-gray-900">
-                                                        {detail.amount || 0}
+                                    editedDetails.map((detail, index) => {
+                                        const isNewProduct = !detail.id; // Producto agregado en esta sesión de edición
+                                        return (
+                                            <tr key={index} className={`hover:bg-gray-50 ${isNewProduct ? 'bg-blue-50' : ''}`}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {detail.product_name || 'Producto no disponible'}
+                                                        {isNewProduct && (
+                                                            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                Nuevo
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                <div className="text-sm text-gray-900">
-                                                    {formatCurrency(detail.price)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {formatCurrency(detail.subtotal)}
-                                                </div>
-                                            </td>
-                                            {isEditing && (
-                                                <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                    <button
-                                                        onClick={() => handleRemoveProduct(index)}
-                                                        className="text-red-600 hover:text-red-800 transition"
-                                                        title="Eliminar producto"
-                                                    >
-                                                        Eliminar
-                                                    </button>
                                                 </td>
-                                            )}
-                                        </tr>
-                                    ))
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            value={detail.amount}
+                                                            onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 1)}
+                                                            className="w-20 px-2 py-1 text-sm border rounded text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm text-gray-900">
+                                                            {detail.amount || 0}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <div className="text-sm text-gray-900">
+                                                        {formatCurrency(detail.price)}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {formatCurrency(detail.subtotal)}
+                                                    </div>
+                                                </td>
+                                                {isEditing && (
+                                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                        <button
+                                                            onClick={() => handleRemoveProduct(index)}
+                                                            className="text-red-600 hover:text-red-800 transition text-sm"
+                                                            title="Eliminar producto"
+                                                        >
+                                                            Eliminar
+                                                        </button>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        );
+                                    })
                                 ) : (
                                     <tr>
                                         <td colSpan={isEditing ? 5 : 4} className="px-6 py-4 text-center text-gray-500">
@@ -411,6 +585,14 @@ export default function QuoteShow() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de productos - Solo pasar la lista combinada cuando esté en modo edición */}
+            <ProductList
+                items={getCombinedCartForModal()}
+                isOpen={isProductModalOpen}
+                closeModal={() => setIsProductModalOpen(false)}
+                onSelectProduct={handleSelectProduct}
+            />
         </AppLayout>
     );
 }
