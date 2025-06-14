@@ -196,9 +196,33 @@ export default function QuoteShow() {
                                 <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
                                     Generar PDF
                                 </button>
-                                <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                                    Enviar por email
-                                </button>
+                                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                            Generar PDF
+                        </button>
+                            <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition "
+                            onClick={async () => {
+                                try {
+                                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                    const response = await fetch(`/quotes/send-whatsapp/${quote.id}`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': csrfToken || '',
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+                                    const data = await response.json();
+                                    if (data.ultramsg_response) {
+                                        alert('¡Cotización enviada por WhatsApp!');
+                                    } else {
+                                        alert('Ocurrió un error al enviar la cotización.');
+                                    }
+                                } catch (error) {
+                                    alert('Error de red o del servidor.');
+                                }
+                            }}
+                        >
+                            Enviar por WhatsApp
+                        </button>
                             </>
                         ) : (
                             <>
