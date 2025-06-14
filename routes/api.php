@@ -43,3 +43,4 @@ Route::get('/offers/getOfferData', [OfferController::class, 'getOfferData']);
 
 
 
+
