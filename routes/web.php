@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\SaleController;
+use App\Models\Sale;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
@@ -55,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteByWhatsapp'])->name('quotes.sendWhatsapp');
      Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp'])->name('quotes.sendWhatsapp');
     Route::post('/quotes/send-whatsapp-text/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp']);
+
 
 
 });

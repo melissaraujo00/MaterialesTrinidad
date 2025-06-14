@@ -183,6 +183,7 @@ export default function QuoteShow() {
                     </div>
 
                     <div className="flex gap-2">
+
                         {!isEditing ? (
                             <>
                                 {hasPermission("realizar ventas") && (
@@ -243,6 +244,7 @@ export default function QuoteShow() {
                                 </button>
                             </>
                         )}
+
                     </div>
                 </div>
 

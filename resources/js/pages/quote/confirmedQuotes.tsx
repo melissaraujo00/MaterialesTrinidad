@@ -98,8 +98,8 @@ export default function ConfirmedQuotes() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Cotizaciones Confirmadas</h1>
-                    
-                    
+
+
                 </div>
 
                 <DataTable

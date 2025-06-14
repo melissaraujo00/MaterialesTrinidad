@@ -123,10 +123,15 @@ const mainNavItems: NavItem[] = [
                 title: 'Cotizaciones confirmadas',
                 href: '/quotes-confirmed',
                 icon: CheckCircle,
-                permission: 'realizar ventas', 
+                permission: 'realizar ventas',
             },
         ]
     },
+    {
+        title: 'Ventas',
+        icon: CheckCircle,
+        href: '/sales'
+    }
 
 ];
 
