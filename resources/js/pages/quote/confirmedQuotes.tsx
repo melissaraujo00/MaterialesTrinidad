@@ -73,7 +73,7 @@ export default function ConfirmedQuotes() {
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
                 // Generar factura o reporte
-                actions += `<button class="invoice-btn bg-orange-500 text-sm text-white px-3 py-1 rounded hover:bg-orange-700 ml-2">Pasar a ventas</button>`;
+                
 
 
                 td.innerHTML = actions;

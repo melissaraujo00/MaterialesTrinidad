@@ -13,13 +13,13 @@ class SaleDetail extends Model
         'amount',
         'price',
         'subtotal'
-    ];
-
+    ];  // Relación con la venta
     public function sale()
     {
         return $this->belongsTo(Sale::class);
     }
 
+    // Relación con el producto
     public function product()
     {
         return $this->belongsTo(Product::class);

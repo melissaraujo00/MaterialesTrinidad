@@ -16,10 +16,23 @@ class Sale extends Model
         'total',
     ];
 
-     public function details()
+     // Relación con el cliente
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    // Relación con el usuario (vendedor)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Relación con los detalles de venta
+    public function details()
     {
         return $this->hasMany(SaleDetail::class);
     }
 
-    
+
 }

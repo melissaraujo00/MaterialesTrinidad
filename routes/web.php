@@ -43,8 +43,6 @@ Route::middleware(['auth'])->group(function () {
     ]);
     Route::resource('quotes',QuoteController::class);
     Route::get('quotes-confirmed', [QuoteController::class, 'confirmedQuotes'])->name('quotes.confirmed');
-    Route::resource('quoteDetails',QuoteDetailController::class);
-
     // Ruta para el dashboard
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
@@ -57,6 +55,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteByWhatsapp'])->name('quotes.sendWhatsapp');
      Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp'])->name('quotes.sendWhatsapp');
     Route::post('/quotes/send-whatsapp-text/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp']);
+
+
+
+    Route::resource('sales', SaleController::class);
+    Route::post('/fromQuote', [SaleController::class, 'fromQuote'])->name('sales.fromQuote');
+
+
 
 
 
