@@ -21,6 +21,13 @@ interface Category {
     name: string;
 }
 export default function Products() {
+    const page = usePage();
+    const permissions =
+        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
+            ? page.props.auth.user.permissions
+            : [];
+    const hasPermission = (perm: string) => permissions.includes(perm);
+
     const tableRef = useRef<any>(null);
     const { selectedCategory: initialCategory, selectedBrand: initialBrand, categories: rawCategories, brands: rawBrands } = usePage().props;
 
@@ -126,13 +133,15 @@ export default function Products() {
             <Toaster position="top-right" richColors />
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center mb-4">
-                    <form action={route('inventoryReport')} method="GET" className="inline">
-                        <input type="hidden" name="category" value={selectedCategory?.toString() ?? ""} />
-                        <input type="hidden" name="brand" value={selectedBrand?.toString() ?? ""} />
-                        <button type="submit" className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition">
-                            Reporte
-                        </button>
-                    </form>
+                    {hasPermission("generar reporte") && (
+                        <form action={route('inventoryReport')} method="GET" className="inline">
+                            <input type="hidden" name="category" value={selectedCategory?.toString() ?? ""} />
+                            <input type="hidden" name="brand" value={selectedBrand?.toString() ?? ""} />
+                            <button type="submit" className="ml-3 bg-blue-600 text-white rounded px-3 py-1 text-sm hover:bg-blue-700 transition">
+                                Reporte
+                            </button>
+                        </form>
+                    )}
 
                     <div className="flex flex-wrap gap-4">
                         <div className="flex-1 min-w-[150px]">

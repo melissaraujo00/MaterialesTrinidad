@@ -58,6 +58,7 @@ const mainNavItems: NavItem[] = [
                 title: 'Inventario',
                 href: '/inventoryIndex',
                 icon: ListChecks,
+                permission: 'ver reporte',
             }
         ]
     },

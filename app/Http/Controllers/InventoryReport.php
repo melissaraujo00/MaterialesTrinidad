@@ -30,6 +30,7 @@ class InventoryReport extends Controller
 
     public function inventoryReport(Request $request)
     {
+        $this->authorize('generate', self::class);
         $selectedCategory = null;
         $selectedBrand = null;
         $query = Product::with('brand', 'category');
@@ -66,6 +67,7 @@ class InventoryReport extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('view', self::class);
         return Inertia::render('reports/Inventory/products', [
             'categories' => Category::select('id', 'name')->get(),
             'brands' => Brand::select('id', 'name')->get(),
