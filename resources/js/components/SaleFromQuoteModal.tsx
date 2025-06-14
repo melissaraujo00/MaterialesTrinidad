@@ -49,11 +49,12 @@ export default function SaleFromQuoteModal({
     };
 
     router.post('/sales/fromQuote', postData, {
-      onSuccess: () => {
-        toast.success('Venta creada exitosamente');
-        onSaleCreated();
-        onClose();
-      },
+        onSuccess: () => {
+    toast.success('Venta creada exitosamente');
+    onSaleCreated();
+    onClose();
+    },
+
       onError: (errors: any) => {
         console.error('Error al crear la venta:', errors);
 

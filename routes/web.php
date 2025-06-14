@@ -58,8 +58,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 
+     Route::post('/sales/fromQuote', [SaleController::class, 'fromQuote'])->name('sales.fromQuote');
     Route::resource('sales', SaleController::class);
-    Route::post('/fromQuote', [SaleController::class, 'fromQuote'])->name('sales.fromQuote');
 
 
 
