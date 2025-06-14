@@ -21,7 +21,7 @@ interface Quote {
 }
 
 export default function ConfirmedQuotes() {
-    const page = usePage() as any;
+     const page = usePage() as any;
     const permissions =
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
             ? page.props.auth.user.permissions
@@ -73,12 +73,8 @@ export default function ConfirmedQuotes() {
                 actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
                 // Generar factura o reporte
-                actions += `<button class="invoice-btn bg-purple-600 text-sm text-white px-3 py-1 rounded hover:bg-purple-700 ml-2">Generar Factura</button>`;
+                actions += `<button class="invoice-btn bg-orange-500 text-sm text-white px-3 py-1 rounded hover:bg-orange-700 ml-2">Pasar a ventas</button>`;
 
-                // Eliminar (solo si tiene permisos)
-                if (hasPermission("realizar cotizaciones")) {
-                    actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600 ml-2">Eliminar</button>`;
-                }
 
                 td.innerHTML = actions;
 
@@ -102,22 +98,8 @@ export default function ConfirmedQuotes() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Cotizaciones Confirmadas</h1>
-                    <div className="flex gap-2">
-                        <Link
-                            href="/quotes"
-                            className="bg-gray-600 text-white rounded px-4 py-2 text-sm hover:bg-gray-700 transition"
-                        >
-                            Ver Pendientes
-                        </Link>
-                        {hasPermission("realizar cotizaciones") && (
-                            <Link
-                                href="/quotes/create"
-                                className="bg-green-600 text-white rounded px-4 py-2 text-sm hover:bg-green-700 transition"
-                            >
-                                Nueva Cotización
-                            </Link>
-                        )}
-                    </div>
+                    
+                    
                 </div>
 
                 <DataTable

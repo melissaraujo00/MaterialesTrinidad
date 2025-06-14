@@ -13,7 +13,7 @@ class QuotePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('realizar cotizaciones');
+        return $user->can('realizar cotizaciones') || $user->can('realizar ventas') ;
     }
 
     /**
@@ -21,7 +21,7 @@ class QuotePolicy
      */
     public function view(User $user, Quote $quote): bool
     {
-        return $user->can('realizar cotizaciones');;
+        return $user->can('realizar cotizaciones') || $user->can('realizar ventas') ;
     }
 
     /**
@@ -37,7 +37,7 @@ class QuotePolicy
      */
     public function update(User $user, Quote $quote): bool
     {
-        return $user->can('realizar cotizaciones');;
+        return $user->can('realizar ventas');;
     }
 
     /**

@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, User, ListChecks,NotebookPen, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight, ShoppingCart} from 'lucide-react';
+import { LayoutGrid, User, ListChecks, NotebookPen, Box, Users, ListIcon, UserCheck, UserRoundCog, ArrowLeftRight, ShoppingCart, FileText, PencilLine, CheckCircle } from 'lucide-react';
 import AppLogo from './app-logo';
 import { permission, title } from 'process';
 
@@ -93,22 +93,28 @@ const mainNavItems: NavItem[] = [
         permission: 'ver datos empresa'
     },
     {
-        title: 'realizar cotizaciones',
-        href: '/quotes',
-        icon: ShoppingCart,
-        permission: 'realizar cotizaciones'
-    },
-    {
         title: 'Ofertas',
         href: '/offers',
         icon: NotebookPen,
         permission: 'ver ofertas',
     },
     {
-        title: 'Cotizaciones confirmadas',
-        href: '/quotes-confirmed',
-        icon: NotebookPen,
-        permission: 'ver ofertas',
+        title: 'Cotizaciones',
+        icon: FileText,
+        children: [
+            {
+                title: 'realizar cotizaciones',
+                href: '/quotes',
+                icon: PencilLine,
+                permission: 'realizar cotizaciones',
+            },
+            {
+                title: 'Cotizaciones confirmadas',
+                href: '/quotes-confirmed',
+                icon: CheckCircle,
+                permission: 'realizar ventas', 
+            },
+        ]
     },
 
 ];

@@ -9,6 +9,7 @@ import 'datatables.net-buttons-dt';
 import 'datatables.net-responsive-dt';
 import jszip from 'jszip';
 import DeleteQuoteModal from "../../components/DeleteQuoteModal";
+import ConfirmQuoteModal from "../../components/ConfirmQuoteModal";
 
 window.JSZip = jszip;
 DataTable.use(DT);
@@ -18,6 +19,9 @@ interface Quote {
     total: number;
     date: Date;
     status: string;
+    customer?: {
+        name: string;
+    };
 }
 
 export default function Quotes() {
@@ -30,12 +34,19 @@ export default function Quotes() {
 
     const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isConfirming, setIsConfirming] = useState(false);
 
     const user = page.props.auth?.user;
 
     const openDeleteModal = (quote: Quote) => {
         setSelectedQuote(quote);
         setIsDeleteModalOpen(true);
+    };
+
+    const openConfirmModal = (quote: Quote) => {
+        setSelectedQuote(quote);
+        setIsConfirmModalOpen(true);
     };
 
     const statusColor = (status: string) => {
@@ -47,17 +58,22 @@ export default function Quotes() {
     };
 
     const confirmQuote = (quoteId: number) => {
+        setIsConfirming(true);
         router.put(`/quotes/${quoteId}`, 
             { status: 'confirmada' },
             {
                 onSuccess: () => {
                     toast.success('Cotización confirmada exitosamente');
+                    setIsConfirmModalOpen(false);
+                    setSelectedQuote(null);
+                    setIsConfirming(false);
                     // Recargar la tabla
                     window.location.reload();
                 },
                 onError: (errors) => {
                     toast.error('Error al confirmar la cotización');
                     console.error(errors);
+                    setIsConfirming(false);
                 }
             }
         );
@@ -105,9 +121,7 @@ export default function Quotes() {
                 const confirmBtn = td.querySelector('.confirm-btn');
                 if (confirmBtn) {
                     confirmBtn.addEventListener('click', () => {
-                        if (confirm(`¿Estás seguro de que quieres confirmar la cotización #${rowData.id}?`)) {
-                            confirmQuote(rowData.id);
-                        }
+                        openConfirmModal(rowData);
                     });
                 }
 
@@ -168,6 +182,14 @@ export default function Quotes() {
                 closeModal={() => setIsDeleteModalOpen(false)}
                 quote={selectedQuote}
                 deleteEndpoint="/quotes"
+            />
+
+            <ConfirmQuoteModal
+                isOpen={isConfirmModalOpen}
+                closeModal={() => setIsConfirmModalOpen(false)}
+                quote={selectedQuote}
+                onConfirm={confirmQuote}
+                isLoading={isConfirming}
             />
         </AppLayout>
     );
