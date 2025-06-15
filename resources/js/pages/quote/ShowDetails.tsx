@@ -341,9 +341,9 @@ export default function QuoteShow() {
     // --- Preparación de props para SaleFromQuoteModal ---
     // Mapea initialDetails (QuoteDetail[]) a ProductForSaleModal[]
     const productsForSaleModal = initialDetails.map(detail => ({
-        id: detail.product_id || detail.id || 0, // Asegura que haya un ID de producto
+        id: detail.product_id || detail.id || 0, 
         name: detail.product_name,
-        quantity: detail.amount, // ¡Aquí está la corrección clave! Mapear 'amount' a 'quantity'
+        quantity: detail.amount,
         price: detail.price,
     }));
 

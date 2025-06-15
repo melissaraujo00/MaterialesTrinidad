@@ -28,8 +28,9 @@ class SaleController extends Controller
             'products' => 'required|array|min:1',
             'products.*.id' => 'required|integer|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
-        ]);
+            'products.*.price' => 'required|numeric|min:1',
 
+        ]);
         DB::beginTransaction();
 
         $quote = Quote::with('customer')->findOrFail($request->quote_id);
@@ -44,19 +45,22 @@ class SaleController extends Controller
                 return redirect()->back();
             }
 
-            $subtotal = $productModel->priceWithTax * $productData['quantity'];
+            $subtotal = $productData['price'] * $productData['quantity'];
             $totalSale += $subtotal;
 
             $saleDetailsData[] = [
                 'product_id' => $productModel->id,
                 'quantity' => $productData['quantity'],
-                'price' => $productModel->priceWithTax,
+                'price' => $productData['price'],
                 'subtotal' => $subtotal,
-                'amount' => $subtotal
+                'amount' => $productData['quantity']
             ];
 
             $productModel->decrement('stock', $productData['quantity']);
         }
+        $quote->status = 'venta';
+
+        $quote->save();
 
         $sale = Sale::create([
             'customer_id' => $quote->customer_id,
@@ -71,16 +75,17 @@ class SaleController extends Controller
             $sale->details()->create($detailData);
         }
 
+
         DB::commit();
 
-        return redirect()->route('sales.index'); // o a la ruta que tengas
+        //return redirect()->route('sales.index');
 
 
     } catch (ValidationException $e) {
         return redirect()->back()->withErrors($e->errors())->withInput();
     } catch (\Exception $e) {
         DB::rollBack();
-        return redirect()->back(); 
+        return redirect()->back();
     }
 }
 

@@ -45,6 +45,7 @@ export default function SaleFromQuoteModal({
       products: quoteDetails.map((p) => ({
         id: p.id,
         quantity: p.quantity,
+        price: p.price
       })),
     };
 

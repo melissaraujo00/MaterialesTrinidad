@@ -1,109 +1,111 @@
-import React, { useEffect, useState } from 'react';
-import DataTable, { TableColumn } from 'react-data-table-component';
-import { router } from '@inertiajs/react';
+import { useState } from "react";
+import { Head, usePage, Link } from "@inertiajs/react";
+import AppLayout from "@/layouts/app-layout";
+import { Toaster } from "sonner";
+import DeleteCategoryModal from "@/components/DeleteCategoryModal";
+import DataTable from "datatables.net-react";
+import DT from "datatables.net-dt";
+import languageES from "datatables.net-plugins/i18n/es-ES.mjs";
+import "datatables.net-buttons-dt";
+import "datatables.net-responsive-dt";
+import "datatables.net-buttons/js/buttons.html5";
+import "datatables.net-buttons/js/buttons.print";
+import jszip from "jszip";
+import DeleteEntityModal from "../../components/DeleteEntityModal";
 
-interface Customer {
-  name: string;
-}
+window.JSZip = jszip;
+DataTable.use(DT);
 
-interface Sale {
+interface Category {
   id: number;
-  date: string;
-  customer: Customer;
-  total: number;
-  subtotal: number;
-}
-
-interface AuthUser {
-  id: number;
   name: string;
-  permissions: string[];
+  description: string;
 }
 
-interface Props {
-  sales: Sale[];
-  auth: {
-    user: AuthUser;
+export default function Categories() {
+  // Obtener permisos del usuario autenticado
+  const page = usePage();
+  const permissions =
+    page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
+      ? page.props.auth.user.permissions
+      : [];
+  const hasPermission = (perm: string) => permissions.includes(perm);
+
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const openDeleteModal = (category: Category) => {
+    setSelectedCategory(category);
+    setIsDeleteModalOpen(true);
   };
-}
 
-export default function SalesIndex({ sales, auth }: Props) {
-  const [filterText, setFilterText] = useState('');
-  const [filteredSales, setFilteredSales] = useState<Sale[]>(sales);
+  const columns = [
+    { data: 'name' },
+    { data: 'description' },
+    {
+      data: null,
+      title: "Acciones",
+      orderable: false,
+      searchable: false,
+      createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
+        let actions = "";
+        if (hasPermission("editar categoria")) {
+          actions += `<a href="categories/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
+        }
+        if (hasPermission("eliminar categoria")) {
+          actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
+        }
+        td.innerHTML = actions;
 
-  useEffect(() => {
-    const filtered = sales.filter(sale =>
-      sale.customer?.name?.toLowerCase().includes(filterText.toLowerCase()) ||
-      String(sale.id).includes(filterText)
-    );
-    setFilteredSales(filtered);
-  }, [filterText, sales]);
-
-  const columns: TableColumn<Sale>[] = [
-    {
-      name: 'ID',
-      selector: row => row.id,
-      sortable: true,
+        if (hasPermission("eliminar categoria")) {
+          td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
+        }
+      }
     },
-    {
-      name: 'Cliente',
-      selector: row => row.customer?.name ?? 'Sin cliente',
-      sortable: true,
-    },
-    {
-      name: 'Fecha',
-      selector: row => new Date(row.date).toLocaleDateString(),
-      sortable: true,
-    },
-    {
-      name: 'Subtotal ($)',
-      selector: row => row.subtotal.toFixed(2),
-      sortable: true,
-      right: true,
-    },
-    {
-      name: 'Total ($)',
-      selector: row => row.total.toFixed(2),
-      sortable: true,
-      right: true,
-    },
-    {
-      name: 'Acciones',
-      cell: row => (
-        <button
-          onClick={() => router.visit(`/sales/${row.id}`)}
-          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
-        >
-          Ver
-        </button>
-      ),
-    }
   ];
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-900 rounded shadow">
-      <h1 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Ventas de {auth.user.name}</h1>
+    <AppLayout>
+      <Head title="Categorías" />
+      <Toaster position="top-right" richColors />
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Buscar por cliente o ID..."
-          className="w-full md:w-1/3 px-4 py-2 border rounded"
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-        />
+      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
+        <div className="flex justify-end">
+          {hasPermission("crear categoria") && (
+            <Link
+              href="/categories/create"
+              className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+            >
+              Agregar Categoría
+            </Link>
+          )}
+        </div>
+
+        <DataTable ajax="/api/categories/getCategoryData" options={{
+          language: languageES,
+          responsive: true,
+          layout: {
+            topStart: ["pageLength"],
+          },
+        }}
+          columns={columns} className="display" >
+          <thead>
+            <tr>
+              <th>Nombre de Categoria</th>
+              <th>Descripción</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+        </DataTable>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredSales}
-        pagination
-        highlightOnHover
-        striped
-        responsive
-        persistTableHead
-        noDataComponent="No se encontraron ventas."
+      <DeleteEntityModal
+        isOpen={isDeleteModalOpen}
+        closeModal={() => setIsDeleteModalOpen(false)}
+        entity={selectedCategory}
+        entityType="Categoria"
+        deleteEndpoint="/categories"
       />
-    </div>
+    </AppLayout>
   );
 }
