@@ -212,12 +212,21 @@ export default function OfferEdit() {
                                 {touched.product_id && errors.product_id && <small className="text-red-500">{errors.product_id}</small>}
                             </div>
                             <div>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                                >
-                                    Guardar cambios
-                                </button>
+                                <div className="flex justify-start">
+                                    <button
+                                        type="button"
+                                        onClick={() => window.history.back()}
+                                        className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+                                    >
+                                        Editar Promoción
+                                    </button>
+                                </div>
                             </div>
                         </Form>
                     )}
