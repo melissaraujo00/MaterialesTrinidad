@@ -78,7 +78,7 @@ class SaleController extends Controller
 
         DB::commit();
 
-        //return redirect()->route('sales.index');
+        return redirect()->route('sales.index');
 
 
     } catch (ValidationException $e) {
@@ -110,6 +110,33 @@ class SaleController extends Controller
             }),
             'subtotal_calculated_from_details' => $quote->details->sum('subtotal')
         ]);
+    }
+
+    public function getSaleData()
+    {
+        $data = Quote::query()
+            ->with('customer', 'user')
+            ->where('status', 'venta')
+            ->orderBy('date', 'desc')
+            ->get()
+            ->map(function ($quote) {
+                return [
+                    'id' => $quote->id,
+                    'date' => $quote->date,
+                    'total' => number_format($quote->total, 2),
+                    'customer' => [
+                        'id' => $quote->customer->id ?? null,
+                        'name' => $quote->customer->name ?? 'Cliente eliminado',
+                    ],
+                    'user' => [
+                        'id' => $quote->user->id ?? null,
+                        'name' => $quote->user->name ?? 'Usuario eliminado',
+                    ],
+                    'status' => $quote->status ?? 'Pendiente',
+                ];
+            });
+
+        return response()->json(['data' => $data]);
     }
 
 
