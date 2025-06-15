@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Offer;
 use Inertia\Inertia;
+use App\Http\Requests\UpdateOfferRequest;
 
 class OfferController extends Controller
 {
@@ -18,7 +19,7 @@ class OfferController extends Controller
 
     public function getOfferData()
     {
-        $data= Offer::query()
+        $data = Offer::query()
             ->with('product')
             ->get()
             ->map(function ($offer) {
@@ -72,7 +73,7 @@ class OfferController extends Controller
      */
     public function store(StoreOfferRequest $request)
     {
-         Offer::create($request->validated());
+        Offer::create($request->validated());
 
         return redirect()->route('offers.index')->with('success', 'Offer created successfully.');
     }
@@ -84,14 +85,25 @@ class OfferController extends Controller
     {
         //
     }
+    public function edit(Offer $offer)
+    {
+        $product = Product::all();
+        return Inertia::render('offer/Edit', [
+            'offer' => $offer,
+            'products' => $product
+        ]);
+    }
 
+    public function update(UpdateOfferRequest $request, Offer $offer)
+    {
+        $offer->update($request->validated());
+
+        return redirect()->route('offers.index')->with('success', 'Offers updated successfully.');
+    }
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+
 
     /**
      * Remove the specified resource from storage.

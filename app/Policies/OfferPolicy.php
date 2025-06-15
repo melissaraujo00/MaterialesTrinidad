@@ -37,7 +37,7 @@ class OfferPolicy
      */
     public function update(User $user, Offer $offer): bool
     {
-        return false;
+        return $user->can('editar oferta');
     }
 
     /**
