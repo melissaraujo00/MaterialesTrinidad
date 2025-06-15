@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import ProductList from "./ProducList";
 import SaleFromQuoteModal from "@/components/SaleFromQuoteModal"; // Ajusta la ruta si es necesario
 
+
 // Mantén QuoteDetail tal cual, si realmente representa la estructura del backend
 interface QuoteDetail {
     id?: number; // ID del registro de detalle de la cotización en sí
@@ -62,14 +63,13 @@ interface ProductForSaleModal {
 
 export default function QuoteShow() {
     const pageProps = usePage().props as any;
+    const details = pageProps.details as QuoteDetail[];
+
 
     const quote = pageProps.quote as Quote;
     const initialDetails = pageProps.details as QuoteDetail[];
     const page = usePage();
-    const permissions =
-        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-            ? page.props.auth.user.permissions
-            : [];
+    const permissions = page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions) ? page.props.auth.user.permissions : [];
     const hasPermission = (perm: string) => permissions.includes(perm);
 
     // Estados para manejo de edición
@@ -85,7 +85,7 @@ export default function QuoteShow() {
     // Recalcular totales cuando cambien los detalles
     const [calculatedTotals, setCalculatedTotals] = useState({
         subtotal: quote?.subtotal || 0,
-        total: quote?.total || 0
+        total: quote?.total || 0,
     });
 
     useEffect(() => {
@@ -101,7 +101,8 @@ export default function QuoteShow() {
         const newSubtotal = editedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
         setCalculatedTotals({
             subtotal: newSubtotal,
-            total: newSubtotal // Asumiendo que el total es igual al subtotal por ahora
+            total: newSubtotal, // Asumiendo que no hay impuestos, ajusta según tu lógica
+
         });
     }, [editedDetails]);
 
@@ -109,14 +110,11 @@ export default function QuoteShow() {
         return (
             <AppLayout>
                 <Head title="Error - Cotización no encontrada" />
-                <div className="flex items-center justify-center min-h-screen">
+                <div className="flex min-h-screen items-center justify-center">
                     <div className="text-center">
-                        <h1 className="text-2xl font-bold text-red-600 mb-4">Error al cargar la cotización</h1>
-                        <p className="text-gray-600 mb-4">No se pudieron cargar los datos de la cotización.</p>
-                        <Link
-                            href="/quotes"
-                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                        >
+                        <h1 className="mb-4 text-2xl font-bold text-red-600">Error al cargar la cotización</h1>
+                        <p className="mb-4 text-gray-600">No se pudieron cargar los datos de la cotización.</p>
+                        <Link href="/quotes" className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700">
                             Volver a cotizaciones
                         </Link>
                     </div>
@@ -128,7 +126,7 @@ export default function QuoteShow() {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-SV', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'USD',
         }).format(amount || 0);
     };
 
@@ -137,7 +135,7 @@ export default function QuoteShow() {
         return new Date(dateString).toLocaleDateString('es-SV', {
             year: 'numeric',
             month: 'long',
-            day: 'numeric'
+            day: 'numeric',
         });
     };
 
@@ -287,15 +285,15 @@ export default function QuoteShow() {
 
         try {
             const updateData = {
-                details: editedDetails.map(detail => ({
+                details: editedDetails.map((detail) => ({
                     id: detail.id,
                     product_id: detail.product_id,
                     amount: detail.amount,
                     price: detail.price,
-                    subtotal: detail.subtotal
+                    subtotal: detail.subtotal,
                 })),
                 subtotal: calculatedTotals.subtotal,
-                total: calculatedTotals.total
+                total: calculatedTotals.total,
             };
 
             router.put(`/quotes/${quote.id}`, updateData, {
@@ -308,7 +306,7 @@ export default function QuoteShow() {
                 onError: (errors) => {
                     console.error('Error al actualizar:', errors);
                     toast.error('Error al actualizar la cotización');
-                }
+                },
             });
         } catch (error) {
             console.error('Error:', error);
@@ -341,7 +339,7 @@ export default function QuoteShow() {
     // --- Preparación de props para SaleFromQuoteModal ---
     // Mapea initialDetails (QuoteDetail[]) a ProductForSaleModal[]
     const productsForSaleModal = initialDetails.map(detail => ({
-        id: detail.product_id || detail.id || 0, 
+        id: detail.product_id || detail.id || 0,
         name: detail.product_name,
         quantity: detail.amount,
         price: detail.price,
@@ -356,40 +354,33 @@ export default function QuoteShow() {
                 {/* Header with back button */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link
-                            href="/quotes"
-                            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition"
-                        >
-                            <ArrowLeft className="w-4 h-4" />
+                        <Link href="/quotes" className="flex items-center gap-2 text-gray-600 transition hover:text-gray-800">
+                            <ArrowLeft className="h-4 w-4" />
                             Volver a cotizaciones
                         </Link>
-                        <h1 className="text-3xl font-bold text-gray-800">
-                            Cotización #{quote.id}
-                        </h1>
-                        {isEditing && (
-                            <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                                Modo edición
-                            </span>
-                        )}
+                        <h1 className="text-3xl font-bold text-gray-800">Cotización #{quote.id}</h1>
+                        {isEditing && <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">Modo edición</span>}
                     </div>
-
                     <div className="flex gap-2">
-
-                        {!isEditing ? (
-                            <>
-                                {hasPermission("realizar ventas") && (
-                                    <button
-                                        onClick={handleStartEdit}
-                                        className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition flex items-center gap-2"
-                                    >
-                                        Editar
-                                    </button>
-                                )}
-                                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                                    Generar PDF
-                                </button>
-
+                    {!isEditing ? (
+                        <div className="flex items-center gap-4">
+                            {hasPermission('realizar ventas') && (
                                 <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="flex items-center gap-2 rounded bg-orange-500 px-4 py-2 text-white transition hover:bg-orange-600"
+                                >
+                                    Editar
+                                </button>
+                            )}
+                            <a
+                                href={`/quotesReport/${quote.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+                            >
+                                Generar PDF
+                            </a>
+                            <button
                                     className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
                                     onClick={() => {
                                         console.log("Abriendo modal de venta. Quote:", quote);
@@ -399,122 +390,83 @@ export default function QuoteShow() {
                                 >
                                     Pasar a ventas
                                 </button>
-
-
-
-                                <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition "
-                                    onClick={async () => {
-                                        try {
-                                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                            const response = await fetch(`/quotes/send-whatsapp/${quote.id}`, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'X-CSRF-TOKEN': csrfToken || '',
-                                                    'Accept': 'application/json'
-                                                }
-                                            });
-                                            const data = await response.json();
-                                            if (data.ultramsg_response) {
-                                                alert('¡Cotización enviada por WhatsApp!');
-                                            } else {
-                                                alert('Ocurrió un error al enviar la cotización.');
-                                            }
-                                        } catch (error) {
-                                            alert('Error de red o del servidor.');
+                            <button
+                                className="rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
+                                onClick={async () => {
+                                    try {
+                                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                        const response = await fetch(`/quotes/send-whatsapp/${quote.id}`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': csrfToken || '',
+                                                Accept: 'application/json',
+                                            },
+                                        });
+                                        const data = await response.json();
+                                        if (data.ultramsg_response) {
+                                            alert('¡Cotización enviada por WhatsApp!');
+                                        } else {
+                                            alert('Ocurrió un error al enviar la cotización.');
                                         }
-                                    }}
-                                >
-                                    Enviar por WhatsApp
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={handleSaveChanges}
-                                    disabled={loading}
-                                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
-                                >
-                                    {loading ? 'Guardando...' : 'Guardar'}
-                                </button>
-                                <button
-                                    onClick={() => setIsProductModalOpen(true)}
-                                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                                >
-                                    Agregar Productos
-                                </button>
-                                <button
-                                    onClick={handleCancelEdit}
-                                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition flex items-center gap-2"
-                                >
-                                    Cancelar
-                                </button>
-                            </>
-                        )}
-
-                    </div>
+                                    } catch (error) {
+                                        alert('Error de red o del servidor.');
+                                    }
+                                }}
+                            >
+                                Enviar por WhatsApp
+                            </button>
+                        </div>
+                    ) : (
+                        <div>
+                            <button
+                                onClick={handleSaveChanges}
+                                disabled={loading}
+                                className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-white transition hover:bg-green-700 disabled:opacity-50"
+                            >
+                                {loading ? 'Guardando...' : 'Guardar'}
+                            </button>
+                            <button
+                                onClick={handleCancelEdit}
+                                className="flex items-center gap-2 rounded bg-gray-500 px-4 py-2 text-white transition hover:bg-gray-600"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    )}
                 </div>
+            </div>
 
-                {/* Quote information card */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                        Información de la Cotización
-                    </h2>
+            {/* Quote information card */}
+            <div className="rounded-lg bg-white p-6 shadow-md">
+                <h2 className="mb-4 text-xl font-semibold text-gray-800">Información de la Cotización</h2>
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <Building2 className="w-5 h-5 text-blue-600" />
-                                <div>
-                                    <p className="text-sm text-gray-600">Cliente</p>
-                                    <p className="font-medium text-gray-800">{quote.customer?.name || 'Cliente no disponible'}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <Calendar className="w-5 h-5 text-blue-600" />
-                                <div>
-                                    <p className="text-sm text-gray-600">Fecha</p>
-                                    <p className="font-medium text-gray-800">{formatDate(quote.date)}</p>
-                                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <Building2 className="h-5 w-5 text-blue-600" />
+                            <div>
+                                <p className="text-sm text-gray-600">Cliente</p>
+                                <p className="font-medium text-gray-800">{quote.customer?.name || 'Cliente no disponible'}</p>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <User className="w-5 h-5 text-blue-600" />
-                                <div>
-                                    <p className="text-sm text-gray-600">Vendedor</p>
-                                    <p className="font-medium text-gray-800">{quote.user?.name || 'Vendedor no disponible'}</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <DollarSign className="w-5 h-5 text-green-600" />
-                                <div>
-                                    <p className="text-sm text-gray-600">Total</p>
-                                    <p className="font-bold text-xl text-green-600">
-                                        {formatCurrency(isEditing ? calculatedTotals.total : quote.total)}
-                                    </p>
-                                    {isEditing && calculatedTotals.total !== quote.total && (
-                                        <p className="text-sm text-gray-500">
-                                            Original: {formatCurrency(quote.total)}
-                                        </p>
-                                    )}
-                                </div>
+                        <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-blue-600" />
+                            <div>
+                                <p className="text-sm text-gray-600">Fecha</p>
+                                <p className="font-medium text-gray-800">{formatDate(quote.date)}</p>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Quote details table */}
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="px-6 py-4 bg-gray-50 border-b">
-                        <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                            <Package className="w-5 h-5" />
-                            Detalles de la Cotización
-                        </h2>
-                    </div>
-
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <User className="h-5 w-5 text-blue-600" />
+                            <div>
+                                <p className="text-sm text-gray-600">Vendedor</p>
+                                <p className="font-medium text-gray-800">{quote.user?.name || 'Vendedor no disponible'}</p>
+                            </div>
+                        </div>
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-gray-100">
@@ -606,26 +558,19 @@ export default function QuoteShow() {
 
                     {/* Total summary */}
                     <div className="px-6 py-4 bg-gray-50 border-t">
-                        <div className="flex justify-end">
-                            <div className="w-64 space-y-2">
-                                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                                    <span>Total:</span>
-                                    <span className="text-green-600">
-                                        {formatCurrency(isEditing ? calculatedTotals.total : quote.total)}
-                                    </span>
-                                </div>
+                        <div className="flex items-center gap-3">
+                            <DollarSign className="h-5 w-5 text-green-600" />
+                            <div>
+                                <p className="text-sm text-gray-600">Total</p>
+                                <p className="text-xl font-bold text-green-600">{formatCurrency(isEditing ? calculatedTotals.total : quote.total)}</p>
                                 {isEditing && calculatedTotals.total !== quote.total && (
-                                    <div className="flex justify-between text-sm text-gray-500">
-                                        <span>Total original:</span>
-                                        <span>{formatCurrency(quote.total)}</span>
-                                    </div>
+                                    <p className="text-sm text-gray-500">Original: {formatCurrency(quote.total)}</p>
                                 )}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             {/* Modal de productos - Solo pasar la lista combinada cuando esté en modo edición */}
             <ProductList
                 items={getCombinedCartForModal()}
@@ -648,6 +593,8 @@ export default function QuoteShow() {
                     setIsSaleModalOpen(false); // Cerrar el modal
                 }}
             />
-        </AppLayout>
+        </div>
+    </div>
+    </AppLayout>
     );
 }

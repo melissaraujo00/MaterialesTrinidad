@@ -48,12 +48,16 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
+
     // Rutas para descargar PDF
     Route::get('/inventoryIndex', [InventoryReport::class, 'index'])->name('inventoryIndex');
     Route::get('/inventoryReport', [InventoryReport::class, 'inventoryReport'])->name('inventoryReport');
      Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
     Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteByWhatsapp'])->name('quotes.sendWhatsapp');
      Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp'])->name('quotes.sendWhatsapp');
+
+    Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
+
     Route::post('/quotes/send-whatsapp-text/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp']);
 
 
