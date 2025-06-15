@@ -31,13 +31,17 @@ class Quote extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function details(): HasMany
+    // Relación con los detalles de la cotización
+    public function details() // Asumo que se llama 'details' y apunta a QuoteDetail
     {
         return $this->hasMany(QuoteDetail::class);
     }
 
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class);
-    }
+    public function products()
+{
+    return $this->belongsToMany(Product::class, 'product_quote')
+                ->withPivot('quantity', 'price')
+                ->withTimestamps();
+}
+
 }

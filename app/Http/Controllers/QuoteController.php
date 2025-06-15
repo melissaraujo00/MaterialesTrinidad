@@ -95,9 +95,9 @@ class QuoteController extends Controller
 
     public function confirmedQuotes()
 {
-    
+
     $this->authorize('viewAny', Quote::class);
-    
+
     $user = auth()->user();
     return Inertia::render('quote/confirmedQuotes', [
         'permissions' => Permission::all(),
@@ -228,7 +228,7 @@ class QuoteController extends Controller
             if ($request->has('status')) {
                 // Actualización de estado
                 $validated = $request->validate([
-                    'status' => 'required|string|in:pendiente,confirmada,cancelada',
+                    'status' => 'required|string|in:pendiente,confirmada,cancelada,venta',
                 ]);
 
                 $quote->update($validated);
@@ -270,7 +270,7 @@ class QuoteController extends Controller
                 // Actualizar o crear detalles
                 foreach ($validated['details'] as $detailData) {
                     $detailData['quote_id'] = $quote->id;
-                    
+
                     if (isset($detailData['id'])) {
                         // Actualizar detalle existente
                         QuoteDetail::where('id', $detailData['id'])

@@ -4,12 +4,14 @@ import { Toaster, toast } from "sonner";
 import { ArrowLeft, Calendar, User, Building2, DollarSign, Package, Edit3, Save, X, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ProductList from "./ProducList";
+import SaleFromQuoteModal from "@/components/SaleFromQuoteModal"; // Ajusta la ruta si es necesario
 
+// Mantén QuoteDetail tal cual, si realmente representa la estructura del backend
 interface QuoteDetail {
-    id?: number;
-    product_id?: number;
+    id?: number; // ID del registro de detalle de la cotización en sí
+    product_id?: number; // ID del producto real
     product_name: string;
-    amount: number;
+    amount: number; // Esta es la cantidad en el detalle de la cotización
     price: number;
     subtotal: number;
 }
@@ -30,7 +32,7 @@ interface Quote {
     };
 }
 
-interface Product {
+interface Product { // Esta interfaz parece describir un producto completo de tu inventario
     id: number;
     name: string;
     priceWithTax: number;
@@ -43,10 +45,20 @@ interface Product {
 }
 
 interface CartItem extends Product {
-    quantity: number;
-    applyDiscount: boolean;
+    quantity: number; // Cantidad en el carrito
+    applyDiscount: boolean; // Asumiendo que esto está presente en tu lógica de selección de productos
     totalPrice: number;
 }
+
+// Interfaz para los productos que se pasarán a SaleFromQuoteModal
+// Esto se alinea con la expectativa de la interfaz 'Product' de SaleFromQuoteModal
+interface ProductForSaleModal {
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+}
+
 
 export default function QuoteShow() {
     const pageProps = usePage().props as any;
@@ -65,9 +77,9 @@ export default function QuoteShow() {
     const [editedDetails, setEditedDetails] = useState<QuoteDetail[]>(initialDetails || []);
     const [loading, setLoading] = useState(false);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-    
-    // SEPARAR LOS ESTADOS: uno para el carrito principal y otro para productos ya en la cotización
-    const [cart, setCart] = useState<CartItem[]>([]); // Para nuevos productos
+    const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
+
+    const [cart, setCart] = useState<CartItem[]>([]);
     const [existingProductIds, setExistingProductIds] = useState<number[]>([]);
 
     // Recalcular totales cuando cambien los detalles
@@ -76,7 +88,6 @@ export default function QuoteShow() {
         total: quote?.total || 0
     });
 
-    // Inicializar la lista de productos existentes cuando se inicia la edición
     useEffect(() => {
         if (isEditing && editedDetails) {
             const productIds = editedDetails
@@ -90,7 +101,7 @@ export default function QuoteShow() {
         const newSubtotal = editedDetails.reduce((sum, detail) => sum + detail.subtotal, 0);
         setCalculatedTotals({
             subtotal: newSubtotal,
-            total: newSubtotal
+            total: newSubtotal // Asumiendo que el total es igual al subtotal por ahora
         });
     }, [editedDetails]);
 
@@ -142,40 +153,41 @@ export default function QuoteShow() {
     const handleRemoveProduct = (index: number) => {
         const productToRemove = editedDetails[index];
         const updatedDetails = editedDetails.filter((_, i) => i !== index);
-        
+
         setEditedDetails(updatedDetails);
-        
+
         // Si el producto removido tenía product_id, quitarlo de la lista de existentes
         if (productToRemove.product_id) {
             setExistingProductIds(prev => prev.filter(id => id !== productToRemove.product_id));
         }
-        
+
         toast.success('Producto eliminado de la cotización');
     };
 
-    // NUEVA FUNCIÓN: Crear lista combinada para el modal
+    // NUEVA FUNCIÓN: Crear lista combinada para el modal (ProductList)
     const getCombinedCartForModal = (): CartItem[] => {
         // Convertir productos existentes en la cotización a formato CartItem
         const existingAsCartItems: CartItem[] = editedDetails
-            .filter(detail => detail.product_id)
+            .filter(detail => detail.product_id) // Solo detalles que tienen un product_id real
             .map(detail => ({
-                id: detail.product_id!,
+                id: detail.product_id!, // Usar product_id como ID
                 name: detail.product_name,
                 priceWithTax: detail.price,
                 discountPrice: null,
-                brand_id: '',
-                category_id: '',
-                image: '',
-                stock: 999, // Valor placeholder
-                stockMinimun: 0,
-                quantity: detail.amount,
-                applyDiscount: false,
-                totalPrice: detail.subtotal
+                brand_id: '', // Valores de marcador de posición
+                category_id: '', // Valores de marcador de posición
+                image: '', // Valores de marcador de posición
+                stock: 999, // Valor de marcador de posición
+                stockMinimun: 0, // Valor de marcador de posición
+                quantity: detail.amount, // Mapea 'amount' a 'quantity'
+                applyDiscount: false, // Asume falso para productos existentes por defecto
+                totalPrice: detail.subtotal // Usa el subtotal calculado
             }));
 
-        // Combinar con nuevos productos del carrito
+        // Combinar con nuevos productos del carrito (si los hay)
         return [...existingAsCartItems, ...cart];
     };
+
 
     const handleSelectProduct = (productWithDetails: CartItem) => {
         // Verificar si el producto ya existe en la cotización (editedDetails) o en el carrito
@@ -188,7 +200,8 @@ export default function QuoteShow() {
         }
 
         // Calcular precio final
-        const finalPrice = productWithDetails.applyDiscard && productWithDetails.discountPrice
+        // La propiedad 'applyDiscard' debería ser 'applyDiscount' según tu interfaz CartItem
+        const finalPrice = productWithDetails.applyDiscount && productWithDetails.discountPrice
             ? productWithDetails.discountPrice
             : productWithDetails.priceWithTax;
 
@@ -218,15 +231,15 @@ export default function QuoteShow() {
     const removeProductFromCart = (id: number) => {
         // Remover del carrito temporal
         setCart(prev => prev.filter(p => p.id !== id));
-        
+
         // Remover también de editedDetails si no tenía ID original (era nuevo)
-        setEditedDetails(prev => prev.filter(detail => 
+        setEditedDetails(prev => prev.filter(detail =>
             !(detail.product_id === id && !detail.id)
         ));
-        
+
         // Remover de la lista de productos existentes
         setExistingProductIds(prev => prev.filter(existingId => existingId !== id));
-        
+
         toast.success('Producto eliminado de la cotización');
     };
 
@@ -239,7 +252,7 @@ export default function QuoteShow() {
         // Actualizar en carrito temporal
         setCart(prev => prev.map(item => {
             if (item.id === id) {
-                const price = item.applyDiscount && item.discountPrice
+                const price = item.applyDiscount && item.discountPrice // Corregido 'applyDiscard' a 'applyDiscount'
                     ? item.discountPrice
                     : item.priceWithTax;
                 return {
@@ -306,17 +319,33 @@ export default function QuoteShow() {
     };
 
     const handleCancelEdit = () => {
+        // Restaurar los detalles originales
         setEditedDetails(initialDetails);
         setCart([]); // Limpiar carrito temporal
-        setExistingProductIds([]);
+        setExistingProductIds([]); // Limpiar IDs de productos existentes
         setIsEditing(false);
         toast.info('Cambios cancelados');
     };
 
     const handleStartEdit = () => {
         setIsEditing(true);
-        setCart([]); // Asegurar que el carrito esté limpio al iniciar edición
+        // Al iniciar la edición, los editedDetails ya deben tener los initialDetails
+        // Y el carrito debe estar vacío para nuevos productos
+        setCart([]);
+        const productIds = initialDetails
+            .map(detail => detail.product_id)
+            .filter((id): id is number => id !== undefined);
+        setExistingProductIds(productIds);
     };
+
+    // --- Preparación de props para SaleFromQuoteModal ---
+    // Mapea initialDetails (QuoteDetail[]) a ProductForSaleModal[]
+    const productsForSaleModal = initialDetails.map(detail => ({
+        id: detail.product_id || detail.id || 0, 
+        name: detail.product_name,
+        quantity: detail.amount,
+        price: detail.price,
+    }));
 
     return (
         <AppLayout>
@@ -345,6 +374,7 @@ export default function QuoteShow() {
                     </div>
 
                     <div className="flex gap-2">
+
                         {!isEditing ? (
                             <>
                                 {hasPermission("realizar ventas") && (
@@ -358,8 +388,43 @@ export default function QuoteShow() {
                                 <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
                                     Generar PDF
                                 </button>
-                                <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                                    Enviar por email
+
+                                <button
+                                    className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+                                    onClick={() => {
+                                        console.log("Abriendo modal de venta. Quote:", quote);
+                                        console.log("Detalles para el modal de venta:", productsForSaleModal);
+                                        setIsSaleModalOpen(true);
+                                    }}
+                                >
+                                    Pasar a ventas
+                                </button>
+
+
+
+                                <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition "
+                                    onClick={async () => {
+                                        try {
+                                            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                            const response = await fetch(`/quotes/send-whatsapp/${quote.id}`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': csrfToken || '',
+                                                    'Accept': 'application/json'
+                                                }
+                                            });
+                                            const data = await response.json();
+                                            if (data.ultramsg_response) {
+                                                alert('¡Cotización enviada por WhatsApp!');
+                                            } else {
+                                                alert('Ocurrió un error al enviar la cotización.');
+                                            }
+                                        } catch (error) {
+                                            alert('Error de red o del servidor.');
+                                        }
+                                    }}
+                                >
+                                    Enviar por WhatsApp
                                 </button>
                             </>
                         ) : (
@@ -385,6 +450,7 @@ export default function QuoteShow() {
                                 </button>
                             </>
                         )}
+
                     </div>
                 </div>
 
@@ -566,6 +632,21 @@ export default function QuoteShow() {
                 isOpen={isProductModalOpen}
                 closeModal={() => setIsProductModalOpen(false)}
                 onSelectProduct={handleSelectProduct}
+            />
+
+            {/* Modal de confirmación de venta */}
+            <SaleFromQuoteModal
+                isOpen={isSaleModalOpen}
+                onClose={() => setIsSaleModalOpen(false)}
+                quote={quote}
+                // Aquí pasamos los productos mapeados con 'quantity' en lugar de 'amount'
+                quoteDetails={productsForSaleModal}
+                onSaleCreated={() => {
+                    // Lógica para recargar la página o actualizar datos después de crear una venta
+                    toast.success("Venta creada con éxito!");
+                    router.reload({ only: ['quote', 'details'] }); // Recargar la página o solo los datos de la cotización
+                    setIsSaleModalOpen(false); // Cerrar el modal
+                }}
             />
         </AppLayout>
     );

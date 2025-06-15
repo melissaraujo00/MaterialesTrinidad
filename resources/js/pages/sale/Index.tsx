@@ -89,18 +89,18 @@ export default function ConfirmedQuotes() {
 
     return (
         <AppLayout>
-            <Head title="Cotizaciones Confirmadas" />
+            <Head title="Ventas" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Cotizaciones Confirmadas</h1>
+                    <h1 className="text-2xl font-bold">Ventas</h1>
 
 
                 </div>
 
                 <DataTable
-                    ajax={`/api/quotes/getConfirmQuotesData/${user.id}`}
+                    ajax={`/api/sales/getSaleData`}
                     options={{
                         language: languageES,
                         responsive: true,

@@ -44,5 +44,21 @@ class Product extends Model
         return $this->hasMany(Offer::class);
     }
 
-    
+    public function saleDetails()
+{
+    return $this->hasMany(SaleDetail::class);
+}
+
+
+    public function reduceStock($quantity)
+{
+    $this->stock -= $quantity;
+    if ($this->stock < 0) {
+        throw new \Exception("Stock insuficiente del producto: {$this->name}");
+    }
+    $this->save();
+}
+
+
+
 }

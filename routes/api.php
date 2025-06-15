@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CustomerApiController;
 use App\Http\Controllers\Api\RoleApiController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
@@ -40,6 +41,8 @@ Route::get('/businessData/getBusinessData',[BusinessDataController::class,'getBu
 Route::get('/quotes/getQuotesData/{user_id}', [QuoteController::class, 'getQuoteData']);
 Route::get('/quotes/getConfirmQuotesData/{user_id}', [QuoteController::class, 'getConfirmQuoteData']);
 Route::get('/offers/getOfferData', [OfferController::class, 'getOfferData']);
+Route::get('/sales/getSaleData', [SaleController::class, 'getSaleData']);
+
 
 
 

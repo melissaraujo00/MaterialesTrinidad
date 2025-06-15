@@ -1,12 +1,11 @@
 <?php
 
 use App\Models\Customer;
-use App\Models\Trader;
+use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Pest\ArchPresets\Custom;
 
 return new class extends Migration
 {
@@ -15,17 +14,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quotes', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->decimal('total',12,2);
-            $table->date('date');
-            $table->decimal('subtotal',12,2);
-            $table->foreignIdFor(Customer::class)->constrained();
+            $table->foreignIdFor(Quote::class)->nullable()->constrained();
+            $table->foreignIdFor(Customer::class)->nullable()->constrained();
             $table->foreignIdFor(User::class)->constrained();
-            $table->ENUM('status', ['pendiente', 'confirmada', 'venta'])->default('pendiente');
-            $table->softDeletes();
+            $table->date('date');
+            $table->decimal('subtotal', 10, 2);
+            $table->decimal('total', 10, 2);
             $table->timestamps();
-
         });
     }
 
@@ -34,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quotes');
+        Schema::dropIfExists('sales');
     }
 };
