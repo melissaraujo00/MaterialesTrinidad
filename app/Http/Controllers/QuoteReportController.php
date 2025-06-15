@@ -9,16 +9,16 @@ use Illuminate\Support\Facades\Http;
 
 class QuoteReportController extends Controller
 {
-    // public function QuoteReport(Quote $quote)
-    // {
-    //     $quote->load(['details']);
+    public function QuoteReport(Quote $quote)
+    {
+        $quote->load(['details']);
 
-    //     $pdf = Pdf::loadView('quotes.report', [
-    //         'quote' => $quote
-    //     ]);
+        $pdf = Pdf::loadView('quotes.report', [
+            'quote' => $quote
+        ]);
 
-    //     return $pdf->stream('reporte_cotizacion.pdf');
-    // }
+        return $pdf->stream('reporte_cotizacion.pdf');
+    }
 
     public function sendQuoteTextByWhatsapp($id)
     {

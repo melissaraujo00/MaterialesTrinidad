@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    //Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
+    Route::get('/quotesReport/{quote}', [QuoteReportController::class, 'QuoteReport'])->name('quoteReport');
     Route::post('/quotes/send-whatsapp/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp'])->name('quotes.sendWhatsapp');
     Route::post('/quotes/send-whatsapp-text/{id}', [QuoteReportController::class, 'sendQuoteTextByWhatsapp']);
 
