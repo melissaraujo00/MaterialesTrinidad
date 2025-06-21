@@ -70,7 +70,7 @@ export default function ConfirmedQuotes() {
                 let actions = "";
 
                 // Ver detalles - Usar Link de Inertia para navegación
-                actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
+                actions += `<a href="/sales/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
                 // Generar factura o reporte
                 td.innerHTML = actions;
