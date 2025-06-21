@@ -170,9 +170,7 @@ export default function SaleShow() {
                                                         <div className="text-sm font-medium text-gray-900">
                                                             {detail.product?.name || 'Producto sin nombre'}
                                                         </div>
-                                                        <div className="text-sm text-gray-500">
-                                                            SKU: {detail.product?.sku || 'N/A'}
-                                                        </div>
+                                                       
                                                     </div>
                                                 </div>
                                             </td>
