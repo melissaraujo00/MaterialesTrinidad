@@ -95,8 +95,16 @@ export default function ConfirmedQuotes() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Ventas</h1>
-
-
+                </div>
+                 <div className="flex justify-end">
+                    {hasPermission("crear venta")   &&(
+                        <Link
+                            href="/sales/create"
+                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+                        >
+                            Crear Venta
+                        </Link>
+                    )}
                 </div>
 
                 <DataTable

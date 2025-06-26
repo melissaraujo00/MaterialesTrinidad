@@ -67,7 +67,8 @@ class UserRoleSeeder extends Seeder
             'crear oferta',
             'realizar ventas',
             'ver reporte',
-            'generar reporte'
+            'generar reporte',
+            'crear venta'
 
         ];
 

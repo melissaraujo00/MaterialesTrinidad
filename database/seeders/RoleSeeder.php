@@ -18,31 +18,5 @@ class RoleSeeder extends Seeder
         Role::create(['name' => 'Vendedor','guard_name' => 'web', 'description' => 'Puede realizar cotizaciones']);
         Role::create(['name' => 'Cajera','guard_name' => 'web', 'description' => 'realiza la factura de una venta']);
         Role::create(['name' => 'Bodega','guard_name' => 'web', 'description' => 'Tiene el control de todo el sistema y puede asignar roles']);
-        // $roles = [
-        //     [
-        //         'name' => 'Adminitrador',
-        //         'description' => 'Tiene el control de todo el sistema y puede asignar roles'
-        //     ],
-        //     [
-        //         'name' => 'Supervisor',
-        //         'description' => 'Tiene control de ventas de los vendendore'
-        //     ],
-        //     [
-        //         'name' => 'Vendedor',
-        //         'description' => 'Puede realizar cotizaciones'
-        //     ],
-        //     [
-        //         'name' => 'Cajera',
-        //         'description' => 'realiza la factura de una venta'
-        //     ],
-        //     [
-        //         'name' => 'Bodega',
-        //         'description' => 'Tiene el control de todo el sistema y puede asignar roles'
-        //     ]
-        // ];
-
-        // foreach($roles as $role){
-        //     Role::create($role);
-        // }
     }
 }

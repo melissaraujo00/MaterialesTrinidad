@@ -160,7 +160,9 @@ class SaleController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('sale/Create', [
+            'sales' => Sale::all()
+        ]);
     }
 
     /**
@@ -178,7 +180,7 @@ class SaleController extends Controller
     {
         $sale->load('details.product', 'customer', 'user');
 
-       
+
         return Inertia::render('sale/Details', [
             'sale' => $sale->toArray()
         ]);
