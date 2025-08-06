@@ -9,36 +9,10 @@ import { router } from "@inertiajs/react";
 import CreateCustomertButton from "@/components/CreateCustomerButton";
 import CreateCustomerModal from "../quote/CreateCustomer";
 import { useEffect } from "react";
+import { Product } from "@/interfaces/productsInterfaces";
+import { CartItem } from "@/interfaces/shoppingCartInterfaces";
+import { Customer } from "@/interfaces/customersInterfaces";
 
-interface Customer {
-    id: number;
-    name: string;
-    email: string;
-    phoneNumber: string;
-    nit: string;
-    district_id: number;
-    address: string;
-    description: string;
-    status: string;
-}
-
-interface Product {
-    id: number;
-    name: string;
-    priceWithTax: number;
-    discountPrice: number | null;
-    brand_id: string;
-    category_id: string;
-    image: string;
-    stock: number;
-    stockMinimun: number;
-}
-
-interface CartItem extends Product {
-    quantity: number;
-    applyDiscount: boolean;
-    totalPrice: number;
-}
 
 export default function CreateQuote() {
     const page = usePage() as any;
