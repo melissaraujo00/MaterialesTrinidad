@@ -3,6 +3,7 @@ import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { hasPermission } from "@/globals/permissions";
 
 interface BusinessData {
     id: number;
@@ -16,13 +17,6 @@ interface BusinessData {
 }
 
 export default function BusinessData() {
-    const page = usePage();
-    const permissions =
-        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-            ? page.props.auth.user.permissions
-            : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
-
 
     const [businessData, setBusinessData] = useState<BusinessData | null>(null);
     const [loading, setLoading] = useState(true);
