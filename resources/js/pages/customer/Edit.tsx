@@ -1,114 +1,55 @@
-import React, { useState, useEffect } from "react";
-import { Head, useForm } from "@inertiajs/react";
-import { Toaster, toast } from "sonner";
-import { router } from "@inertiajs/react";
-import { usePage } from "@inertiajs/react";
-import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
-import AppLayout from "@/layouts/app-layout";
-import { forEach } from "jszip";
+// pages/customer/edit.tsx
+import React, { useMemo } from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import { Toaster } from 'sonner';
+import { Formik, Form } from 'formik';
+import AppLayout from '@/layouts/app-layout';
+import { FormField, SelectField } from '@/components/forms';
+import { useLocationFilters, useFormSubmit } from '@/hooks';
+import { customerValidationSchema } from '@/schemas';
+import { Customer, Department, Municipality, District } from '@/types';
 
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  nit: string;
-  district_id: number;
-  address: string;
-  description: string;
-  status: string;
+interface PageProps {
+  customer: Customer;
+  departments: Department[];
+  municipalities: Municipality[];
+  districts: District[];
 }
 
 export default function CustomerEdit() {
-  const { customer, departments, municipalities, districts } = usePage<{
-    customer: Customer;
-    departments: { id: number; name: string }[];
-    municipalities: { id: number; name: string; department_id: number }[];
-    districts: { id: number; name: string; municipality_id: number }[];
-  }>().props;
+  const { customer, departments, municipalities, districts } = usePage<PageProps>().props;
 
-  // Encontrar el municipio del distrito seleccionado del cliente
-  const customerDistrict = districts.find(d => d.id === customer.district_id);
-  const customerMunicipalityId = customerDistrict ? customerDistrict.municipality_id : '';
-  
-  // Encontrar el departamento del municipio
-  const customerMunicipality = municipalities.find(m => m.id === customerMunicipalityId);
-  const customerDepartmentId = customerMunicipality ? customerMunicipality.department_id : '';
+  // Calcular IDs iniciales de ubicación
+  const initialLocation = useMemo(() => {
+    const district = districts.find(d => d.id === customer.district_id);
+    const municipality = district
+      ? municipalities.find(m => m.id === district.municipality_id)
+      : null;
+    const department = municipality
+      ? departments.find(dep => dep.id === municipality.department_id)
+      : null;
 
-  const [filteredMunicipalities, setFilteredMunicipalities] = useState(municipalities);
-  const [filteredDistricts, setFilteredDistricts] = useState(districts);
-  const [selectedDepartment, setSelectedDepartment] = useState(customerDepartmentId.toString());
-  const [selectedMunicipality, setSelectedMunicipality] = useState(customerMunicipalityId.toString());
+    return {
+      departmentId: department?.id,
+      municipalityId: municipality?.id
+    };
+  }, [customer.district_id, districts, municipalities, departments]);
 
-  useEffect(() => {
-    setFilteredMunicipalities(
-      selectedDepartment
-        ? municipalities.filter(m => m.department_id === Number(selectedDepartment))
-        : []
-    );
-  }, [selectedDepartment, municipalities]);
-
-  useEffect(() => {
-    setFilteredDistricts(
-      selectedMunicipality
-        ? districts.filter(d => d.municipality_id === Number(selectedMunicipality))
-        : []
-    );
-  }, [selectedMunicipality, districts]);
-
-  // Ejecutar esto al cargar para precargar los municipios y distritos según los valores iniciales
-  useEffect(() => {
-    if (customerDepartmentId) {
-      setSelectedDepartment(customerDepartmentId.toString());
-      setFilteredMunicipalities(
-        municipalities.filter(m => m.department_id === Number(customerDepartmentId))
-      );
-    }
-
-    if (customerMunicipalityId) {
-      setSelectedMunicipality(customerMunicipalityId.toString());
-      setFilteredDistricts(
-        districts.filter(d => d.municipality_id === Number(customerMunicipalityId))
-      );
-    }
-  }, [customer, customerDepartmentId, customerMunicipalityId]);
-
-  const validationSchema = Yup.object({
-    name: Yup.string().min(3, 'El nombre debe tener al menos 3 caracteres').required('El nombre es requerido '),
-    email: Yup.string().email('Formato de correo no válido').matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'El correo debe ser válido'),
-    phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
-    nit: Yup.string().matches(/^\d{4}-\d{6}-\d{3}-\d{1}$/, 'El NIT debe tener el formato 0000-000000-000-0'),
-    status: Yup.string().required("Seleccione un estado"),
-    department_id: Yup.string().required("El Departamento es requerido"),
-    municipality_id: Yup.string().required("El Municipio es requerido"),
-    district_id: Yup.string().required("El distrito es requerido"),
+  // Hook para filtros de ubicación
+  const locationFilters = useLocationFilters({
+    initialDepartmentId: initialLocation.departmentId,
+    initialMunicipalityId: initialLocation.municipalityId,
+    departments,
+    municipalities,
+    districts
   });
 
-  const handleSubmit = (values: any) => {
-    const data = new FormData();
-    data.append("name", values.name);
-    data.append("email", values.email);
-    data.append("phoneNumber", values.phoneNumber);
-    data.append("nit", values.nit);
-    data.append("district_id", values.district_id);
-    data.append("address", values.address);
-    data.append("description", values.description);
-    data.append("status", values.status);
-    data.append("_method", "PUT"); // Para simular un PUT request en Laravel
-
-    router.post(`/customers/${customer.id}`, data, {
-      onSuccess: () => {
-        toast.success("Cliente actualizado con éxito.");
-        setTimeout(() => {
-        }, 1000);
-    },
-    onError: (errors) => {
-      console.error("Errores de validación:", errors);
-      toast.error(Object.values(errors)[0]);
-    },
-    });
-  };
+  // Hook para submit
+  const { handleSubmit } = useFormSubmit({
+    route: `/customers/${customer.id}`,
+    method: 'put',
+    successMessage: 'Cliente actualizado con éxito'
+  });
 
   return (
     <AppLayout>
@@ -120,222 +61,127 @@ export default function CustomerEdit() {
 
         <Formik
           initialValues={{
-            name: customer.name || "",
-            email: customer.email || "",
-            phoneNumber: customer.phoneNumber || "",
-            nit: customer.nit || "",
-            department_id: selectedDepartment,
-            municipality_id: selectedMunicipality,
-            district_id: customer.district_id?.toString() || "",
-            address: customer.address || "",
-            description: customer.description || "",
-            status: customer.status || "",
+            name: customer.name || '',
+            email: customer.email || '',
+            phoneNumber: customer.phoneNumber || '',
+            nit: customer.nit || '',
+            department_id: locationFilters.selectedDepartment,
+            municipality_id: locationFilters.selectedMunicipality,
+            district_id: customer.district_id?.toString() || '',
+            address: customer.address || '',
+            description: customer.description || '',
+            status: customer.status || ''
           }}
-          enableReinitialize={true}
-          validationSchema={validationSchema}
+          validationSchema={customerValidationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur, touched, errors }) => (
-            <Form className="space-y-2">
-                {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
-                <Field
-                  type="text"
-                  id="name"
-                  name="name"
-                  placeholder="Ej: Juan Perez"
-                  value={values.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
-              </div>
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electronico</label>
-                <Field
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="Ej: nombre@gmail.com"
-                  value={values.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.email && errors.email && <small className="text-red-500">{errors.email}</small>}
-              </div>
-              {/* Phone Number */}
-              <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Numero de Telefono</label>
-                <Field
-                  type="text"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  placeholder="56437632"
-                  value={values.phoneNumber}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.phoneNumber && errors.phoneNumber && <small className="text-red-500">{errors.phoneNumber}</small>}
-              </div>
-              {/* nit */}
-              <div>
-                <label htmlFor="nit" className="block text-sm font-medium text-gray-700 dark:text-gray-300">NIT</label>
-                <Field
-                  type="text"
-                  id="nit"
-                  name="nit"
-                  placeholder="Ej: 0000-000000-000-0"
-                  value={values.nit}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.nit && errors.nit && <small className="text-red-500">{errors.nit}</small>}
-              </div>
+          <Form className="space-y-2">
+            {/* Name */}
+            <FormField
+              name="name"
+              label="Nombre"
+              placeholder="Ej: Juan Perez"
+              required
+            />
 
-              {/* Departamento */}
-              <div>
-                <label htmlFor="department_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Departamento</label>
-                <Field
-                  as="select"
-                  id="department_id"
-                  name="department_id"
-                  value={values.department_id}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setSelectedDepartment(e.target.value); // Actualizar el departamento seleccionado
-                    setSelectedMunicipality(''); // Limpiar el municipio seleccionado cuando cambie el departamento
-                  }}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                >
-                  <option value="" disabled>Seleccione un Departamento </option>
-                  
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>{department.name}</option>
-                  ))}
-                </Field>
-                {touched.department_id && errors.department_id && <small className="text-red-500">{errors.department_id}</small>}
-              </div>
+            {/* Email */}
+            <FormField
+              name="email"
+              type="email"
+              label="Correo Electronico"
+              placeholder="Ej: nombre@gmail.com"
+            />
 
-              {/* Municipio */}
-              <div>
-                <label htmlFor="municipality_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Municipio</label>
-                <Field
-                  as="select"
-                  id="municipality_id"
-                  name="municipality_id"
-                  value={values.municipality_id}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setSelectedMunicipality(e.target.value); // Actualizar el municipio seleccionado
-                  }}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                >
-                  <option value="" disabled>Selecciones un Municipio</option>
-                  {filteredMunicipalities.map((municipality) => (
-                    <option key={municipality.id} value={municipality.id}>{municipality.name}</option>
-                  ))}
-                </Field>
-                {touched.municipality_id && errors.municipality_id && <small className="text-red-500">{errors.municipality_id}</small>}
-              </div>
+            {/* Phone Number */}
+            <FormField
+              name="phoneNumber"
+              type="tel"
+              label="Numero de Telefono"
+              placeholder="56437632"
+              required
+            />
 
-              {/* Distrito */}
-              <div>
-                <label htmlFor="district_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Distrito</label>
-                <Field
-                  as="select"
-                  id="district_id"
-                  name="district_id"
-                  value={values.district_id}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                >
-                  <option value="" disabled>Seleccione un Distrito</option>
-                  {filteredDistricts.map((district) => (
-                    <option key={district.id} value={district.id}>{district.name}</option>
-                  ))}
-                </Field>
-                {touched.district_id && errors.district_id && <small className="text-red-500">{errors.district_id}</small>}
-              </div>
-              {/* address */}
-              <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Direccion</label>
-                <Field
-                  type="text"
-                  id="address"
-                  name="address"
-                  placeholder="Ej: Col. Franciso Casa #4"
-                  value={values.address}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.address && errors.address && <small className="text-red-500">{errors.address}</small>}
-              </div>
-              {/* description */}
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripion Opcional</label>
-                <Field
-                  type="text"
-                  id="description"
-                  name="description"
-                  placeholder="Ej: Frente de ferreteria Olivia"
-                  value={values.description}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
-              </div>
+            {/* NIT */}
+            <FormField
+              name="nit"
+              label="NIT"
+              placeholder="Ej: 0000-000000-000-0"
+            />
 
-              {/* Status */}
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                <Field
-                  as="select"
-                  id="status"
-                  name="status"
-                  value={values.status}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                >
-                  <option value="" disabled>Selecciona un Estado</option>
-                  <option value="activo">Activo</option>
-                  <option value="inactivo">Inactivo</option>
-                </Field>
-                {touched.status && errors.status && <small className="text-red-500">{errors.status}</small>}
-              </div>
+            {/* Departamento */}
+            <SelectField
+              name="department_id"
+              label="Departamento"
+              options={departments}
+              placeholder="Seleccione un Departamento"
+              required
+              onChange={locationFilters.handleDepartmentChange}
+            />
 
-              <div className="flex justify-start space-x-4">
-                <button
-                  type="button"
-                  onClick={() => window.history.back()}
-                  className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-                >
-                  Actualizar Cliente
-                </button>
-              </div>
-            </Form>
-          )}
+            {/* Municipio */}
+            <SelectField
+              name="municipality_id"
+              label="Municipio"
+              options={locationFilters.filteredMunicipalities}
+              placeholder="Seleccione un Municipio"
+              required
+              onChange={locationFilters.handleMunicipalityChange}
+            />
+
+            {/* Distrito */}
+            <SelectField
+              name="district_id"
+              label="Distrito"
+              options={locationFilters.filteredDistricts}
+              placeholder="Seleccione un Distrito"
+              required
+            />
+
+            {/* Address */}
+            <FormField
+              name="address"
+              label="Direccion"
+              placeholder="Ej: Col. Francisco Casa #4"
+            />
+
+            {/* Description */}
+            <FormField
+              name="description"
+              label="Descripcion Opcional"
+              placeholder="Ej: Frente de ferreteria Olivia"
+            />
+
+            {/* Status */}
+            <SelectField
+              name="status"
+              label="Estado"
+              options={[
+                { id: 'activo', name: 'Activo' },
+                { id: 'inactivo', name: 'Inactivo' }
+              ]}
+              placeholder="Selecciona un Estado"
+              required
+            />
+
+            {/* Actions */}
+            <div className="flex justify-start space-x-4">
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+              >
+                Actualizar Cliente
+              </button>
+            </div>
+          </Form>
         </Formik>
       </div>
     </AppLayout>
   );
 }
-
-

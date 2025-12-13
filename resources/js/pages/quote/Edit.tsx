@@ -1,3 +1,4 @@
+// pages/quote/edit.tsx
 import React from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import { Toaster } from 'sonner';
@@ -7,26 +8,37 @@ import { FormField, SelectField } from '@/components/forms';
 import { useFormSubmit } from '@/hooks';
 import { useQuoteItems } from '@/hooks/forms/useQuoteItems';
 import { quoteValidationSchema, QUOTE_STATUS_OPTIONS } from '@/schemas/quoteSchema';
+import { Quote } from '@/types/entities/quote';
 import { Customer } from '@/types/entities/customer';
 import { Product } from '@/types/entities/product';
 
 interface PageProps {
+  quote: Quote;
   customers: Customer[];
   products: Product[];
 }
 
-export default function QuoteCreate() {
-  const { customers, products } = usePage<PageProps>().props;
+export default function QuoteEdit() {
+  const { quote, customers, products } = usePage<PageProps>().props;
 
-  const quoteItems = useQuoteItems({ products });
+  // Inicializar items desde la cotización existente
+  const initialItems = quote.items.map(item => ({
+    product_id: item.product_id.toString(),
+    quantity: item.quantity,
+    price: item.price
+  }));
 
-  const { handleSubmit } = useFormSubmit({
-    route: '/quotes',
-    method: 'post',
-    successMessage: 'Cotización creada con éxito'
+  const quoteItems = useQuoteItems({
+    products,
+    initialItems
   });
 
-  // Formatear precio
+  const { handleSubmit } = useFormSubmit({
+    route: `/quotes/${quote.id}`,
+    method: 'put',
+    successMessage: 'Cotización actualizada con éxito'
+  });
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-SV', {
       style: 'currency',
@@ -34,29 +46,25 @@ export default function QuoteCreate() {
     }).format(price);
   };
 
-  // Obtener fecha actual en formato YYYY-MM-DD
-  const today = new Date().toISOString().split('T')[0];
-
   return (
     <AppLayout>
-      <Head title="Crear Cotización" />
+      <Head title="Editar Cotización" />
       <Toaster position="top-right" richColors />
 
       <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Crear Nueva Cotización</h2>
+        <h2 className="text-2xl font-semibold mb-4">Editar Cotización #{quote.id}</h2>
 
         <Formik
           initialValues={{
-            customer_id: '',
-            date: today,
+            customer_id: quote.customer_id.toString(),
+            date: quote.date,
             items: quoteItems.items,
-            discount: 0,
-            notes: '',
-            status: 'pendiente'
+            discount: quote.discount || 0,
+            notes: quote.notes || '',
+            status: quote.status
           }}
           validationSchema={quoteValidationSchema}
           onSubmit={(values) => {
-            // Calcular totales y agregar al submit
             const dataToSubmit = {
               ...values,
               items: quoteItems.items,
@@ -121,7 +129,6 @@ export default function QuoteCreate() {
                     <div className="space-y-3">
                       {quoteItems.items.map((item, index) => (
                         <div key={index} className="grid grid-cols-12 gap-2 items-start bg-gray-50 dark:bg-gray-900 p-3 rounded">
-                          {/* Producto */}
                           <div className="col-span-5">
                             <select
                               value={item.product_id}
@@ -129,7 +136,6 @@ export default function QuoteCreate() {
                                 const value = e.target.value;
                                 quoteItems.updateItem(index, 'product_id', value);
                                 setFieldValue(`items.${index}.product_id`, value);
-                                // Actualizar precio automáticamente
                                 const price = quoteItems.getProductPrice(value);
                                 setFieldValue(`items.${index}.price`, price);
                               }}
@@ -138,13 +144,12 @@ export default function QuoteCreate() {
                               <option value="">Seleccionar producto</option>
                               {products.map((product) => (
                                 <option key={product.id} value={product.id}>
-                                  {product.name} - {formatPrice(product.priceWithTax)}
+                                  {product.name} - {formatPrice(product.price)}
                                 </option>
                               ))}
                             </select>
                           </div>
 
-                          {/* Cantidad */}
                           <div className="col-span-2">
                             <input
                               type="number"
@@ -160,7 +165,6 @@ export default function QuoteCreate() {
                             />
                           </div>
 
-                          {/* Precio */}
                           <div className="col-span-2">
                             <input
                               type="number"
@@ -177,14 +181,12 @@ export default function QuoteCreate() {
                             />
                           </div>
 
-                          {/* Subtotal */}
                           <div className="col-span-2 flex items-center">
                             <span className="text-sm font-medium">
                               {formatPrice(quoteItems.calculateItemSubtotal(item))}
                             </span>
                           </div>
 
-                          {/* Eliminar */}
                           <div className="col-span-1 flex items-center">
                             <button
                               type="button"
@@ -215,7 +217,6 @@ export default function QuoteCreate() {
                 <h3 className="text-lg font-medium mb-3">Resumen</h3>
 
                 <div className="max-w-md ml-auto space-y-2">
-                  {/* Descuento */}
                   <div className="flex items-center gap-4">
                     <label className="text-sm font-medium w-32">Descuento (%):</label>
                     <input
@@ -281,7 +282,7 @@ export default function QuoteCreate() {
                   type="submit"
                   className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
                 >
-                  Crear Cotización
+                  Actualizar Cotización
                 </button>
               </div>
             </Form>

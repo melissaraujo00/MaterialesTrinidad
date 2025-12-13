@@ -1,281 +1,194 @@
-import { Head, usePage } from "@inertiajs/react";
-import AppLayout from "@/layouts/app-layout";
-import { Toaster, toast } from "sonner";
-import { router } from "@inertiajs/react";
-import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
-import { useState } from 'react';
+// pages/product/create.tsx
+import React from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import { Toaster } from 'sonner';
+import { Formik, Form } from 'formik';
+import AppLayout from '@/layouts/app-layout';
+import { FormField, SelectField } from '@/components/forms';
+import { useFormSubmit } from '@/hooks';
+import { productValidationSchema, UNIT_OPTIONS, STATUS_OPTIONS } from '@/schemas/productSchema';
+import { Category, Brand, ProductFormData } from '@/types/entities/product';
+
+interface PageProps {
+  categories: Category[];
+  brands: Brand[]; // Asegúrate de enviar esto desde el ProductController
+}
 
 export default function ProductCreate() {
-    const { categories, brands } = usePage<{
-        categories: { id: number; name: string }[],
-        brands: { id: number; name: string }[];
-    }>().props;
+  const { categories, brands } = usePage<PageProps>().props;
 
-    const [preview, setPreview] = useState<string | null>(null);
+  const { handleSubmit } = useFormSubmit({
+    route: '/products',
+    method: 'post',
+    successMessage: 'Producto creado con éxito'
+  });
 
-    const validationSchema = Yup.object({
-        name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('El nombre es requerido'),
-        priceWithTax: Yup.number().typeError('El precio es requerido').positive('El precio debe ser positivo y mayor a 0').required('El precio es requerido'),
-        discountPrice: Yup.number().typeError('El precio con descuento es requerido').positive('El precio con descuento debe ser positivo y mayor a 0').required('El precio con descuento es requerido'),
-        description: Yup.string().max(255, 'La descripción no puede exceder los 255 caracteres'),
-        category_id: Yup.string(),
-        brand_id: Yup.string(),
-        stock: Yup.number().integer().min(0, 'El stock debe ser un número entero').required('El stock es requerido'),
-        stockMinimun: Yup.number().integer().min(0, 'El stock mínimo debe ser un número entero').required('El stock mínimo es requerido'),
-        image: Yup.mixed()
-            .nullable()
-            .test("fileSize", "La imagen es muy grande debe de ser menor de 2MB", (value) => {
-                return !value || (value instanceof File && value.size <= 2097152);
-            })
-            .test("fileFormat", "Formato no soportado", (value) => {
-                return !value || (value instanceof File && ["image/jpeg", "image/png", "image/webp"].includes(value.type));
-            })
-            .test("filePathLength", "La ruta del archivo excede los 255 caracteres", (value) => {
-                return !value || (value instanceof File && value.name.length <= 255);
-            }),
-    });
+  // Valores iniciales basados en tu interfaz ProductFormData
+  const initialValues: ProductFormData = {
+    name: '',
+    description: '',
+    priceWithTax: 0,
+    discountPrice: 0,
+    stock: '',     // Inicializamos como string para que el input esté vacío
+    stockMinimun: '', // Inicializamos como string
+    brand_id: '',
+    category_id: '',
+    unit: '',
+    status: 'activo',
+    image: ''
+  };
 
-    const handleSubmit = (values: any) => {
-        const data = new FormData();
-        data.append("name", values.name);
-        data.append("description", values.description || "");
-        data.append("priceWithTax", String(values.priceWithTax));
-        data.append("discountPrice", String(values.discountPrice));
-        data.append("category_id", values.category_id);
-        data.append("brand_id", values.brand_id);
-        data.append("stock", String(values.stock));
-        data.append("stockMinimun", String(values.stockMinimun));
+  return (
+    <AppLayout>
+      <Head title="Crear Producto" />
+      <Toaster position="top-right" richColors />
 
-        if (values.image) {
-            data.append("image", values.image);
-        }
+      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
+        <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Producto</h2>
 
-        router.post("/products", data, {
-            onSuccess: () => {
-                setTimeout(() => {
-                    toast.success("Producto creado con éxito.");
-                }, 1000);
-            },
-            onError: (errors) => {
-                console.error("Errores de validación:", errors);
-                toast.error("Hubo un error al crear el Producto. Verifica los datos.");
-                if (errors.image) {
-                    toast.error(errors.image);
-                }
-            },
-        });
-    };
+        <Formik
+          initialValues={initialValues}
+          validationSchema={productValidationSchema}
+          onSubmit={(values) => {
+            // Convertimos strings vacíos a números si es necesario antes de enviar
+            // Formik maneja esto, pero aseguramos la conversión para la API
+            const payload = {
+                ...values,
+                stock: Number(values.stock),
+                stockMinimun: Number(values.stockMinimun),
+                priceWithTax: Number(values.priceWithTax),
+                discountPrice: Number(values.discountPrice),
+                // Si brand_id es vacío, enviamos null
+                brand_id: values.brand_id ? Number(values.brand_id) : null,
+            };
+            handleSubmit(payload);
+          }}
+        >
+          {({ values }) => (
+            <Form className="space-y-4">
+              {/* Información Básica */}
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-medium mb-3">Información Básica</h3>
 
-    return (
-        <AppLayout>
-            <Head title="Crear Producto" />
-            <Toaster position="top-right" richColors />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    name="name"
+                    label="Nombre del Producto"
+                    placeholder="Ej: Cemento Holcim 50kg"
+                    required
+                  />
 
-            <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Producto</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                     <SelectField
+                        name="category_id"
+                        label="Categoría"
+                        options={categories}
+                        placeholder="Seleccionar..."
+                        required
+                      />
 
-                <Formik
-                    initialValues={{
-                        name: "",
-                        description: "",
-                        priceWithTax: "",
-                        discountPrice: "",
-                        category_id: "",
-                        brand_id: "",
-                        stock: "",
-                        stockMinimun: "",
-                        image: null,
-                    }}
-                    validationSchema={validationSchema}
-                    onSubmit={handleSubmit}
+                      <SelectField
+                        name="brand_id"
+                        label="Marca"
+                        options={brands}
+                        placeholder="Seleccionar..."
+                      />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <FormField
+                    name="description"
+                    label="Descripción"
+                    placeholder="Descripción detallada del producto..."
+                  />
+                </div>
+              </div>
+
+              {/* Precios */}
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-medium mb-3">Precios</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    name="priceWithTax"
+                    label="Precio Venta (con Impuestos)"
+                    type="number"
+                    placeholder="0.00"
+                    required
+                  />
+
+                  <FormField
+                    name="discountPrice"
+                    label="Precio con Descuento"
+                    type="number"
+                    placeholder="0.00 (Dejar en 0 si no aplica)"
+                  />
+                </div>
+              </div>
+
+              {/* Inventario y Detalles */}
+              <div className="border-b pb-4">
+                <h3 className="text-lg font-medium mb-3">Inventario y Detalles</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Stock Actual */}
+                    <FormField
+                      name="stock"
+                      label="Stock Actual"
+                      type="number"
+                      placeholder="0"
+                      required
+                    />
+
+                    {/* Stock Mínimo (Nuevo campo) */}
+                    <FormField
+                      name="stockMinimun"
+                      label="Stock Mínimo (Alerta)"
+                      type="number"
+                      placeholder="Ej: 5"
+                      required
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <SelectField
+                      name="unit"
+                      label="Unidad de Medida"
+                      options={UNIT_OPTIONS}
+                      placeholder="Seleccione unidad"
+                      required
+                    />
+
+                    <SelectField
+                      name="status"
+                      label="Estado"
+                      options={STATUS_OPTIONS}
+                      required
+                    />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-start space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => window.history.back()}
+                  className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
                 >
-                    {({ values, handleChange, handleBlur, touched, errors, setFieldValue }) => (
-                        <Form className="space-y-2">
-                            {/* Name */}
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
-                                <Field
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    placeholder="Ej: Lamina"
-                                    value={values.name}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
-                            </div>
-
-                            {/* Description */}
-                            <div>
-                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción (Opcional)</label>
-                                <Field
-                                    type="text"
-                                    id="description"
-                                    name="description"
-                                    placeholder="Ej: El producto es para uso general"
-                                    value={values.description}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
-                            </div>
-
-                            {/* Price */}
-                            <div>
-                                <label htmlFor="priceWithTax" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio: $</label>
-                                <Field
-                                    type="number"
-                                    step="0.01"
-                                    id="priceWithTax"
-                                    name="priceWithTax"
-                                    placeholder="Ej: 12.50"
-                                    value={values.priceWithTax}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.priceWithTax && errors.priceWithTax && <small className="text-red-500">{errors.priceWithTax}</small>}
-                            </div>
-                            {/* Discount Price */}
-                            <div>
-                                <label htmlFor="discountPrice" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Precio con descuento</label>
-                                <Field
-                                    type="number"
-                                    step="0.01"
-                                    id="discountPrice"
-                                    name="discountPrice"
-                                    placeholder="Ej: 6.70"
-                                    value={values.discountPrice}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.discountPrice && errors.discountPrice && <small className="text-red-500">{errors.discountPrice}</small>}
-                            </div>
-
-                            {/* Category */}
-                            <div>
-                                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría (Opcional)</label>
-                                <Field
-                                    as="select"
-                                    id="category_id"
-                                    name="category_id"
-                                    value={values.category_id}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                >
-                                    <option value="" disabled>Seleccione una Categoría</option>
-                                    {categories.map((category) => (
-                                        <option key={category.id} value={category.id}>{category.name}</option>
-                                    ))}
-                                </Field>
-                                {touched.category_id && errors.category_id && <small className="text-red-500">{errors.category_id}</small>}
-                            </div>
-
-                            {/* Brand */}
-                            <div>
-                                <label htmlFor="brand_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca (Opcional)</label>
-                                <Field
-                                    as="select"
-                                    id="brand_id"
-                                    name="brand_id"
-                                    value={values.brand_id}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                >
-                                    <option value="" disabled>Seleccione una Marca</option>
-                                    {brands.map((brand) => (
-                                        <option key={brand.id} value={brand.id}>{brand.name}</option>
-                                    ))}
-                                </Field>
-                                {touched.brand_id && errors.brand_id && <small className="text-red-500">{errors.brand_id}</small>}
-                            </div>
-
-                            {/* Stock */}
-                            <div>
-                                <label htmlFor="stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad de producto disponible</label>
-                                <Field
-                                    type="number"
-                                    placeholder = "Ej: 100"
-                                    id="stock"
-                                    name="stock"
-                                    value={values.stock}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.stock && errors.stock && <small className="text-red-500">{errors.stock}</small>}
-                            </div>
-
-                            {/* Stock Minimum */}
-                            <div>
-                                <label htmlFor="stockMinimun" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Mínimo</label>
-                                <Field
-                                    type="number"
-                                    placeholder = "Ej: 10"
-                                    id="stockMinimun"
-                                    name="stockMinimun"
-                                    value={values.stockMinimun}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                                />
-                                {touched.stockMinimun && errors.stockMinimun && <small className="text-red-500">{errors.stockMinimun}</small>}
-                            </div>
-
-                            {/* Image Upload */}
-                            <div className="mb-3">
-                                <label className="block text-gray-950 text-sm font-medium dark:text-gray-300">Imagen (opcional)</label>
-                                <input
-                                    type="file"
-                                    name="image"
-                                    accept="image/*"
-                                    onChange={(event) => {
-                                        const file = event.currentTarget.files?.[0];
-                                        if (file) {
-                                            setPreview(URL.createObjectURL(file));
-                                            setFieldValue("image", file);
-                                        }
-                                    }}
-                                    className="w-full text-gray-950 dark:text-white"
-                                />
-                                {touched.image && errors.image && <small className="text-red-500">{errors.image}</small>}
-                            </div>
-
-                            {/* Image Preview */}
-                            {preview && (
-                                <div className="mb-3">
-                                    <p className="text-sm mb-1 dark:text-gray-300">Vista previa de la imagen:</p>
-                                    <img src={preview} alt="Vista Previa" className="w-32 h-32 object-cover rounded" />
-                                </div>
-                            )}
-
-                            {/* Buttons */}
-                            <div className="flex justify-start gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => window.history.back()}
-                                    className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-                                >
-                                    Crear Producto
-                                </button>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
-            </div>
-        </AppLayout>
-    );
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+                >
+                  Crear Producto
+                </button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </AppLayout>
+  );
 }
