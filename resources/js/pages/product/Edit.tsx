@@ -1,140 +1,147 @@
-// pages/product/edit.tsx
-import React from 'react';
-import { Head, usePage } from '@inertiajs/react';
-import { Toaster } from 'sonner';
-import { Formik, Form } from 'formik';
+import React, { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { Toaster, toast } from 'sonner';
+import { Formik, Form, Field } from 'formik';
 import AppLayout from '@/layouts/app-layout';
-import { FormField, SelectField } from '@/components/forms';
-import { useFormSubmit } from '@/hooks';
-import { productValidationSchema, UNIT_OPTIONS, STATUS_OPTIONS } from '@/schemas/productSchema';
-import { Product, Category } from '@/types/entities/product';
+import { productValidationSchema } from '@/schemas/productSchema'; // Asegúrate de que no importe STATUS_OPTIONS aquí
 
-interface PageProps {
-  product: Product;
-  categories: Category[];
+interface Category { id: number; name: string; }
+interface Brand { id: number; name: string; }
+interface Product {
+    id: number;
+    name: string;
+    description: string | null;
+    priceWithTax: number;
+    discountPrice: number;
+    stock: number;
+    stockMinimun: number;
+    category_id: number | string;
+    brand_id: number | string | null;
+    image: string | null;
 }
 
 export default function ProductEdit() {
-  const { product, categories } = usePage<PageProps>().props;
+    const { product, categories, brands } = usePage<{
+        product: Product,
+        categories: Category[],
+        brands: Brand[]
+    }>().props;
 
-  const { handleSubmit } = useFormSubmit({
-    route: `/products/${product.id}`,
-    method: 'put',
-    successMessage: 'Producto actualizado con éxito'
-  });
+    const [preview, setPreview] = useState<string | null>(product.image);
 
-  return (
-    <AppLayout>
-      <Head title="Editar Producto" />
-      <Toaster position="top-right" richColors />
+    const handleSubmit = (values: any) => {
+        router.post(`/products/${product.id}`, {
+            ...values,
+            _method: 'PUT',
+        }, {
+            forceFormData: true,
+            onSuccess: () => toast.success("Producto actualizado con éxito."),
+            onError: () => toast.error("Error al actualizar el producto."),
+        });
+    };
 
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Editar Producto</h2>
+    return (
+        <AppLayout>
+            <Head title="Editar Producto" />
+            <Toaster position="top-right" richColors />
 
-        <Formik
-          initialValues={{
-            name: product.name || '',
-            description: product.description || '',
-            price: product.price || '',
-            stock: product.stock || '',
-            category_id: product.category_id?.toString() || '',
-            unit: product.unit || '',
-            status: product.status || 'activo'
-          }}
-          validationSchema={productValidationSchema}
-          onSubmit={handleSubmit}
-        >
-          <Form className="space-y-4">
-            {/* Información Básica */}
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium mb-3">Información Básica</h3>
+            <div className="flex flex-col gap-6 p-6 bg-white shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
+                <h2 className="text-2xl font-semibold mb-4">Editar Producto: {product.name}</h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  name="name"
-                  label="Nombre del Producto"
-                  placeholder="Ej: Cemento Holcim 50kg"
-                  required
-                />
+                <Formik
+                    initialValues={{
+                        name: product.name || "",
+                        description: product.description || "",
+                        priceWithTax: product.priceWithTax || "",
+                        discountPrice: product.discountPrice || "0",
+                        category_id: product.category_id || "",
+                        brand_id: product.brand_id || "",
+                        stock: product.stock || "",
+                        stockMinimun: product.stockMinimun || "",
+                        image: null, 
+                    }}
+                    validationSchema={productValidationSchema}
+                    onSubmit={handleSubmit}
+                >
+                    {({ values, errors, touched, setFieldValue }) => (
+                        <Form className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium">Nombre</label>
+                                    <Field name="name" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
+                                    {touched.name && errors.name && <small className="text-red-500">{errors.name as string}</small>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium">Descripción</label>
+                                    <Field name="description" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
+                                </div>
+                            </div>
 
-                <SelectField
-                  name="category_id"
-                  label="Categoría"
-                  options={categories}
-                  placeholder="Seleccione una categoría"
-                  required
-                />
-              </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium">Categoría</label>
+                                    <Field as="select" name="category_id" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800">
+                                        <option value="">Seleccione Categoría</option>
+                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </Field>
+                                    {touched.category_id && errors.category_id && <small className="text-red-500">{errors.category_id as string}</small>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium">Marca</label>
+                                    <Field as="select" name="brand_id" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800">
+                                        <option value="">Seleccione Marca</option>
+                                        {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                                    </Field>
+                                </div>
+                            </div>
 
-              <div className="mt-4">
-                <FormField
-                  name="description"
-                  label="Descripción"
-                  placeholder="Descripción detallada del producto..."
-                />
-              </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium">Precio $</label>
+                                    <Field name="priceWithTax" type="number" step="0.01" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium">Descuento $</label>
+                                    <Field name="discountPrice" type="number" step="0.01" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium">Stock</label>
+                                    <Field name="stock" type="number" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium">Stock Mínimo</label>
+                                    <Field name="stockMinimun" type="number" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium">Imagen del Producto</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.currentTarget.files?.[0] || null;
+                                        setFieldValue("image", file);
+                                        setPreview(file ? URL.createObjectURL(file) : product.image);
+                                    }}
+                                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                />
+                                {preview && (
+                                    <div className="mt-2">
+                                        <p className="text-xs text-gray-500 mb-1">Vista previa:</p>
+                                        <img src={preview} className="w-32 h-32 object-cover rounded shadow-md border" />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-4">
+                                <button type="button" onClick={() => window.history.back()} className="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+                                <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Actualizar Producto</button>
+                            </div>
+                        </Form>
+                    )}
+                </Formik>
             </div>
-
-            {/* Precios e Inventario */}
-            <div className="border-b pb-4">
-              <h3 className="text-lg font-medium mb-3">Precios e Inventario</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  name="price"
-                  label="Precio"
-                  type="number"
-                  placeholder="0.00"
-                  required
-                />
-
-                <FormField
-                  name="stock"
-                  label="Stock Actual"
-                  type="number"
-                  placeholder="0"
-                  required
-                />
-
-                <SelectField
-                  name="unit"
-                  label="Unidad de Medida"
-                  options={UNIT_OPTIONS}
-                  placeholder="Seleccione unidad"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Estado */}
-            <div>
-              <SelectField
-                name="status"
-                label="Estado"
-                options={STATUS_OPTIONS}
-                required
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-start space-x-4 pt-4">
-              <button
-                type="button"
-                onClick={() => window.history.back()}
-                className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-              >
-                Actualizar Producto
-              </button>
-            </div>
-          </Form>
-        </Formik>
-      </div>
-    </AppLayout>
-  );
+        </AppLayout>
+    );
 }

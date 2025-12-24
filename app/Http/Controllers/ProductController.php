@@ -164,11 +164,18 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-
         $data = $request->validated();
 
-        // Procesar la imagen si se envió
+        // Eliminar el campo image del array data si no se subió uno nuevo
+        // para evitar que se sobrescriba con null la ruta vieja
+        unset($data['image']);
+
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            // Opcional: Eliminar la imagen anterior del disco si existe
+            // if ($product->image) {
+            //    Storage::disk('public')->delete(str_replace('/storage/', '', $product->image));
+            // }
+
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('products', $filename, 'public');
