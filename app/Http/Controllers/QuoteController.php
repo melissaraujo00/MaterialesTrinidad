@@ -2,111 +2,141 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreQuoteRequest;
 use App\Models\Customer;
+use App\Models\Department;
+use App\Models\District;
+use App\Models\Municipality;
+use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Quote;
 use App\Models\QuoteDetail;
-use App\Models\Permission;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
 class QuoteController extends Controller
 {
+
     public function __construct()
     {
-        // IMPORTANTE: Si te da error 403 (Forbidden), comenta esta línea
-        // hasta que tengas configurado el archivo QuotePolicy.php
         $this->authorizeResource(Quote::class, 'quote');
     }
 
-    // Helper privado para obtener los datos compartidos del usuario
-    // Esto evita repetir código en cada método
-    private function getAuthProps()
+    public function getQuoteData($user_id)
     {
-        $user = auth()->user();
-        return [
-            'user' => [
-                'id' => $user?->id,
-                'name' => $user?->name,
-                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
-            ]
-        ];
-    }
-
-    public function index()
-    {
-        $quotes = Quote::with(['customer', 'user', 'details'])
+        $data = Quote::query()
+            ->with('customer', 'user')
+            ->where('user_id', $user_id)
+            ->where('status', 'pendiente')
             ->orderBy('date', 'desc')
             ->get()
             ->map(function ($quote) {
                 return [
                     'id' => $quote->id,
-                    'customer_id' => $quote->customer_id,
-                    'customer_name' => $quote->customer->name ?? 'Cliente eliminado',
                     'date' => $quote->date,
-                    'subtotal' => $quote->subtotal,
-                    'total' => $quote->total,
-                    'status' => $quote->status ?? 'pendiente',
-                    'items_count' => $quote->details->count(),
+                    'total' => number_format($quote->total, 2),
+                    'customer' => [
+                        'id' => $quote->customer->id ?? null,
+                        'name' => $quote->customer->name ?? 'Cliente eliminado',
+                    ],
+                    'user' => [
+                        'id' => $quote->user->id ?? null,
+                        'name' => $quote->user->name ?? 'Usuario eliminado',
+                    ],
+                    'status' => $quote->status ?? 'Pendiente',
                 ];
             });
 
+        return response()->json(['data' => $data]);
+    }
+
+    public function getConfirmQuoteData($user_id)
+    {
+        $data = Quote::query()
+            ->with('customer', 'user')
+            ->where('status', 'confirmada')
+            ->orderBy('date', 'desc')
+            ->get()
+            ->map(function ($quote) {
+                return [
+                    'id' => $quote->id,
+                    'date' => $quote->date,
+                    'total' => number_format($quote->total, 2),
+                    'customer' => [
+                        'id' => $quote->customer->id ?? null,
+                        'name' => $quote->customer->name ?? 'Cliente eliminado',
+                    ],
+                    'user' => [
+                        'id' => $quote->user->id ?? null,
+                        'name' => $quote->user->name ?? 'Usuario eliminado',
+                    ],
+                    'status' => $quote->status ?? 'Pendiente',
+                ];
+            });
+
+        return response()->json(['data' => $data]);
+    }
+
+    public function index()
+    {
+        $user = auth()->user();
         return Inertia::render('quote/Index', [
-            'quotes' => $quotes,
-            'permissions' => Permission::all(), // Si usas esto en el front
-            'auth' => $this->getAuthProps(),    // <--- NECESARIO PARA EL LAYOUT
+            'permissions' => Permission::all(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
+            ]
         ]);
     }
+
+    public function confirmedQuotes()
+{
+
+    $this->authorize('viewAny', Quote::class);
+
+    $user = auth()->user();
+    return Inertia::render('quote/confirmedQuotes', [
+        'permissions' => Permission::all(),
+        'auth' => [
+            'user' => [
+                'id' => $user?->id,
+                'name' => $user?->name,
+                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+            ]
+        ]
+    ]);
+}
 
     public function create()
     {
-        // 1. Clientes (Si customers tampoco tiene 'status', quita el where ahí también)
-        // Asumiendo que customers SÍ tiene status, lo dejamos. Si falla, quítalo.
-        $customers = Customer::where('status', 'activo')
-            ->orderBy('name')
-            ->select('id', 'name')
-            ->get();
-
-        // 2. Productos - CORREGIDO
-        // Quitamos "where('status', 'activo')" porque la columna no existe.
-        // Laravel filtrará automáticamente los eliminados por el SoftDelete.
-        $products = Product::orderBy('name')
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => (float) $product->price,
-                    'stock' => $product->stock,
-                    'unit' => $product->unit ?? 'unidad',
-                ];
-            });
+        $departments = Department::all();
+        $municipalities = Municipality::all();
+        $districts = District::all();
 
         return Inertia::render('quote/Create', [
-            'customers' => $customers,
-            'products' => $products,
-            'auth' => $this->getAuthProps(),
+            'departments' => $departments,
+            'municipalities' => $municipalities,
+            'districts' => $districts,
         ]);
     }
-
-
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
+            'user_id' => 'required|exists:users,id',
             'date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
             'subtotal' => 'required|numeric|min:0',
-            'tax' => 'nullable|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
             'total' => 'required|numeric|min:0',
-            'status' => 'nullable|string',
-            'notes' => 'nullable|string|max:500',
+            'details' => 'required|array',
+            'details.*.amount' => 'required|integer|min:1',
+            'details.*.price' => 'required|numeric|min:0',
+            'details.*.subtotal' => 'required|numeric|min:0',
+            'details.*.product_id' => 'required|exists:products,id',
         ]);
 
         DB::beginTransaction();
@@ -114,155 +144,173 @@ class QuoteController extends Controller
         try {
             $quote = Quote::create([
                 'customer_id' => $validated['customer_id'],
-                'user_id' => auth()->id(),
+                'user_id' => $validated['user_id'],
                 'date' => $validated['date'],
                 'subtotal' => $validated['subtotal'],
-                'tax' => $validated['tax'] ?? 0,
-                'discount' => $validated['discount'] ?? 0,
                 'total' => $validated['total'],
-                'status' => $validated['status'] ?? 'pendiente',
-                'notes' => $validated['notes'] ?? null,
             ]);
 
-            foreach ($validated['items'] as $item) {
-                QuoteDetail::create([
-                    'quote_id' => $quote->id,
-                    'product_id' => $item['product_id'],
-                    'amount' => $item['quantity'],
-                    'price' => $item['price'],
-                    'subtotal' => $item['quantity'] * $item['price'],
-                ]);
+            foreach ($validated['details'] as $detail) {
+                $detail['quote_id'] = $quote->id;
+                QuoteDetail::create($detail);
             }
 
             DB::commit();
 
-            return redirect()->route('quotes.index')->with('success', 'Cotización creada exitosamente.');
-
+            return redirect()->route('quotes.index')->with([
+                'success' => 'Cotización y detalles creados exitosamente.',
+                'quote' => $quote
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors('Error al crear: ' . $e->getMessage());
+            return back()->withErrors('Error al crear la cotización: ' . $e->getMessage());
         }
     }
 
-        public function edit(Quote $quote)
+    public function show(Quote $quote)
     {
-        $quote->load(['details']);
+        try {
+            $quote->load(['customer', 'user', 'details.product']);
 
-        // Clientes
-        $customers = Customer::where('status', 'activo')
-            ->orderBy('name')
-            ->select('id', 'name')
-            ->get();
+            if (!$quote) {
+                return redirect()->route('quotes.index')->with('error', 'Cotización no encontrada.');
+            }
 
-        // Productos - CORREGIDO
-        // Quitamos la condición que causaba el error
-        $products = Product::orderBy('name')
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => (float) $product->price,
-                    'stock' => $product->stock,
-                    'unit' => $product->unit ?? 'unidad',
-                ];
-            });
-
-        // Preparar datos
-        $quoteData = [
-            'id' => $quote->id,
-            'customer_id' => $quote->customer_id,
-            'date' => $quote->date,
-            'subtotal' => (float) $quote->subtotal,
-            'tax' => (float) ($quote->tax ?? 0),
-            'discount' => (float) ($quote->discount ?? 0),
-            'total' => (float) $quote->total,
-            'status' => $quote->status,
-            'notes' => $quote->notes ?? '',
-            'items' => $quote->details->map(function ($detail) {
+            $details = $quote->details->map(function ($detail) {
                 return [
                     'id' => $detail->id,
                     'product_id' => $detail->product_id,
-                    'quantity' => (int) $detail->amount,
+                    'product_name' => $detail->product->name ?? 'Producto eliminado',
+                    'amount' => (int) $detail->amount,
                     'price' => (float) $detail->price,
                     'subtotal' => (float) $detail->subtotal,
                 ];
-            }),
-        ];
+            });
 
-        return Inertia::render('quote/Edit', [
-            'quote' => $quoteData,
-            'customers' => $customers,
-            'products' => $products,
-            'auth' => $this->getAuthProps(),
-        ]);
+            $quoteData = [
+                'id' => $quote->id,
+                'date' => $quote->date,
+                'subtotal' => (float) $quote->subtotal,
+                'total' => (float) $quote->total,
+                'status' => $quote->status ?? 'Pendiente',
+                'customer' => [
+                    'id' => $quote->customer->id ?? null,
+                    'name' => $quote->customer->name ?? 'Cliente eliminado',
+                ],
+                'user' => [
+                    'id' => $quote->user->id ?? null,
+                    'name' => $quote->user->name ?? 'Usuario eliminado',
+                ],
+            ];
+
+            return Inertia::render('quote/ShowDetails', [
+                'quote' => $quoteData,
+                'details' => $details->toArray(),
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->route('quotes.index')->with('error', 'Error al cargar la cotización: ' . $e->getMessage());
+        }
     }
 
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Quote $quote)
     {
-        // Si es solo actualización de estado (desde tabla)
-        if ($request->has('status') && !$request->has('items')) {
-             $validated = $request->validate([
-                'status' => 'required|string',
-            ]);
-            $quote->update($validated);
-            return redirect()->route('quotes.index')->with('success', 'Estado actualizado.');
-        }
-
-        // Actualización completa
-        $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-            'subtotal' => 'required|numeric|min:0',
-            'tax' => 'nullable|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'total' => 'required|numeric|min:0',
-            'status' => 'nullable|string',
-            'notes' => 'nullable|string|max:500',
-        ]);
-
-        DB::beginTransaction();
         try {
-            $quote->update([
-                'customer_id' => $validated['customer_id'],
-                'date' => $validated['date'],
-                'subtotal' => $validated['subtotal'],
-                'tax' => $validated['tax'] ?? 0,
-                'discount' => $validated['discount'] ?? 0,
-                'total' => $validated['total'],
-                'status' => $validated['status'] ?? $quote->status,
-                'notes' => $validated['notes'] ?? null,
-            ]);
+            // Validar si es una actualización de estado o de detalles
+            if ($request->has('status')) {
+                // Actualización de estado
+                $validated = $request->validate([
+                    'status' => 'required|string|in:pendiente,confirmada,cancelada,venta',
+                ]);
 
-            $quote->details()->delete();
+                $quote->update($validated);
 
-            foreach ($validated['items'] as $item) {
-                QuoteDetail::create([
-                    'quote_id' => $quote->id,
-                    'product_id' => $item['product_id'],
-                    'amount' => $item['quantity'],
-                    'price' => $item['price'],
-                    'subtotal' => $item['quantity'] * $item['price'],
+                return redirect()->route('quotes.index')->with([
+                    'success' => 'Estado de cotización actualizado exitosamente.',
+                    'quote' => $quote
+                ]);
+            } else {
+                // Actualización de detalles
+                $validated = $request->validate([
+                    'details' => 'required|array|min:1',
+                    'details.*.id' => 'nullable|exists:quote_details,id',
+                    'details.*.product_id' => 'required|exists:products,id',
+                    'details.*.amount' => 'required|integer|min:1',
+                    'details.*.price' => 'required|numeric|min:0',
+                    'details.*.subtotal' => 'required|numeric|min:0',
+                    'subtotal' => 'required|numeric|min:0',
+                    'total' => 'required|numeric|min:0',
+                ]);
+
+                DB::beginTransaction();
+
+                // Obtener los IDs de los detalles actuales
+                $currentDetailIds = $quote->details->pluck('id')->toArray();
+                $updatedDetailIds = collect($validated['details'])
+                    ->filter(function ($detail) {
+                        return isset($detail['id']);
+                    })
+                    ->pluck('id')
+                    ->toArray();
+
+                // Eliminar detalles que ya no están en la lista
+                $detailsToDelete = array_diff($currentDetailIds, $updatedDetailIds);
+                if (!empty($detailsToDelete)) {
+                    QuoteDetail::whereIn('id', $detailsToDelete)->delete();
+                }
+
+                // Actualizar o crear detalles
+                foreach ($validated['details'] as $detailData) {
+                    $detailData['quote_id'] = $quote->id;
+
+                    if (isset($detailData['id'])) {
+                        // Actualizar detalle existente
+                        QuoteDetail::where('id', $detailData['id'])
+                            ->update([
+                                'amount' => $detailData['amount'],
+                                'price' => $detailData['price'],
+                                'subtotal' => $detailData['subtotal'],
+                            ]);
+                    } else {
+                        // Crear nuevo detalle (si fuera necesario)
+                        QuoteDetail::create($detailData);
+                    }
+                }
+
+                // Actualizar totales de la cotización
+                $quote->update([
+                    'subtotal' => $validated['subtotal'],
+                    'total' => $validated['total'],
+                ]);
+
+                DB::commit();
+
+                return redirect()->route('quotes.show', $quote->id)->with([
+                    'success' => 'Cotización actualizada exitosamente.',
                 ]);
             }
 
-            DB::commit();
-            return redirect()->route('quotes.index')->with('success', 'Cotización actualizada.');
-
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors('Error al actualizar: ' . $e->getMessage());
+            return back()->withErrors('Error al actualizar la cotización: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Quote $quote)
     {
-        $quote->details()->delete(); // Asegurar borrar detalles primero si no hay cascada en BD
         $quote->delete();
-        return redirect()->route('quotes.index')->with('success', 'Cotización eliminada.');
+
+        return redirect()->route('quotes.index')->with('success', 'Cotización eliminada correctamente.');
     }
 }

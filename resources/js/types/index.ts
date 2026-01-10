@@ -1,3 +1,17 @@
+import { LucideIcon } from 'lucide-react';
+export interface NavItem {
+    title: string;
+    href?: string;
+    icon?: LucideIcon;
+    permission?: string;
+    children?: NavItem[];
+}
+export interface Brand {
+    id: number;
+    name: string;
+    description: string;
+}
+
 export interface Category {
     id: number;
     name: string;

@@ -87,13 +87,13 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
+    --background: 0 0% 100%;       /* Fondo blanco puro */
+    --foreground: 222.2 84% 4.9%;  /* Texto casi negro */
+    --card: 0 0% 100%;
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
@@ -103,8 +103,8 @@
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: oklch(0.87 0 0);
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
@@ -120,11 +120,13 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+    --radius: 0.5rem; /* Un borde ligeramente redondeado, pero profesional */
+    --primary: 222.2 47.4% 11.2%; /* Negro pizarra */
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
+    --background: 222.2 84% 4.9%;  /* Fondo oscuro profundo */
+    --foreground: 210 40% 98%;
     --card: oklch(0.145 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
@@ -139,7 +141,7 @@
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: oklch(0.269 0 0);
+    --border: 217.2 32.6% 17.5%;
     --input: oklch(0.269 0 0);
     --ring: oklch(0.439 0 0);
     --chart-1: oklch(0.488 0.243 264.376);
@@ -155,8 +157,31 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+
+
+}
+/* Estilos para forzar el modo oscuro en DataTables */
+.dark .dt-container,
+.dark .dataTable,
+.dark .dataTable th,
+.dark .dataTable td {
+    color: #e4e4e7 !important; /* zinc-200 */
 }
 
+.dark .dt-search input {
+    background-color: #09090b !important; /* zinc-950 */
+    border-color: #27272a !important; /* zinc-800 */
+    color: #ffffff !important;
+}
+
+.dark .dt-paging-button {
+    color: #a1a1aa !important; /* zinc-400 */
+}
+
+.dark .dt-length select {
+    background-color: #09090b !important;
+    color: #ffffff !important;
+}
 @layer base {
     * {
         @apply border-border;

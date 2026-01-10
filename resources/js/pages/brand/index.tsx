@@ -1,100 +1,68 @@
-import { useState } from "react";
-import { Head, usePage, Link } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
-import DataTable from "datatables.net-react";
 import DT from "datatables.net-dt";
+import DataTable from "datatables.net-react";
 import languageES from "datatables.net-plugins/i18n/es-ES.mjs";
-import "datatables.net-buttons-dt";
-import "datatables.net-responsive-dt";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import DeleteEntityModal from "../../components/DeleteEntityModal";
-import "datatables.net-buttons/js/buttons.html5";
-import "datatables.net-buttons/js/buttons.print";
-import jszip from "jszip";
+import { useBrandsTable } from "../../Features/Brands/hooks/useBrandActions";
 
-window.JSZip = jszip;
 DataTable.use(DT);
 
-interface Brand {
-    id: number;
-    name: string;
-    description: string;
-}
-
 export default function Brands() {
-    // Obtener permisos del usuario autenticado
-    const page = usePage();
-    const permissions =
-        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-            ? page.props.auth.user.permissions
-            : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
-
-    const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-    const openDeleteModal = (brand: Brand) => {
-        setSelectedBrand(brand);
-        setIsDeleteModalOpen(true);
-    };
-
-    const columns = [
-        { data: 'name' },
-        { data: 'description' },
-        {
-            data: null,
-            orderable: false,
-            searchable: false,
-            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                let actions = "";
-                if (hasPermission("editar marca")) {
-                    actions += `<a href="brands/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
-                }
-                if (hasPermission("eliminar marca")) {
-                    actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
-                }
-                td.innerHTML = actions;
-
-                if (hasPermission("eliminar marca")) {
-                    td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
-                }
-            }
-        }
-    ];
+    const {
+        columns,
+        selectedBrand,
+        isDeleteModalOpen,
+        setIsDeleteModalOpen,
+        hasPermission
+    } = useBrandsTable();
 
     return (
         <AppLayout>
-            <Head title="Brands" />
+            <Head title="Marcas" />
             <Toaster position="top-right" richColors />
 
-            <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
+            <div className="p-6 space-y-6 transition-colors duration-300">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                            Marcas
+                        </h1>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-instrument">
+                            Administra los fabricantes y marcas del inventario.
+                        </p>
+                    </div>
 
-                <div className="flex justify-end">
                     {hasPermission("crear marca") && (
-                        <Link
-                            href="/brands/create"
-                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
-                            Agregar Marca
-                        </Link>
+                        <Button asChild variant="default" size="sm" className="gap-2 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                            <Link href="/brands/create">
+                                <Plus className="h-4 w-4" />
+                                Agregar Marca
+                            </Link>
+                        </Button>
                     )}
                 </div>
 
-                <DataTable ajax="/api/brands/getBrandData" options={{
-                    language: languageES,
-                    responsive: true,
-                    layout: {
-                        topStart: ['pageLength'],
-                    },
-                }} columns={columns} className="display">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Descripcion</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                </DataTable>
+                <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors dark:border-zinc-800 dark:bg-zinc-950">
+                    <DataTable
+                        ajax="/api/brands/getBrandData"
+                        options={{
+                            language: languageES,
+                            responsive: true,
+                            layout: {
+                                topStart: ['pageLength'],
+                                topEnd: ['search'],
+                            },
+                        }}
+                        columns={columns}
+                        className="w-full text-sm text-zinc-900 dark:text-zinc-200"
+                    />
+                </div>
             </div>
+
             <DeleteEntityModal
                 isOpen={isDeleteModalOpen}
                 closeModal={() => setIsDeleteModalOpen(false)}

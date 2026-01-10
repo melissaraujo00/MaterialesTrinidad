@@ -1,293 +1,431 @@
-import React from 'react';
-import { Head, usePage } from '@inertiajs/react';
-import { Toaster } from 'sonner';
-import { Formik, Form, FieldArray } from 'formik';
-import AppLayout from '@/layouts/app-layout';
-import { FormField, SelectField } from '@/components/forms';
-import { useFormSubmit } from '@/hooks';
-import { useQuoteItems } from '@/hooks/forms/useQuoteItems';
-import { quoteValidationSchema, QUOTE_STATUS_OPTIONS } from '@/schemas/quoteSchema';
-import { Customer } from '@/types/entities/customer';
-import { Product } from '@/types/entities/product';
+import { Head, Link, usePage } from "@inertiajs/react";
+import AppLayout from "@/layouts/app-layout";
+import { useState } from "react";
+import { toast, Toaster } from "sonner";
+import CustomerList from "./CustomersList";
+import CustomerListButton from "../../components/CustomerListButton";
+import ProductList from "./ProducList";
+import { router } from "@inertiajs/react";
+import CreateCustomertButton from "@/components/CreateCustomerButton";
+import CreateCustomerModal from "./CreateCustomer";
+import { useEffect } from "react";
 
-interface PageProps {
-  customers: Customer[];
-  products: Product[];
+interface Customer {
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    nit: string;
+    district_id: number;
+    address: string;
+    description: string;
+    status: string;
 }
 
-export default function QuoteCreate() {
-  const { customers, products } = usePage<PageProps>().props;
+interface Product {
+    id: number;
+    name: string;
+    priceWithTax: number;
+    discountPrice: number | null;
+    brand_id: string;
+    category_id: string;
+    image: string;
+    stock: number;
+    stockMinimun: number;
+}
 
-  const quoteItems = useQuoteItems({ products });
+interface CartItem extends Product {
+    quantity: number;
+    applyDiscount: boolean;
+    totalPrice: number;
+}
 
-  const { handleSubmit } = useFormSubmit({
-    route: '/quotes',
-    method: 'post',
-    successMessage: 'Cotización creada con éxito'
-  });
+export default function CreateQuote() {
+    const page = usePage() as any;
+    const clienteCreated = page.props.customer
+    const { departments, municipalities, districts, } = usePage<{
+        departments: { id: number; name: string }[];
+        municipalities: { id: number; name: string; department_id: number }[];
+        districts: { id: number; name: string; municipality_id: number }[];
 
-  // Formatear precio
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-SV', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
-  };
+    }>().props;
 
-  // Obtener fecha actual en formato YYYY-MM-DD
-  const today = new Date().toISOString().split('T')[0];
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    const [cart, setCart] = useState<CartItem[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  return (
-    <AppLayout>
-      <Head title="Crear Cotización" />
-      <Toaster position="top-right" richColors />
+    const userId = page.props.auth?.user?.id;
+    const userName = page.props.auth?.user?.name;
 
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Crear Nueva Cotización</h2>
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [openCustomerList, setOpenCustomerList] = useState(false);
+    const [openCustomerCreate, setOpenCustomerCreate] = useState(false);
 
-        <Formik
-          initialValues={{
-            customer_id: '',
-            date: today,
-            items: quoteItems.items,
-            discount: 0,
-            notes: '',
-            status: 'pendiente'
-          }}
-          validationSchema={quoteValidationSchema}
-          onSubmit={(values) => {
-            // Calcular totales y agregar al submit
-            const dataToSubmit = {
-              ...values,
-              items: quoteItems.items,
-              subtotal: quoteItems.subtotal,
-              tax: quoteItems.taxAmount,
-              discount: quoteItems.discountAmount,
-              total: quoteItems.total
+
+    const openCustomerListModal = () => {
+        setOpenCustomerList(true);
+    };
+
+    const closeCustomerListModal = () => {
+        setOpenCustomerList(false);
+    };
+
+    const openCustomerCreatetModal = () => {
+        setOpenCustomerCreate(true);
+    };
+
+    const closeCustomerCreatetModal = () => {
+        setOpenCustomerCreate(false);
+    };
+
+    const handleSelectCustomer = (customer: Customer) => {
+        setSelectedCustomer(customer);
+        toast.success(`Cliente ${customer.name} seleccionado`);
+    };
+
+    useEffect(() => {
+        if (clienteCreated) {
+            setSelectedCustomer(clienteCreated);
+            toast.success(`Cliente ${clienteCreated.name} creado y seleccionado`);
+        }
+    }, [clienteCreated]);
+
+    const handleSelectProduct = (productWithDetails: Product & { quantity: number; applyDiscount: boolean }) => {
+        const productExistsInCart = cart.some(item => item.id === productWithDetails.id);
+
+        if (productExistsInCart) {
+            toast.error('Este producto ya está en la cotización');
+            return;
+        }
+
+        // LÓGICA CORREGIDA: Usar el precio que ya viene calculado desde ProducList
+        const price = productWithDetails.applyDiscount && productWithDetails.discountPrice
+            ? productWithDetails.discountPrice
+            : productWithDetails.priceWithTax;
+
+        const newItem: CartItem = {
+            ...productWithDetails,
+            totalPrice: price * productWithDetails.quantity
+        };
+
+        setCart(prev => [...prev, newItem]);
+
+        // El mensaje ya viene desde ProducList, no necesitamos duplicarlo aquí
+    };
+
+    const removeProductFromCart = (id: number) => {
+        setCart(prev => prev.filter(p => p.id !== id));
+        toast.success('Producto eliminado de la cotización');
+    };
+
+    const updateProductQuantity = (id: number, quantity: number) => {
+        if (quantity <= 0) {
+            removeProductFromCart(id);
+            return;
+        }
+
+        setCart(prev => prev.map(item => {
+            if (item.id === id) {
+                const price = item.applyDiscount && item.discountPrice
+                    ? item.discountPrice
+                    : item.priceWithTax;
+                return {
+                    ...item,
+                    quantity,
+                    totalPrice: price * quantity
+                };
+            }
+            return item;
+        }));
+    };
+
+    const getTotalCart = () => {
+        return cart.reduce((total, item) => total + item.totalPrice, 0);
+    };
+
+    const getSubtotal = () => {
+        return cart.reduce((total, item) => total + (item.priceWithTax * item.quantity), 0);
+    };
+
+    const getTotalDiscount = () => {
+        return cart.reduce((total, item) => {
+            if (item.applyDiscount && item.discountPrice) {
+                return total + ((item.priceWithTax - item.discountPrice) * item.quantity);
+            }
+            return total;
+        }, 0);
+    };
+
+    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    const clearCart = () => {
+        setCart([]);
+        toast.success('Cotización limpiada');
+    };
+
+    const saveQuotation = () => {
+        if (!selectedCustomer || cart.length === 0) {
+            toast.error("Debe seleccionar un cliente y agregar productos.");
+            return;
+        }
+
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+
+        const details = cart.map((item) => {
+            const price = item.applyDiscount && item.discountPrice
+                ? item.discountPrice
+                : item.priceWithTax;
+
+            return {
+                amount: item.quantity,
+                price: price,
+                subtotal: price * item.quantity,
+                quote_id: 1,
+                product_id: item.id,
             };
-            handleSubmit(dataToSubmit);
-          }}
-          enableReinitialize
-        >
-          {({ values, setFieldValue, errors, touched }) => (
-            <Form className="space-y-6">
-              {/* Información General */}
-              <div className="border-b pb-4">
-                <h3 className="text-lg font-medium mb-3">Información General</h3>
+        });
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <SelectField
-                    name="customer_id"
-                    label="Cliente"
-                    options={customers}
-                    placeholder="Seleccione un cliente"
-                    required
-                  />
+        const quotationData = {
+            total: getTotalCart(),
+            date: currentDate,
+            subtotal: getSubtotal(),
+            customer_id: selectedCustomer.id,
+            user_id: userId,
+            details
+        };
 
-                  <FormField
-                    name="date"
-                    label="Fecha"
-                    type="date"
-                    required
-                  />
+        router.post("/quotes", quotationData, {
+            onSuccess: (response: any) => {
+                toast.success("Cotización guardada exitosamente.");
 
-                  <SelectField
-                    name="status"
-                    label="Estado"
-                    options={QUOTE_STATUS_OPTIONS}
-                    required
-                  />
-                </div>
-              </div>
+            },
+            onError: (errors) => {
+                toast.error("Ocurrió un error al guardar la cotización.");
+                console.error(errors);
+                setIsSubmitting(false);
+            }
+        });
 
-              {/* Items de Cotización */}
-              <div className="border-b pb-4">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-lg font-medium">Productos</h3>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      quoteItems.addItem();
-                      setFieldValue('items', [...quoteItems.items, { product_id: '', quantity: 1, price: 0 }]);
-                    }}
-                    className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition"
-                  >
-                    + Agregar Producto
-                  </button>
-                </div>
 
-                <FieldArray name="items">
-                  {() => (
-                    <div className="space-y-3">
-                      {quoteItems.items.map((item, index) => (
-                        <div key={index} className="grid grid-cols-12 gap-2 items-start bg-gray-50 dark:bg-gray-900 p-3 rounded">
-                          {/* Producto */}
-                          <div className="col-span-5">
-                            <select
-                              value={item.product_id}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                quoteItems.updateItem(index, 'product_id', value);
-                                setFieldValue(`items.${index}.product_id`, value);
-                                // Actualizar precio automáticamente
-                                const price = quoteItems.getProductPrice(value);
-                                setFieldValue(`items.${index}.price`, price);
-                              }}
-                              className="w-full px-2 py-1 border rounded text-sm dark:bg-gray-800 dark:border-gray-700"
-                            >
-                              <option value="">Seleccionar producto</option>
-                              {products.map((product) => (
-                                <option key={product.id} value={product.id}>
-                                  {product.name} - {formatPrice(product.priceWithTax)}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
 
-                          {/* Cantidad */}
-                          <div className="col-span-2">
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                quoteItems.updateItem(index, 'quantity', value);
-                                setFieldValue(`items.${index}.quantity`, value);
-                              }}
-                              placeholder="Cant."
-                              min="1"
-                              className="w-full px-2 py-1 border rounded text-sm dark:bg-gray-800 dark:border-gray-700"
-                            />
-                          </div>
 
-                          {/* Precio */}
-                          <div className="col-span-2">
-                            <input
-                              type="number"
-                              value={item.price}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                quoteItems.updateItem(index, 'price', value);
-                                setFieldValue(`items.${index}.price`, value);
-                              }}
-                              placeholder="Precio"
-                              step="0.01"
-                              min="0"
-                              className="w-full px-2 py-1 border rounded text-sm dark:bg-gray-800 dark:border-gray-700"
-                            />
-                          </div>
 
-                          {/* Subtotal */}
-                          <div className="col-span-2 flex items-center">
-                            <span className="text-sm font-medium">
-                              {formatPrice(quoteItems.calculateItemSubtotal(item))}
-                            </span>
-                          </div>
+    };
 
-                          {/* Eliminar */}
-                          <div className="col-span-1 flex items-center">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                quoteItems.removeItem(index);
-                                const newItems = quoteItems.items.filter((_, i) => i !== index);
-                                setFieldValue('items', newItems);
-                              }}
-                              className="text-red-600 hover:text-red-800 text-sm"
-                              disabled={quoteItems.items.length === 1}
-                            >
-                              🗑️
-                            </button>
-                          </div>
+    return (
+        <AppLayout>
+            <Head title="Crear Cotización" />
+            <Toaster position="top-right" richColors />
+
+            <div className="p-6 bg-white rounded-xl shadow dark:bg-black/10 text-black dark:text-white space-y-6">
+                <h1 className="text-2xl font-bold">Nueva Cotización</h1>
+                <h1 className="text-md font-bold">Vendedor: {userName}</h1>
+
+                {/* Información del cliente seleccionado */}
+                {selectedCustomer && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 w-100">
+                        <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Cliente Seleccionado:</h3>
+                        <div className="grid grid-cols-[auto,1fr] gap-4 text-blue-800 dark:text-blue-200 text-sm">
+                            <div>
+                                <p className="font-medium">{selectedCustomer.name}</p>
+                                <p>{selectedCustomer.email}</p>
+                            </div>
+                            <div>
+                                <p>{selectedCustomer.phoneNumber}</p>
+                                <p>NIT: {selectedCustomer.nit}</p>
+                            </div>
                         </div>
-                      ))}
                     </div>
-                  )}
-                </FieldArray>
-
-                {typeof errors.items === 'string' && touched.items && (
-                  <p className="text-red-500 text-sm mt-2">{errors.items}</p>
                 )}
-              </div>
 
-              {/* Resumen de Totales */}
-              <div className="border-b pb-4">
-                <h3 className="text-lg font-medium mb-3">Resumen</h3>
+                {/* Botones de acción */}
+                <div className="flex gap-4 flex-wrap">
+                    <CustomerListButton openModal={openCustomerListModal} />
+                    <CreateCustomertButton openModal={openCustomerCreatetModal} />
 
-                <div className="max-w-md ml-auto space-y-2">
-                  {/* Descuento */}
-                  <div className="flex items-center gap-4">
-                    <label className="text-sm font-medium w-32">Descuento (%):</label>
-                    <input
-                      type="number"
-                      value={quoteItems.discount}
-                      onChange={(e) => {
-                        const value = Number(e.target.value) || 0;
-                        quoteItems.setDiscount(value);
-                        setFieldValue('discount', value);
-                      }}
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      className="px-3 py-1 border rounded w-24 dark:bg-gray-800 dark:border-gray-700"
-                    />
-                  </div>
+                    <button
+                        onClick={() => setIsProductModalOpen(true)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                    >
+                        Agregar Productos
+                    </button>
 
-                  <div className="border-t pt-2 space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Subtotal:</span>
-                      <span className="font-medium">{formatPrice(quoteItems.subtotal)}</span>
-                    </div>
-
-                    {quoteItems.discount > 0 && (
-                      <div className="flex justify-between text-sm text-green-600">
-                        <span>Descuento ({quoteItems.discount}%):</span>
-                        <span>-{formatPrice(quoteItems.discountAmount)}</span>
-                      </div>
+                    {cart.length > 0 && (
+                        <button
+                            onClick={clearCart}
+                            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                        >
+                            Limpiar Cotización
+                        </button>
                     )}
-
-                    <div className="flex justify-between text-sm">
-                      <span>IVA (13%):</span>
-                      <span className="font-medium">{formatPrice(quoteItems.taxAmount)}</span>
-                    </div>
-
-                    <div className="flex justify-between text-lg font-bold border-t pt-2">
-                      <span>Total:</span>
-                      <span>{formatPrice(quoteItems.total)}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
 
-              {/* Notas */}
-              <div>
-                <FormField
-                  name="notes"
-                  label="Notas / Observaciones"
-                  placeholder="Información adicional sobre la cotización..."
-                />
-              </div>
+                {/* Resumen de carrito */}
+                <div className="border-t pt-4">
+                    <h2 className="text-lg font-semibold mb-4">Productos en la Cotización:</h2>
+                    {cart.length === 0 ? (
+                        <div className="text-center py-8">
+                            <p className="text-gray-500 text-lg">No hay productos en la cotización.</p>
+                            <p className="text-gray-400 text-sm mt-2">Haz clic en "Agregar Productos" para comenzar.</p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm border-collapse border border-gray-200 dark:border-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <th className="text-left p-3 border border-gray-200 dark:border-gray-700">Producto</th>
+                                        <th className="text-left p-3 border border-gray-200 dark:border-gray-700">Categoria</th>
+                                        <th className="text-center p-3 border border-gray-200 dark:border-gray-700">Cantidad</th>
+                                        <th className="text-right p-3 border border-gray-200 dark:border-gray-700">Precio Unit.</th>
+                                        <th className="text-center p-3 border border-gray-200 dark:border-gray-700">Descuento C/U</th>
+                                        <th className="text-center p-3 border border-gray-200 dark:border-gray-700">Descuento Total</th>
+                                        <th className="text-right p-3 border border-gray-200 dark:border-gray-700">Total</th>
+                                        <th className="text-center p-3 border border-gray-200 dark:border-gray-700">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cart.map(item => (
+                                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <td className="p-3 border border-gray-200 dark:border-gray-700">
+                                                <div>
+                                                    <div className="font-medium">{item.name}</div>
+                                                </div>
+                                            </td>
+                                            <td className="p-3 border border-gray-200 dark:border-gray-700">
+                                                <div>
+                                                    <div className="font-medium">{item.category_id}</div>
+                                                </div>
+                                            </td>
+                                            <td className="p-3 text-center border border-gray-200 dark:border-gray-700">
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-3 text-right border border-gray-200 dark:border-gray-700">
+                                                {item.applyDiscount && item.discountPrice ? (
+                                                    <div>
+                                                        <div className="text-green-600 font-medium">
+                                                            ${item.discountPrice}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 line-through">
+                                                            ${item.priceWithTax}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="font-medium">${item.priceWithTax}</div>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-center border border-gray-200 dark:border-gray-700">
+                                                {item.applyDiscount && item.discountPrice ? (
+                                                    <span className="text-green-700 dark:text-green-400">
+                                                        ${(item.priceWithTax - item.discountPrice).toFixed(2)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-gray-400 italic">NO</span>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-right font-semibold border border-gray-200 dark:border-gray-700">
+                                                {item.applyDiscount && item.discountPrice ? (
+                                                    <span className="text-green-700 dark:text-green-400">
+                                                        ${((item.priceWithTax - item.discountPrice) * item.quantity).toFixed(2)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-gray-400 italic">NO</span>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-center border border-gray-200 dark:border-gray-700">
+                                                ${item.totalPrice}
+                                            </td>
+                                            <td className="p-3 text-center border border-gray-200 dark:border-gray-700">
+                                                <button
+                                                    className="text-red-600 hover:text-red-800 text-xs px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                                                    onClick={() => removeProductFromCart(item.id)}
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot className="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <td colSpan={6} className="p-3 text-right font-semibold border border-gray-200 dark:border-gray-700">
+                                            subtotal:
+                                        </td>
+                                        <td colSpan={2} className="p-3 text-center text-lg font-bold border border-gray-200 dark:border-gray-700">
+                                            ${getSubtotal()}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan={6} className="p-3 text-right font-semibold border border-gray-200 dark:border-gray-700">
+                                            descuento total:
+                                        </td>
+                                        <td colSpan={2} className="p-3 text-center text-lg font-bold border border-gray-200 dark:border-gray-700">
+                                            ${getTotalDiscount().toFixed(2)}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan={6} className="p-3 text-right font-semibold border border-gray-200 dark:border-gray-700">
+                                            Total general:
+                                        </td>
+                                        <td colSpan={2} className="p-3 text-center text-lg font-bold border border-gray-200 dark:border-gray-700">
+                                            ${getTotalCart().toFixed(2)}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    )}
+                </div>
 
-              {/* Actions */}
-              <div className="flex justify-start space-x-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => window.history.back()}
-                  className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-                >
-                  Crear Cotización
-                </button>
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
-    </AppLayout>
-  );
+                {/* Botón para enviar cotización */}
+                <div className="pt-4 border-t">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={saveQuotation}
+                            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            disabled={!selectedCustomer || cart.length === 0 || isSubmitting}
+                        >
+                            {isSubmitting ? 'Guardando...' : 'Guardar Cotización'}
+                        </button>
+
+                        {(!selectedCustomer || cart.length === 0) && (
+                            <div className="text-sm text-gray-500">
+                                {!selectedCustomer && (
+                                    <p>• Selecciona un cliente</p>
+                                )}
+                                {cart.length === 0 && (
+                                    <p>• Agrega al menos un producto</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Modales */}
+            <CustomerList
+                isOpen={openCustomerList}
+                closeModal={closeCustomerListModal}
+                onSelectCustomer={handleSelectCustomer}
+            />
+
+            <ProductList
+                items={cart}
+                isOpen={isProductModalOpen}
+                closeModal={() => setIsProductModalOpen(false)}
+                onSelectProduct={handleSelectProduct}
+            />
+
+            <CreateCustomerModal
+                isOpen={openCustomerCreate}
+                onClose={closeCustomerCreatetModal}
+                departments={departments}
+                municipalities={municipalities}
+                districts={districts}
+            />
+        </AppLayout>
+    );
 }

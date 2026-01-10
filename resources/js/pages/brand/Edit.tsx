@@ -1,135 +1,121 @@
-import React  from "react";
-import { Head } from "@inertiajs/react";
-import { Toaster, toast } from "sonner";
-import { router } from "@inertiajs/react";
-import * as Yup from 'yup';
-import { useState } from 'react';
+import { Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
-import { Formik, Field } from 'formik';
-
-interface Brand {
-    id: number;
-    name: string;
-    description: string;
-}
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useBrandEdit } from "./hooks/use-brand-edit";
+import { Brand } from "@/types";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 
 interface Props {
     brand: Brand;
 }
 
-const BrandEdit: React.FC<Props> = ({ brand }) => {
-    const [brandExists] = useState(false);
-
-    const validationSchema = Yup.object({
-        name: Yup.string().min(3, 'El nombre debe tener al menos 3 caracteres').required('Campo requerido'),
-        description: Yup.string().min(3, 'La descripcion debe tener al menos 3 caracteres')
-    });
-
-
-    const handleSubmit = (values: { name: string; description: string }) => {
-        if (brandExists) {
-        toast.error("Este nombre de marca ya existe.");
-        return;
-        }
-        router.put(route('brands.update', brand.id), values, {
-        onSuccess: () => {
-            setTimeout(() => {
-                toast.success("Marca editada con éxito.");
-            }, 400);
-            router.reload();
-            },
-            onError: (err) => {
-                if (err.name) {
-                    toast.error(err.name);
-                }
-                else{
-                    toast.error("Error al editar marca.")
-                console.error("Error al editar marca", err);
-                }
-
-
-            },
-        });
-    };
+export default function Edit({ brand }: Props) {
+    const { data, setData, submit, processing, errors } = useBrandEdit(brand);
 
     return (
         <AppLayout>
-            <Head title="Editar Marca" />
-            <Toaster position="top-right" richColors />
+            <Head title={`Editar Marca: ${brand.name}`} />
 
-            <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <h2 className="text-2xl font-semibold mb-4">Editar Marcas</h2>
-                <Formik
-                initialValues={{
-                    id: brand.id.toString(),
-                    name: brand.name,
-                    description: brand.description ?? '',
-                }}
-                enableReinitialize={true}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
+            <div className="max-w-2xl mx-auto p-6 space-y-6">
+                {/* Header dinámico */}
+                <div className="flex items-center gap-4">
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                        <Link href="/brands">
+                            <ArrowLeft className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                        </Link>
+                    </Button>
+                    <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                        Editar Marca
+                    </h2>
+                </div>
+
+                {/* Tarjeta del Formulario Adaptable */}
+                <form
+                    onSubmit={submit}
+                    className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl p-8 space-y-6 transition-colors"
                 >
-                {({ values, handleChange, handleBlur, touched, errors,  handleSubmit}) => (
+                    <div className="space-y-4">
+                        {/* Nombre de Marca */}
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="name"
+                                className={errors.name ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}
+                            >
+                                Nombre de Marca
+                            </Label>
+                            <Input
+                                id="name"
+                                value={data.name}
+                                onChange={(e) => setData("name", e.target.value)}
+                                className={`
+                                    bg-transparent transition-colors
+                                    ${errors.name
+                                        ? "border-red-500 focus-visible:ring-red-500"
+                                        : "border-zinc-200 dark:border-zinc-800 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-700"}
+                                `}
+                            />
+                            {errors.name && (
+                                <p className="text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+                                    {errors.name}
+                                </p>
+                            )}
+                        </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-2">
-                    {/* Name */}
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Nombre
-                        </label>
-                        <Field
-                        type="text"
-                        id="name"
-                        placeholder="Ej: Terniun"
-                        name="name"
-                        value={values.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                        required
-                        />
-                        {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
+                        {/* Descripción */}
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="description"
+                                className="text-zinc-700 dark:text-zinc-300"
+                            >
+                                Descripción
+                            </Label>
+                            <Textarea
+                                id="description"
+                                value={data.description}
+                                onChange={(e) => setData("description", e.target.value)}
+                                className="min-h-[120px] resize-none bg-transparent border-zinc-200 dark:border-zinc-800 shadow-none focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-700"
+                            />
+                            {errors.description && (
+                                <p className="text-xs font-medium text-red-500">{errors.description}</p>
+                            )}
+                        </div>
                     </div>
 
-                    {/* First Name */}
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Descripcion (Opcional)
-                        </label>
-                        <Field
-                        type="text"
-                        id="description"
-                        name="description"
-                        placeholder="Ej: Lamina es una marca de productos de calidad"
-                        value={values.description}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                        />
-                        {touched.description && errors.description && <small className="text-red-500">{errors.description}</small>}
-                    </div>
-                    {/* Submit Button */}
-                    <div className="flex justify-start space-x-5">
-                        <button
-                        type="button"
-                        onClick={() => window.history.back()}  // Volver a la página anterior
-                        className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
+                    {/* Footer del Formulario */}
+                    <div className="flex justify-end gap-3 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            asChild
+                            disabled={processing}
+                            className="dark:border-zinc-800 dark:hover:bg-zinc-900 dark:text-zinc-300"
                         >
-                        Cancelar
-                        </button>
-                        <button
-                        type="submit"
-                        className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
+                            <Link href="/brands">Cancelar</Link>
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="min-w-[140px] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
                         >
-                        Actualizar
-                        </button>
+                            {processing ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="mr-2 h-4 w-4" />
+                            )}
+                            Guardar Cambios
+                        </Button>
                     </div>
-                    </form>
-                )}
-                </Formik>
+                </form>
             </div>
         </AppLayout>
     );
-};
-
-export default BrandEdit;
+}
