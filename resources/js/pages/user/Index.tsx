@@ -6,11 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Toaster } from "sonner";
 import { UserPlus, Search } from "lucide-react";
 import { GenericTable } from "@/components/GenericTable";
-import { useUserTable } from "./hooks/useUserTable"; // Importamos el hook
+import DeleteEntityModal from "@/components/DeleteEntityModal"; // Modal genérico
+import { useUserTable } from "./hooks/useUserTable";
 
 export default function UserIndex() {
-    // Extraemos toda la lógica del hook
-    const { filteredUsers, columns, searchTerm, setSearchTerm } = useUserTable();
+    const {
+        filteredUsers,
+        columns,
+        searchTerm,
+        setSearchTerm,
+        selectedUser,           // Nuevo
+        isDeleteModalOpen,      // Nuevo
+        setIsDeleteModalOpen,   // Nuevo
+        hasPermission           // Nuevo: Traemos la función
+    } = useUserTable();
 
     return (
         <AppLayout>
@@ -18,7 +27,6 @@ export default function UserIndex() {
             <Toaster position="top-right" richColors />
 
             <div className="p-4 md:p-8 space-y-6">
-                {/* Cabecera */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-instrument">
@@ -28,14 +36,17 @@ export default function UserIndex() {
                             Administra los accesos y roles de tu equipo.
                         </p>
                     </div>
-                    <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
-                        <Link href={route('users.create')}>
-                            <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
-                        </Link>
-                    </Button>
+
+                    {/* AQUI APLICAMOS EL PERMISO DE CREAR */}
+                    {hasPermission("crear usuario") && (
+                        <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
+                            <Link href={route('users.create')}>
+                                <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
-                {/* Buscador */}
                 <div className="relative max-w-sm">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <Input
@@ -46,11 +57,19 @@ export default function UserIndex() {
                     />
                 </div>
 
-                {/* Tabla Genérica (Datos y Columnas vienen del hook) */}
                 <GenericTable
                     data={filteredUsers}
                     columns={columns}
                     emptyMessage="No se encontraron usuarios coincidentes."
+                />
+
+                {/* Modal de Eliminación conectado */}
+                <DeleteEntityModal
+                    isOpen={isDeleteModalOpen}
+                    closeModal={() => setIsDeleteModalOpen(false)}
+                    entity={selectedUser}
+                    entityType="Usuarios"
+                    deleteEndpoint="/users" // La ruta base para eliminar (users.destroy)
                 />
             </div>
         </AppLayout>

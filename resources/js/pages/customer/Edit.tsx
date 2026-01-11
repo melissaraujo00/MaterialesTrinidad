@@ -1,187 +1,201 @@
-// pages/customer/edit.tsx
-import React, { useMemo } from 'react';
-import { Head, usePage } from '@inertiajs/react';
-import { Toaster } from 'sonner';
-import { Formik, Form } from 'formik';
-import AppLayout from '@/layouts/app-layout';
-import { FormField, SelectField } from '@/components/forms';
-import { useLocationFilters, useFormSubmit } from '@/hooks';
-import { customerValidationSchema } from '@/schemas';
-import { Customer, Department, Municipality, District } from '@/types';
+import React from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
+import AppLayout from "@/layouts/app-layout";
+import { Toaster } from "sonner";
+import { useCustomerEdit } from "./hooks/useCustomerEdit"; // Importamos el nuevo hook
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, Save, MapPin, User, Loader2 } from "lucide-react";
 
 interface PageProps {
-  customer: Customer;
-  departments: Department[];
-  municipalities: Municipality[];
-  districts: District[];
+    customer: any;
+    departments: any[];
+    municipalities: any[];
+    districts: any[];
 }
 
 export default function CustomerEdit() {
-  const { customer, departments, municipalities, districts } = usePage<PageProps>().props;
+    const props = usePage<PageProps>().props;
 
-  // Calcular IDs iniciales de ubicación
-  const initialLocation = useMemo(() => {
-    const district = districts.find(d => d.id === customer.district_id);
-    const municipality = district
-      ? municipalities.find(m => m.id === district.municipality_id)
-      : null;
-    const department = municipality
-      ? departments.find(dep => dep.id === municipality.department_id)
-      : null;
+    // Usamos el hook de edición
+    const {
+        form,
+        submit,
+        filteredMunicipalities,
+        filteredDistricts,
+        loading
+    } = useCustomerEdit(props);
 
-    return {
-      departmentId: department?.id,
-      municipalityId: municipality?.id
-    };
-  }, [customer.district_id, districts, municipalities, departments]);
+    const { register, setValue, watch, formState: { errors } } = form;
 
-  // Hook para filtros de ubicación
-  const locationFilters = useLocationFilters({
-    initialDepartmentId: initialLocation.departmentId,
-    initialMunicipalityId: initialLocation.municipalityId,
-    departments,
-    municipalities,
-    districts
-  });
+    return (
+        <AppLayout>
+            <Head title={`Editar Cliente: ${props.customer.name}`} />
+            <Toaster position="top-right" richColors />
 
-  // Hook para submit
-  const { handleSubmit } = useFormSubmit({
-    route: `/customers/${customer.id}`,
-    method: 'put',
-    successMessage: 'Cliente actualizado con éxito'
-  });
+            <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
 
-  return (
-    <AppLayout>
-      <Head title="Editar Cliente" />
-      <Toaster position="top-right" richColors />
+                {/* Cabecera */}
+                <div className="flex items-center gap-4 mb-6">
+                    <Button asChild variant="ghost" size="icon" className="rounded-full">
+                        <Link href={route('customers.index')}>
+                            <ArrowLeft className="h-5 w-5 text-zinc-600" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-instrument">
+                            Editar Cliente
+                        </h1>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            Actualizando información de <span className="font-semibold text-zinc-900 dark:text-zinc-100">{props.customer.name}</span>
+                        </p>
+                    </div>
+                </div>
 
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Editar Cliente</h2>
+                <form onSubmit={submit} className="space-y-8">
 
-        <Formik
-          initialValues={{
-            name: customer.name || '',
-            email: customer.email || '',
-            phoneNumber: customer.phoneNumber || '',
-            nit: customer.nit || '',
-            department_id: locationFilters.selectedDepartment,
-            municipality_id: locationFilters.selectedMunicipality,
-            district_id: customer.district_id?.toString() || '',
-            address: customer.address || '',
-            description: customer.description || '',
-            status: customer.status || ''
-          }}
-          validationSchema={customerValidationSchema}
-          onSubmit={handleSubmit}
-        >
-          <Form className="space-y-2">
-            {/* Name */}
-            <FormField
-              name="name"
-              label="Nombre"
-              placeholder="Ej: Juan Perez"
-              required
-            />
+                    {/* Sección 1: Información General */}
+                    <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                            <User className="h-5 w-5 text-blue-600" />
+                            <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">Información General</h3>
+                        </div>
 
-            {/* Email */}
-            <FormField
-              name="email"
-              type="email"
-              label="Correo Electronico"
-              placeholder="Ej: nombre@gmail.com"
-            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className={errors.name && "text-red-500"}>Nombre Completo *</Label>
+                                <Input id="name" {...register("name")} />
+                                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                            </div>
 
-            {/* Phone Number */}
-            <FormField
-              name="phoneNumber"
-              type="tel"
-              label="Numero de Telefono"
-              placeholder="56437632"
-              required
-            />
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className={errors.email && "text-red-500"}>Correo Electrónico</Label>
+                                <Input id="email" type="email" {...register("email")} />
+                                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                            </div>
 
-            {/* NIT */}
-            <FormField
-              name="nit"
-              label="NIT"
-              placeholder="Ej: 0000-000000-000-0"
-            />
+                            <div className="space-y-2">
+                                <Label htmlFor="phoneNumber" className={errors.phoneNumber && "text-red-500"}>Teléfono *</Label>
+                                <Input id="phoneNumber" {...register("phoneNumber")} />
+                                {errors.phoneNumber && <p className="text-xs text-red-500">{errors.phoneNumber.message}</p>}
+                            </div>
 
-            {/* Departamento */}
-            <SelectField
-              name="department_id"
-              label="Departamento"
-              options={departments}
-              placeholder="Seleccione un Departamento"
-              required
-              onChange={locationFilters.handleDepartmentChange}
-            />
+                             <div className="space-y-2">
+                                <Label htmlFor="nit" className={errors.nit && "text-red-500"}>NIT</Label>
+                                <Input id="nit" {...register("nit")} />
+                                {errors.nit && <p className="text-xs text-red-500">{errors.nit.message}</p>}
+                            </div>
 
-            {/* Municipio */}
-            <SelectField
-              name="municipality_id"
-              label="Municipio"
-              options={locationFilters.filteredMunicipalities}
-              placeholder="Seleccione un Municipio"
-              required
-              onChange={locationFilters.handleMunicipalityChange}
-            />
+                            {/* Estado (Solo visible en edición) */}
+                            <div className="space-y-2">
+                                <Label>Estado del Cliente</Label>
+                                <Select
+                                    onValueChange={(val: any) => setValue("status", val)}
+                                    value={watch("status")}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="activo">Activo</SelectItem>
+                                        <SelectItem value="inactivo">Inactivo</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
 
-            {/* Distrito */}
-            <SelectField
-              name="district_id"
-              label="Distrito"
-              options={locationFilters.filteredDistricts}
-              placeholder="Seleccione un Distrito"
-              required
-            />
+                    {/* Sección 2: Ubicación */}
+                    <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                            <MapPin className="h-5 w-5 text-green-600" />
+                            <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">Dirección</h3>
+                        </div>
 
-            {/* Address */}
-            <FormField
-              name="address"
-              label="Direccion"
-              placeholder="Ej: Col. Francisco Casa #4"
-            />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div className="space-y-2">
+                                <Label>Departamento</Label>
+                                <Select onValueChange={(val) => setValue("department_id", val)} value={watch("department_id")}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {props.departments.map((dept) => (
+                                            <SelectItem key={dept.id} value={String(dept.id)}>{dept.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-            {/* Description */}
-            <FormField
-              name="description"
-              label="Descripcion Opcional"
-              placeholder="Ej: Frente de ferreteria Olivia"
-            />
+                            <div className="space-y-2">
+                                <Label>Municipio</Label>
+                                <Select
+                                    onValueChange={(val) => setValue("municipality_id", val)}
+                                    value={watch("municipality_id")}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {filteredMunicipalities.map((muni) => (
+                                            <SelectItem key={muni.id} value={String(muni.id)}>{muni.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-            {/* Status */}
-            <SelectField
-              name="status"
-              label="Estado"
-              options={[
-                { id: 'activo', name: 'Activo' },
-                { id: 'inactivo', name: 'Inactivo' }
-              ]}
-              placeholder="Selecciona un Estado"
-              required
-            />
+                            <div className="space-y-2">
+                                <Label className={errors.district_id && "text-red-500"}>Distrito *</Label>
+                                <Select
+                                    onValueChange={(val) => setValue("district_id", val)}
+                                    value={watch("district_id")}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {filteredDistricts.map((dist) => (
+                                            <SelectItem key={dist.id} value={String(dist.id)}>{dist.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.district_id && <p className="text-xs text-red-500">{errors.district_id.message}</p>}
+                            </div>
+                        </div>
 
-            {/* Actions */}
-            <div className="flex justify-start space-x-4">
-              <button
-                type="button"
-                onClick={() => window.history.back()}
-                className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-              >
-                Actualizar Cliente
-              </button>
+                        <div className="space-y-2">
+                            <Label htmlFor="address" className={errors.address && "text-red-500"}>Dirección Exacta *</Label>
+                            <Textarea id="address" {...register("address")} className="resize-none" />
+                            {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
+                        </div>
+
+                        <div className="space-y-2 mt-4">
+                            <Label htmlFor="description">Referencia / Descripción</Label>
+                            <Input id="description" {...register("description")} />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-4 pt-4">
+                        <Button variant="outline" asChild type="button">
+                            <Link href={route('customers.index')}>Cancelar</Link>
+                        </Button>
+                        <Button type="submit" disabled={loading} className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900">
+                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Actualizar Cliente
+                        </Button>
+                    </div>
+
+                </form>
             </div>
-          </Form>
-        </Formik>
-      </div>
-    </AppLayout>
-  );
+        </AppLayout>
+    );
 }

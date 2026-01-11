@@ -9,6 +9,7 @@ export interface Column<T> {
 interface Props<T> {
     data: T[];
     columns: Column<T>[];
+    emptyMessage?: string;
 }
 
 export function GenericTable<T>({ data, columns }: Props<T>) {
