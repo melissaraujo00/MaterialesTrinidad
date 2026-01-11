@@ -38,7 +38,7 @@ export default function UserIndex() {
                     </div>
 
                     {/* AQUI APLICAMOS EL PERMISO DE CREAR */}
-                    {hasPermission("crear usuario") && (
+                    {hasPermission("crear usuarios") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
                             <Link href={route('users.create')}>
                                 <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
