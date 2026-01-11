@@ -122,11 +122,15 @@
     --sidebar-ring: oklch(0.87 0 0);
     --radius: 0.5rem; /* Un borde ligeramente redondeado, pero profesional */
     --primary: 222.2 47.4% 11.2%; /* Negro pizarra */
+
 }
 
+
+
+
 .dark {
-    --background: 222.2 84% 4.9%;  /* Fondo oscuro profundo */
-    --foreground: 210 40% 98%;
+    --background: oklch(0.145 0 0); /* Fondo oscuro profundo */
+    --foreground: oklch(0.985 0 0);
     --card: oklch(0.145 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
@@ -141,7 +145,7 @@
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.396 0.141 25.723);
     --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border: 217.2 32.6% 17.5%;
+    --border: oklch(0.269 0 0);
     --input: oklch(0.269 0 0);
     --ring: oklch(0.439 0 0);
     --chart-1: oklch(0.488 0.243 264.376);
@@ -166,6 +170,9 @@
 .dark .dataTable th,
 .dark .dataTable td {
     color: #e4e4e7 !important; /* zinc-200 */
+}
+.dt-btn-zinc {
+    @apply px-3 py-1.5 text-xs font-medium rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors dark:text-zinc-400 dark:hover:text-zinc-100;
 }
 
 .dark .dt-search input {

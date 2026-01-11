@@ -1,257 +1,206 @@
-
-import { Head } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
-import { router } from "@inertiajs/react";
-import { toast } from "sonner";
-import { usePage } from "@inertiajs/react";
-import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useUserForm } from "./hooks/useUserForm";
+import { ArrowLeft, Loader2, UserPlus } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 export default function UserCreate() {
-  const { roles } = usePage<{
-    roles: { name: string }[];
-  }>().props;
+    const { roles } = usePage<{ roles: { name: string }[] }>().props;
+    const { data, setData, submit, processing, errors } = useUserForm();
 
-  const validationSchema = Yup.object({
-    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    firstName: Yup.string().min(2, 'El primer nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    lastName: Yup.string().min(2, 'El apellido debe tener al menos 2 caracteres').required('Campo requerido'),
-    email: Yup.string().email('Formato de correo no válido').required('Campo requerido'),
-    birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
-    phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
-    password: Yup.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .matches(/[A-Z]/, 'La contraseña debe tener al menos una letra mayúscula')
-    .matches(/[\W_]/, 'La contraseña debe tener al menos un carácter especial')
-    .required('Campo requerido'),
-    confirmPassword: Yup.string().oneOf([Yup.ref('password'), undefined], 'Las contraseñas no coinciden').required('Campo requerido'),
-    role: Yup.string().required('Campo requerido'),
-});
+    return (
+        <AppLayout>
+            <Head title="Crear Usuario" />
+            <Toaster position="top-right" richColors />
 
+            <div className="max-w-3xl mx-auto p-6 space-y-6">
+                <div className="flex items-center gap-4">
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                        <Link href="/users">
+                            <ArrowLeft className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                            Nuevo Usuario
+                        </h2>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            Asigna credenciales y roles para un nuevo miembro del sistema.
+                        </p>
+                    </div>
+                </div>
 
-
-  const handleSubmit = (values: any) => {
-
-    const data = new FormData();
-    data.append("name", values.name);
-    data.append("firstName", values.firstName);
-    data.append("lastName", values.lastName);
-    data.append("email", values.email);
-    data.append("birthdate", values.birthdate);
-    data.append("phoneNumber", values.phoneNumber);
-    data.append("password", values.password);
-    data.append("role", values.role);
-    
-
-
-
-    router.post("/users", data, {
-      onSuccess: () => {
-        setTimeout(() => {
-            toast.success("Usuario creado con éxito.");
-        }, 1000);
-        router.reload();
-      },
-      onError: (errors) => {
-        console.error("Errores de validación:", errors);
-
-        if (errors.email) {
-          toast.error(errors.email);
-        }
-        if (errors.phoneNumber) {
-          toast.error(errors.phoneNumber);
-        }
-      },
-    });
-};
-
-
-  return (
-    <AppLayout>
-      <Head title="Create User" />
-      <Toaster position="top-right" richColors />
-
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Create New User</h2>
-
-        <Formik
-          initialValues={{
-            name: "",
-            firstName: "",
-            lastName: "",
-            email: "",
-            birthdate: "",
-            phoneNumber: "",
-            password: "",
-            confirmPassword: "",
-            role: "",
-          }}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, handleChange, handleBlur, touched, errors }) => (
-            <Form className="space-y-2">
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                <Field
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={values.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
-              </div>
-
-              {/* First Name */}
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
-                <Field
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={values.firstName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.firstName && errors.firstName && <small className="text-red-500">{errors.firstName}</small>}
-              </div>
-
-              {/* Last Name */}
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
-                <Field
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={values.lastName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.lastName && errors.lastName && <small className="text-red-500">{errors.lastName}</small>}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <Field
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.email && errors.email && <small className="text-red-500">{errors.email}</small>}
-              </div>
-
-              {/* Birthdate */}
-              <div>
-                <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Birthdate</label>
-                <Field
-                  type="date"
-                  id="birthdate"
-                  name="birthdate"
-                  value={values.birthdate}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.birthdate && errors.birthdate && <small className="text-red-500">{errors.birthdate}</small>}
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
-                <Field
-                  type="text"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={values.phoneNumber}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.phoneNumber && errors.phoneNumber && <small className="text-red-500">{errors.phoneNumber}</small>}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                <Field
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.password && errors.password && <small className="text-red-500">{errors.password}</small>}
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
-                <Field
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={values.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.confirmPassword && errors.confirmPassword && <small className="text-red-500">{errors.confirmPassword}</small>}
-              </div>
-
-              {/* Role */}
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-                <Field
-                  as="select"
-                  id="role"
-                  name="role"
-                  value={values.role}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
+                <form
+                    onSubmit={submit}
+                    className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl p-8 space-y-8 transition-colors"
                 >
-                  <option value="" disabled>Select Role</option>
-                  {roles.map((role) => (
-                    <option key={role.name} value={role.name}>{role.name}</option>
-                  ))}
-                </Field>
-                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-              {/* Submit Button */}
-              <div className="flex justify-start">
-              <button
-              type="button"
-              onClick={() => window.history.back()}  // Volver a la página anterior
-              className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-            >
-              Cancelar
-            </button>
-                <button
-                  type="submit"
-                  className={`bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition`}
-                >
-                  Create User
-                </button>
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
-    </AppLayout>
-  );
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className={errors.name ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Nombre de Usuario
+                            </Label>
+                            <Input
+                                id="name"
+                                placeholder="ej. Juan Perez"
+                                value={data.name}
+                                onChange={(e) => setData("name", e.target.value)}
+                                className={`bg-transparent ${errors.name ? "border-red-500 focus-visible:ring-red-500" : "border-zinc-200 dark:border-zinc-800"}`}
+                            />
+                            {errors.name && <p className="text-xs font-medium text-red-500">{errors.name}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className={errors.email ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Correo Electrónico
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="usuario@cotizasis.com"
+                                value={data.email}
+                                onChange={(e) => setData("email", e.target.value)}
+                                className={`bg-transparent ${errors.email ? "border-red-500 focus-visible:ring-red-500" : "border-zinc-200 dark:border-zinc-800"}`}
+                            />
+                            {errors.email && <p className="text-xs font-medium text-red-500">{errors.email}</p>}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="firstName" className="text-zinc-700 dark:text-zinc-300">Primer Nombre</Label>
+                            <Input
+                                id="firstName"
+                                value={data.firstName}
+                                onChange={(e) => setData("firstName", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="lastName" className="text-zinc-700 dark:text-zinc-300">Apellido</Label>
+                            <Input
+                                id="lastName"
+                                value={data.lastName}
+                                onChange={(e) => setData("lastName", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="phoneNumber" className="text-zinc-700 dark:text-zinc-300">Teléfono</Label>
+                            <Input
+                                id="phoneNumber"
+                                placeholder="88888888"
+                                value={data.phoneNumber}
+                                onChange={(e) => setData("phoneNumber", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="birthdate" className="text-zinc-700 dark:text-zinc-300">Fecha de Nacimiento</Label>
+                            <Input
+                                id="birthdate"
+                                type="date"
+                                value={data.birthdate}
+                                onChange={(e) => setData("birthdate", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800 dark:[color-scheme:dark]"
+                            />
+                        </div>
+
+                        {/* Contraseña */}
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className={errors.password ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Contraseña
+                            </Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={data.password}
+                                onChange={(e) => setData("password", e.target.value)}
+                                className={`bg-transparent ${errors.password ? "border-red-500" : "border-zinc-200 dark:border-zinc-800"}`}
+                            />
+                            {errors.password && <p className="text-xs font-medium text-red-500">{errors.password}</p>}
+                        </div>
+
+                        {/* Confirmar Contraseña */}
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword" className={errors.confirmPassword ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Confirmar Contraseña
+                            </Label>
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                value={data.confirmPassword}
+                                onChange={(e) => setData("confirmPassword", e.target.value)}
+                                className={`bg-transparent ${errors.confirmPassword ? "border-red-500" : "border-zinc-200 dark:border-zinc-800"}`}
+                            />
+                            {errors.confirmPassword && <p className="text-xs font-medium text-red-500">{errors.confirmPassword}</p>}
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="role" className={errors.role ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Rol del Sistema
+                            </Label>
+                            <Select
+                                value={data.role}
+                                onValueChange={(value) => setData('role', value)}
+                            >
+                                <SelectTrigger className={`bg-transparent ${errors.role ? "border-red-500" : "border-zinc-200 dark:border-zinc-800"}`}>
+                                    <SelectValue placeholder="Seleccione un rol" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {roles.map((role) => (
+                                        <SelectItem key={role.name} value={role.name}>
+                                            {role.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.role && <p className="text-xs font-medium text-red-500">{errors.role}</p>}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end items-center gap-3 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            asChild
+                            disabled={processing}
+                            className="dark:border-zinc-800 dark:hover:bg-zinc-900 dark:text-zinc-300"
+                        >
+                            <Link href="/users">Cancelar</Link>
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="min-w-[140px] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                        >
+                            {processing ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <UserPlus className="mr-2 h-4 w-4" />
+                            )}
+                            Crear Usuario
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </AppLayout>
+    );
 }

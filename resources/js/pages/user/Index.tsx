@@ -1,120 +1,58 @@
-import { Head, usePage } from "@inertiajs/react";
+import React from "react";
+import { Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Toaster } from "sonner";
-import { Link } from "@inertiajs/react";
-import { useState } from "react";
-import DataTable from 'datatables.net-react';
-import DT from 'datatables.net-dt';
-import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
-import 'datatables.net-buttons-dt';
-import 'datatables.net-buttons/js/buttons.html5.js';
-import 'datatables.net-buttons/js/buttons.print.js';
-import responsive from 'datatables.net-responsive-dt';
-import jszip from 'jszip';
-import DeleteEntityModal from "../../components/DeleteEntityModal";
+import { UserPlus, Search } from "lucide-react";
+import { GenericTable } from "@/components/GenericTable";
+import { useUserTable } from "./hooks/useUserTable"; // Importamos el hook
 
-window.JSZip = jszip;
-DataTable.use(DT, responsive);
-
-export default function Users() {
-    const { props } = usePage();
-    const permissions = props.auth?.user?.permissions ?? [];
-    const hasPermission = (perm) => permissions.includes(perm);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<any>(null);
-
-    const openDeleteModal = (user: any) => {
-        setSelectedUser(user);
-        setIsDeleteModalOpen(true);
-    };
-
-    const columns = [
-        { data: 'name', title: 'Usuario', responsivePriority: 7 },
-        { data: 'firstName', responsivePriority: 7, title: 'Primer Nombre' },
-        { data: 'lastName', responsivePriority: 7, title: 'Apellido' },
-        { data: 'email', responsivePriority: 7,  title: 'Correo Electrónico' },
-        { data: 'birthdate', responsivePriority: 7 , title: 'Fecha de Nacimiento' },
-        { data: 'phoneNumber', responsivePriority: 7, title: 'Teléfono' },
-        {
-            data: 'roles',
-            title: 'Roles',
-            name: 'roles',
-            render: function (data, type, row) {
-                return data && data.length > 0 ? data.join(', ') : '-';
-            },
-            orderable: false,
-            searchable: false
-        },
-        {
-            data: null,
-            title: 'Acciones',
-            orderable: false,
-            searchable: false,
-            responsivePriority: 1,
-            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                let actions = '';
-                if (hasPermission('editar usuarios')) {
-                    actions += `<a href="/users/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500 mr-1">Editar</a>`;
-                }
-                if (hasPermission('eliminar usuarios')) {
-                    actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
-                }
-                td.innerHTML = actions;
-
-                setTimeout(() => {
-                    const deleteBtn = td.querySelector('.delete-btn');
-                    if (deleteBtn) {
-                        deleteBtn.addEventListener('click', () => openDeleteModal(rowData));
-                    }
-                }, 0);
-            }
-        }
-    ];
+export default function UserIndex() {
+    // Extraemos toda la lógica del hook
+    const { filteredUsers, columns, searchTerm, setSearchTerm } = useUserTable();
 
     return (
         <AppLayout>
-            <Head title="Users" />
+            <Head title="Gestión de Usuarios" />
             <Toaster position="top-right" richColors />
 
-            <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <div className="flex justify-end">
-                    {hasPermission('crear usuarios') && (
-                        <Link href="/users/create" className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition">
-                            Agregar Usuario
+            <div className="p-4 md:p-8 space-y-6">
+                {/* Cabecera */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-instrument">
+                            Usuarios
+                        </h2>
+                        <p className="text-zinc-500 dark:text-zinc-400">
+                            Administra los accesos y roles de tu equipo.
+                        </p>
+                    </div>
+                    <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
+                        <Link href={route('users.create')}>
+                            <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
                         </Link>
-                    )}
+                    </Button>
                 </div>
 
-                <DataTable
-                    ajax="/api/users/getUsersData"
-                    options={{
-                        language: languageES,
-                        responsive: true,
-                        dom: 'lBfrtip',
-                        layout: {
-                            topStart: ['pageLength'],
-                            topEnd: ['search'], // Esto pone el buscador a la derecha
-                        },
-                        buttons: [
-                            { extend: 'copy', text: 'Copiar' },
-                            { extend: 'excel', text: 'Excel' },
-                            { extend: 'csv', text: 'CSV' },
-                            { extend: 'print', text: 'Imprimir' }
-                        ],
+                {/* Buscador */}
+                <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                        placeholder="Buscar por nombre o correo..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus:ring-zinc-500"
+                    />
+                </div>
 
-                    }}
+                {/* Tabla Genérica (Datos y Columnas vienen del hook) */}
+                <GenericTable
+                    data={filteredUsers}
                     columns={columns}
-                    className="display nowrap w-full"
+                    emptyMessage="No se encontraron usuarios coincidentes."
                 />
             </div>
-
-            <DeleteEntityModal
-                isOpen={isDeleteModalOpen}
-                closeModal={() => setIsDeleteModalOpen(false)}
-                entity={selectedUser}
-                entityType="Usuario"
-                deleteEndpoint="/users"
-            />
         </AppLayout>
     );
 }

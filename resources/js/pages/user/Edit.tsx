@@ -1,268 +1,202 @@
-import React, { useEffect } from "react";
-import { Head, useForm } from "@inertiajs/react";  // Importa `useForm`
-import { Toaster, toast } from "sonner";
-import { router } from "@inertiajs/react";
-import * as Yup from "yup";  // Importa Yup
+import { Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
+import { Toaster } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useUserEdit } from "./hooks/useUserEdit"; // Hook optimizado sin password
+import { ArrowLeft, Loader2, Save } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+
 interface User {
-  id: number;
-  name: string;
-  firstName: string;
-  lastName: string;
-  birthdate: string;
-  email: string;
-  phoneNumber: string;
-  role: string;
+    id: number;
+    name: string;
+    firstName: string;
+    lastName: string;
+    birthdate: string;
+    email: string;
+    phoneNumber: string;
+    role: string;
 }
 
 interface Role {
-  name: string;
+    name: string;
 }
 
 interface Props {
-  user: User;
-  roles: Role[];
+    user: User;
+    roles: Role[];
 }
 
-const UserEdit: React.FC<Props> = ({ user, roles }) => {
-  const validationSchema = Yup.object({
-    name: Yup.string().min(3, "El nombre debe tener al menos 3 caracteres").required("Campo requerido"),
-    firstName: Yup.string().min(3, "El nombre debe tener al menos 3 caracteres").required("Campo requerido"),
-    lastName: Yup.string().min(3, "El nombre debe tener al menos 3 caracteres").required("Campo requerido"),
-    email: Yup.string().email("Email no válido").required("Campo requerido"),
-    phoneNumber: Yup.string()
-      .matches(/^[0-9]{8}$/, "El número de teléfono debe tener 8 dígitos y solo contener números")
-      .required("Campo requerido"),
-    birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
-    role: Yup.string().required("Campo requerido")
-  });
+export default function UserEdit({ user, roles }: Props) {
+    // Usamos el hook especializado que solo maneja los datos que ves en pantalla
+    const { data, setData, submit, processing, errors } = useUserEdit(user);
 
-  const { data, setData, put, processing, errors } = useForm({
-    name: user.name,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    birthdate: user.birthdate,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    role: user.role,
-  });
+    return (
+        <AppLayout>
+            <Head title={`Editar Usuario: ${user.name}`} />
+            <Toaster position="top-right" richColors />
 
-  useEffect(() => {
-    setData({
-      name: user.name,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      birthdate: user.birthdate,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
+            <div className="max-w-3xl mx-auto p-6 space-y-6">
+                {/* Cabecera consistente con el módulo de Marcas */}
+                <div className="flex items-center gap-4">
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                        <Link href="/users">
+                            <ArrowLeft className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                            Editar Usuario
+                        </h2>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-instrument">
+                            Actualizando la información de <span className="font-bold text-zinc-900 dark:text-zinc-100">{user.name}</span>.
+                        </p>
+                    </div>
+                </div>
 
-    });
-  }, [user]);
+                {/* Tarjeta de Formulario estilo CotizaSis */}
+                <form
+                    onSubmit={submit}
+                    className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl p-8 space-y-8 transition-colors"
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+                        {/* Nombre de Usuario */}
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className={errors.name ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Username
+                            </Label>
+                            <Input
+                                id="name"
+                                value={data.name}
+                                onChange={(e) => setData("name", e.target.value)}
+                                className={`bg-transparent ${errors.name ? "border-red-500" : "border-zinc-200 dark:border-zinc-800"}`}
+                            />
+                            {errors.name && <p className="text-xs font-medium text-red-500">{errors.name}</p>}
+                        </div>
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      role: value, // Convertir el valor a número
-    }));
-  };
+                        {/* Email */}
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className={errors.email ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Correo Electrónico
+                            </Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={data.email}
+                                onChange={(e) => setData("email", e.target.value)}
+                                className={`bg-transparent ${errors.email ? "border-red-500" : "border-zinc-200 dark:border-zinc-800"}`}
+                            />
+                            {errors.email && <p className="text-xs font-medium text-red-500">{errors.email}</p>}
+                        </div>
 
-  const successMessage = "Usuario fue editado Correctamente";
-  const errorMessage = "Fallo al editar Usuario";
+                        {/* Primer Nombre */}
+                        <div className="space-y-2">
+                            <Label htmlFor="firstName" className="text-zinc-700 dark:text-zinc-300">Primer Nombre</Label>
+                            <Input
+                                id="firstName"
+                                value={data.firstName}
+                                onChange={(e) => setData("firstName", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+                        {/* Apellido */}
+                        <div className="space-y-2">
+                            <Label htmlFor="lastName" className="text-zinc-700 dark:text-zinc-300">Apellido</Label>
+                            <Input
+                                id="lastName"
+                                value={data.lastName}
+                                onChange={(e) => setData("lastName", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
 
-    validationSchema
-      .validate(data, { abortEarly: false })
-      .then(() => {
-        // Si la validación es exitosa
-        put(route('users.update', user.id), {
-          onSuccess: () => {
-            setTimeout(() => {
-                        toast.success(successMessage);
-                    }, 1000);
-                router.reload();
-          },
-          onError: (err) => {
-            console.error("Error al crear usuario:", err);
-            toast.error(errorMessage);
-          },
-        });
-      })
-      .catch((validationErrors) => {
-        // Mostrar errores de validación en los campos
-        validationErrors.inner.forEach((error: any) => {
-            console.error(error.message);
-          toast.error(error.message); // Muestra el mensaje de error de la validación
-        });
-      });
-  };
+                        {/* Teléfono */}
+                        <div className="space-y-2">
+                            <Label htmlFor="phoneNumber" className="text-zinc-700 dark:text-zinc-300">Teléfono</Label>
+                            <Input
+                                id="phoneNumber"
+                                value={data.phoneNumber}
+                                onChange={(e) => setData("phoneNumber", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800"
+                            />
+                        </div>
 
-  return (
-    <AppLayout>
-      <Head title="Edit User" />
-      <Toaster position="top-right" richColors />
+                        {/* Fecha Nacimiento */}
+                        <div className="space-y-2">
+                            <Label htmlFor="birthdate" className="text-zinc-700 dark:text-zinc-300">Fecha de Nacimiento</Label>
+                            <Input
+                                id="birthdate"
+                                type="date"
+                                value={data.birthdate}
+                                onChange={(e) => setData("birthdate", e.target.value)}
+                                className="bg-transparent border-zinc-200 dark:border-zinc-800 dark:[color-scheme:dark]"
+                            />
+                        </div>
 
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Edit User</h2>
+                        {/* Rol (Ocupa ancho completo) */}
+                        <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="role" className={errors.role ? "text-red-500" : "text-zinc-700 dark:text-zinc-300"}>
+                                Rol del Sistema
+                            </Label>
+                            <Select
+                                value={data.role}
+                                onValueChange={(value) => setData('role', value)}
+                            >
+                                <SelectTrigger className={`bg-transparent ${errors.role ? "border-red-500" : "border-zinc-200 dark:border-zinc-800"}`}>
+                                    <SelectValue placeholder="Seleccione un rol" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {roles.map((r) => (
+                                        <SelectItem key={r.name} value={r.name}>
+                                            {r.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.role && <p className="text-xs font-medium text-red-500">{errors.role}</p>}
+                        </div>
+                    </div>
 
-        <form onSubmit={handleSubmit} className="space-y-2">
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={data.name}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.name && <div className="text-red-500 text-sm">{errors.name}</div>}
-          </div>
+                    {/* Botones de Acción */}
+                    <div className="flex justify-end items-center gap-3 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            asChild
+                            className="dark:border-zinc-800 dark:hover:bg-zinc-900 dark:text-zinc-300"
+                        >
+                            <Link href="/users">Cancelar</Link>
+                        </Button>
 
-          {/* First Name */}
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={data.firstName}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.firstName && <div className="text-red-500 text-sm">{errors.firstName}</div>}
-          </div>
-
-          {/* Last Name */}
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={data.lastName}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.lastName && <div className="text-red-500 text-sm">{errors.lastName}</div>}
-          </div>
-
-          {/* Birthdate */}
-          <div>
-            <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Birthdate
-            </label>
-            <input
-              type="date"
-              id="birthdate"
-              name="birthdate"
-              value={data.birthdate}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.birthdate && <div className="text-red-500 text-sm">{errors.birthdate}</div>}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={data.email}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={data.phoneNumber}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.phoneNumber && <div className="text-red-500 text-sm">{errors.phoneNumber}</div>}
-          </div>
-
-          {/* Role */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={data.role}
-              onChange={handleSelectChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            >
-              <option value="" disabled>Select Role</option>
-              {roles.map((role) => (
-                <option key={role.name} value={role.name}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
-            {errors.role && <div className="text-red-500 text-sm">{errors.role}</div>}
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-start space-x-5">
-            <button
-              type="button"
-              onClick={() => window.history.back()}  // Volver a la página anterior
-              className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-              disabled={processing}
-            >
-              {processing ? "Actualizando..." : "Actualizar"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </AppLayout>
-  );
-};
-
-export default UserEdit;
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="min-w-[140px] bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+                        >
+                            {processing ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Save className="mr-2 h-4 w-4" />
+                            )}
+                            Guardar Cambios
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </AppLayout>
+    );
+}
