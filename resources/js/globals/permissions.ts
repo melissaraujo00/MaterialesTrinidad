@@ -1,19 +1,20 @@
 import { usePage } from "@inertiajs/react";
 
-export const getPermissions = () => {
-    const page = usePage();
+// Hook base para obtener el array de permisos
+export const usePermissions = () => {
+    const page = usePage<any>(); // Usamos <any> para evitar errores de tipo con props.auth
 
-    return page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions) ? page.props.auth.user.permissions : [];
+    const permissions = page.props.auth?.user?.permissions;
 
+    return Array.isArray(permissions) ? permissions : [];
 }
 
-export const hasPermission = (permission: string) => {
-    const permissions = getPermissions();
+export const useHasPermission = (permission: string) => {
+    const permissions = usePermissions();
     return permissions.includes(permission);
 }
 
-export const hasAllPermissions = (permissionList: string[]) => {
-    const permissions = getPermissions();
+export const useHasAllPermissions = (permissionList: string[]) => {
+    const permissions = usePermissions();
     return permissionList.every(permission => permissions.includes(permission));
 }
-

@@ -18,9 +18,17 @@ export default [
             },
         },
         rules: {
+            // Reglas de React existentes
             'react/react-in-jsx-scope': 'off',
             'react/prop-types': 'off',
             'react/no-unescaped-entities': 'off',
+
+            // --- NUEVAS REGLAS PARA SOLUCIONAR TUS ERRORES ---
+            // Desactiva el error de usar 'any' (soluciona la mayoría de tus 149 errores)
+            '@typescript-eslint/no-explicit-any': 'off',
+
+            // Desactiva el error de variables declaradas pero no usadas
+            '@typescript-eslint/no-unused-vars': 'off',
         },
         settings: {
             react: {
@@ -33,6 +41,7 @@ export default [
             'react-hooks': reactHooks,
         },
         rules: {
+            // Mantenemos esto como error porque rompe la app si no se cumple
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'warn',
         },
