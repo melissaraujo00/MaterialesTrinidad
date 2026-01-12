@@ -81,7 +81,7 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
             return;
         }
 
-        // Verificar que el producto no se haya agregado al carrito 
+        // Verificar que el producto no se haya agregado al carrito
         const productExistsInCart = items.some(item => item.id === product.id);
         if (productExistsInCart) {
             toast.error(`${product.name} ya se agregó a la tabla. No se pueden agregar más unidades.`);
@@ -129,7 +129,7 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
             discountPrice: applyDiscount ? finalPrice : product.discountPrice
         };
 
-        
+
         toast.success(`${product.name} agregado al carrito`);
         onSelectProduct(productWithDetails);
     };
@@ -196,14 +196,14 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
 
                 td.innerHTML = `
                     <div class="flex flex-col items-center">
-                        <input id="${formId}-quantity" 
-                               class="rounded border border-gray-300 p-1 w-16 text-center" 
-                               type="number" 
-                               min="1" 
+                        <input id="${formId}-quantity"
+                               class="rounded border border-gray-300 p-1 w-16 text-center"
+                               type="number"
+                               min="1"
                                max="${maxStock}"
                                value="1"
                                ${maxStock === 0 ? 'disabled' : ''}>
-                        <span class="text-xs text-gray-500 mt-1">Máx: ${maxStock}</span>       
+                        <span class="text-xs text-gray-500 mt-1">Máx: ${maxStock}</span>
                     </div>
                 `;
             }

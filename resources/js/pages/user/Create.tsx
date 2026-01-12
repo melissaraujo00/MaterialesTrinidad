@@ -1,257 +1,67 @@
-
-import { Head } from "@inertiajs/react";
+import React from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
-import { router } from "@inertiajs/react";
-import { toast } from "sonner";
-import { usePage } from "@inertiajs/react";
-import * as Yup from 'yup';
-import { Formik, Form, Field } from 'formik';
+import { Button } from "@/components/ui/button";
+import { UserPlus, Loader2 } from "lucide-react";
+
+// Hooks y Componentes
+import { useUserForm } from "./hooks/useUserForm";
+import { UserHeader } from "@/components/user-form/UserHeader";
+import { UserGeneralInfo } from "@/components/user-form/UserGeneralInfo";
+import { UserSecurity } from "@/components/user-form/UserSecurity";
 
 export default function UserCreate() {
-  const { roles } = usePage<{
-    roles: { name: string }[];
-  }>().props;
+    // 1. Obtener Roles de Inertia
+    const { roles } = usePage<{ roles: { name: string }[] }>().props;
 
-  const validationSchema = Yup.object({
-    name: Yup.string().min(2, 'El nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    firstName: Yup.string().min(2, 'El primer nombre debe tener al menos 2 caracteres').required('Campo requerido'),
-    lastName: Yup.string().min(2, 'El apellido debe tener al menos 2 caracteres').required('Campo requerido'),
-    email: Yup.string().email('Formato de correo no válido').required('Campo requerido'),
-    birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
-    phoneNumber: Yup.string().matches(/^[0-9]{8}$/, 'El número de teléfono debe tener 8 dígitos y solo tener numeros').required('Campo requerido'),
-    password: Yup.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .matches(/[A-Z]/, 'La contraseña debe tener al menos una letra mayúscula')
-    .matches(/[\W_]/, 'La contraseña debe tener al menos un carácter especial')
-    .required('Campo requerido'),
-    confirmPassword: Yup.string().oneOf([Yup.ref('password'), undefined], 'Las contraseñas no coinciden').required('Campo requerido'),
-    role: Yup.string().required('Campo requerido'),
-});
+    // 2. Iniciar Hook
+    const { form, submit, loading } = useUserForm();
 
+    return (
+        <AppLayout>
+            <Head title="Crear Usuario" />
+            <Toaster position="top-right" richColors />
 
+            <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
 
-  const handleSubmit = (values: any) => {
+                {/* Cabecera */}
+                <UserHeader />
 
-    const data = new FormData();
-    data.append("name", values.name);
-    data.append("firstName", values.firstName);
-    data.append("lastName", values.lastName);
-    data.append("email", values.email);
-    data.append("birthdate", values.birthdate);
-    data.append("phoneNumber", values.phoneNumber);
-    data.append("password", values.password);
-    data.append("role", values.role);
-    
+                <form onSubmit={submit}>
 
+                    {/* Layout de 2 columnas asimétricas */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
+                        {/* Columna Izquierda (2/3): Datos Personales */}
+                        <div className="md:col-span-2 space-y-6">
+                            <UserGeneralInfo form={form} />
+                        </div>
 
-    router.post("/users", data, {
-      onSuccess: () => {
-        setTimeout(() => {
-            toast.success("Usuario creado con éxito.");
-        }, 1000);
-        router.reload();
-      },
-      onError: (errors) => {
-        console.error("Errores de validación:", errors);
+                        {/* Columna Derecha (1/3): Seguridad */}
+                        <div className="space-y-6">
+                            <UserSecurity form={form} roles={roles} />
 
-        if (errors.email) {
-          toast.error(errors.email);
-        }
-        if (errors.phoneNumber) {
-          toast.error(errors.phoneNumber);
-        }
-      },
-    });
-};
+                            {/* Botones de Acción (móvil y desktop) */}
+                            <div className="flex flex-col gap-3 pt-2">
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                >
+                                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                                    Crear Usuario
+                                </Button>
 
+                                <Button variant="outline" asChild className="w-full dark:border-zinc-800 dark:text-zinc-300">
+                                    <Link href={route('users.index')}>Cancelar</Link>
+                                </Button>
+                            </div>
+                        </div>
 
-  return (
-    <AppLayout>
-      <Head title="Create User" />
-      <Toaster position="top-right" richColors />
-
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Create New User</h2>
-
-        <Formik
-          initialValues={{
-            name: "",
-            firstName: "",
-            lastName: "",
-            email: "",
-            birthdate: "",
-            phoneNumber: "",
-            password: "",
-            confirmPassword: "",
-            role: "",
-          }}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, handleChange, handleBlur, touched, errors }) => (
-            <Form className="space-y-2">
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                <Field
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={values.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
-              </div>
-
-              {/* First Name */}
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
-                <Field
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={values.firstName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.firstName && errors.firstName && <small className="text-red-500">{errors.firstName}</small>}
-              </div>
-
-              {/* Last Name */}
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
-                <Field
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={values.lastName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.lastName && errors.lastName && <small className="text-red-500">{errors.lastName}</small>}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <Field
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.email && errors.email && <small className="text-red-500">{errors.email}</small>}
-              </div>
-
-              {/* Birthdate */}
-              <div>
-                <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Birthdate</label>
-                <Field
-                  type="date"
-                  id="birthdate"
-                  name="birthdate"
-                  value={values.birthdate}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.birthdate && errors.birthdate && <small className="text-red-500">{errors.birthdate}</small>}
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
-                <Field
-                  type="text"
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  value={values.phoneNumber}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.phoneNumber && errors.phoneNumber && <small className="text-red-500">{errors.phoneNumber}</small>}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                <Field
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.password && errors.password && <small className="text-red-500">{errors.password}</small>}
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
-                <Field
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={values.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                />
-                {touched.confirmPassword && errors.confirmPassword && <small className="text-red-500">{errors.confirmPassword}</small>}
-              </div>
-
-              {/* Role */}
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-                <Field
-                  as="select"
-                  id="role"
-                  name="role"
-                  value={values.role}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-                >
-                  <option value="" disabled>Select Role</option>
-                  {roles.map((role) => (
-                    <option key={role.name} value={role.name}>{role.name}</option>
-                  ))}
-                </Field>
-                {touched.name && errors.name && <small className="text-red-500">{errors.name}</small>}
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-start">
-              <button
-              type="button"
-              onClick={() => window.history.back()}  // Volver a la página anterior
-              className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-            >
-              Cancelar
-            </button>
-                <button
-                  type="submit"
-                  className={`bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition`}
-                >
-                  Create User
-                </button>
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
-    </AppLayout>
-  );
+                    </div>
+                </form>
+            </div>
+        </AppLayout>
+    );
 }

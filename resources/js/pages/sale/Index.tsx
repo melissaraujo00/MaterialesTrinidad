@@ -70,7 +70,7 @@ export default function ConfirmedQuotes() {
                 let actions = "";
 
                 // Ver detalles - Usar Link de Inertia para navegación
-                actions += `<a href="/quotes/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
+                actions += `<a href="/sales/${rowData.id}" class="view-btn bg-blue-500 text-sm text-white px-3 py-1 rounded hover:bg-blue-600">Ver detalles</a>`;
 
                 // Generar factura o reporte
                 td.innerHTML = actions;
@@ -95,8 +95,16 @@ export default function ConfirmedQuotes() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Ventas</h1>
-
-
+                </div>
+                 <div className="flex justify-end">
+                    {hasPermission("crear venta")   &&(
+                        <Link
+                            href="/sales/create"
+                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
+                        >
+                            Crear Venta
+                        </Link>
+                    )}
                 </div>
 
                 <DataTable

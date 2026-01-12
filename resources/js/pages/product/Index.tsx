@@ -1,161 +1,80 @@
-import { Head, usePage, Link } from "@inertiajs/react";
+import React from "react";
+import { Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Toaster } from "sonner";
-import { useState } from "react";
-import DataTable from 'datatables.net-react';
-import DT from 'datatables.net-dt';
-import languageES from 'datatables.net-plugins/i18n/es-ES.mjs';
-import 'datatables.net-buttons-dt';
-import 'datatables.net-buttons/js/buttons.html5.js';
-import 'datatables.net-buttons/js/buttons.print.js';
-import responsive from 'datatables.net-responsive-dt';
-import jszip from 'jszip';
-import DeleteEntityModal from "../../components/DeleteEntityModal";
-import { title } from "process";
+import { Plus, Search } from "lucide-react";
+import { GenericTable } from "@/components/GenericTable";
+import DeleteEntityModal from "@/components/DeleteEntityModal";
+import { useProductTable } from "./hooks/useProductTable";
 
-window.JSZip = jszip;
-DataTable.use(DT, responsive);
-
-interface Product {
-    id: number;
-    name: string;
-}
-
-
-export default function Products() {
-    // Obtener permisos del usuario autenticado
-    const page = usePage();
-    const permissions =
-        page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-            ? page.props.auth.user.permissions
-            : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
-
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-    const getStockBadge = (stock: number, stockMinimun: number) => {
-        if (stock <= stockMinimun) {
-            return `<span class="bg-red-100 text-red-800 text-x font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-red-900 dark:text-red-300">${stock}</span>`;
-        }
-        return '';
-    };
-
-    const openDeleteModal = (product: Product) => {
-        setSelectedProduct(product);
-        setIsDeleteModalOpen(true);
-    };
-    
-    const columns = [
-        { data: 'name', title: 'Producto', responsivePriority: 1 },
-        { data: 'description', title: 'Descripción', responsivePriority: 7 },
-        { data: 'priceWithTax', title: 'Precio', responsivePriority: 1 },
-        { data: 'discountPrice', title: 'Precio con descuento',responsivePriority: 6 },
-        {
-            data: 'stock',
-            title: 'Stock',
-            responsivePriority: 6,
-            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                td.innerHTML = getStockBadge(rowData.stock, rowData.stockMinimun) || rowData.stock;
-            }
-        },
-        {
-            data: 'category_id',
-            title: 'Categoría',
-            responsivePriority: 6,
-            createdCell: (td: HTMLTableCellElement, cellData: any) => {
-                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin categoría</span>' : cellData;
-            }
-        },
-        {
-            data: 'brand_id',
-            title: 'Marca',
-            responsivePriority: 6,
-            createdCell: (td: HTMLTableCellElement, cellData: any) => {
-                td.innerHTML = cellData == null ? '<span class="text-gray-500 italic">Sin marca</span>' : cellData;
-            }
-        },
-        { data: 'stockMinimun', title: 'Stock mínimo', responsivePriority: 6 },
-        {
-            data: 'image',
-            title: 'Imagen',
-            responsivePriority: 8,
-            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-                if (cellData) {
-                    td.innerHTML = `<img src="${cellData}" alt="Imagen del producto" width="200" height="200" class="object-cover rounded shadow-md transition-transform duration-200 hover:scale-110"/>`;
-                } else {
-                    td.innerHTML = `<span class="text-gray-500 italic">Sin imagen</span>`;
-                }
-            }
-        },
-        {
-            data: null,
-            title: 'Acciones',
-            responsivePriority: 1,
-            orderable: false,
-            searchable: false,
-            createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-
-
-                    let actions = "";
-                    if (hasPermission("editar producto")) {
-                        actions += `<a href="products/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
-                    }
-                    if (hasPermission("eliminar producto")) {
-                        actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
-                    }
-                    td.innerHTML = actions;
-
-                    if (hasPermission("eliminar producto")) {
-                        td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
-                    }
-
-            }
-        }
-    ];
+export default function ProductIndex() {
+    // Usamos el hook
+    const {
+        filteredProducts,
+        columns,
+        searchTerm,
+        setSearchTerm,
+        selectedProduct,
+        isDeleteModalOpen,
+        setIsDeleteModalOpen,
+        hasPermission
+    } = useProductTable();
 
     return (
         <AppLayout>
-            <Head title="Products" />
+            <Head title="Productos" />
             <Toaster position="top-right" richColors />
 
-            <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <div className="flex justify-end">
-                    {hasPermission("crear producto")   &&(
-                        <Link
-                            href="/products/create"
-                            className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
-                        >
-                            Agregar Producto
-                        </Link>
+            <div className="p-4 md:p-8 space-y-6">
+                {/* Cabecera */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-instrument">
+                            Productos
+                        </h2>
+                        <p className="text-zinc-500 dark:text-zinc-400">
+                            Gestiona tu inventario de materiales de construcción.
+                        </p>
+                    </div>
+
+                    {hasPermission("crear producto") && (
+                        <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
+                            <Link href={route('products.create')}>
+                                <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
+                            </Link>
+                        </Button>
                     )}
                 </div>
 
-                <DataTable ajax="/api/products/getProductData" options={{
-                            language: languageES,
-                            responsive: true,
-                            dom: 'lBfrtip',
-                            layout: {
-                                topStart: ['pageLength'],
-                                topEnd: ['search'], // Esto pone el buscador a la derecha
-                            },
-                            buttons: [
-                                { extend: 'copy', text: 'Copiar' },
-                                { extend: 'excel', text: 'Excel' },
-                                { extend: 'csv', text: 'CSV' },
-                                { extend: 'print', text: 'Imprimir' }
-                            ],
+                {/* Buscador */}
+                <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                        placeholder="Buscar por nombre o descripción..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus:ring-zinc-500"
+                    />
+                </div>
 
-                        }}columns={columns} className="display nowrap w-full"
-            />
+                {/* Tabla Genérica */}
+                <GenericTable
+                    data={filteredProducts}
+                    columns={columns}
+                    emptyMessage="No se encontraron productos registrados."
+                />
+
+                {/* Modal de Eliminación */}
+                <DeleteEntityModal
+                    isOpen={isDeleteModalOpen}
+                    closeModal={() => setIsDeleteModalOpen(false)}
+                    entity={selectedProduct}
+                    entityType="Producto"
+                    deleteEndpoint="/products"
+                />
             </div>
-            <DeleteEntityModal
-                isOpen={isDeleteModalOpen}
-                closeModal={() => setIsDeleteModalOpen(false)}
-                entity={selectedProduct}
-                entityType="producto"
-                deleteEndpoint="/products"
-            />
         </AppLayout>
     );
 }

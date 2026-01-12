@@ -44,17 +44,15 @@ export default function VerifyEmail({ status, user }: VerifyEmailProps) {
                     Reenviar correo electrónico de verificación
                 </Button>
 
-                {/* Solo muestra el enlace de regreso al login si el correo no está verificado */}
                 {!isEmailVerified && (
                     <TextLink href={route('login')} method="post" className="mx-auto block text-sm">
                         Regresar al inicio de sesión
                     </TextLink>
                 )}
 
-                {/* Si el correo ya está verificado, redirige automáticamente al dashboard */}
                 {isEmailVerified && (
                     <TextLink href={route('dashboard')} className="mx-auto block text-sm">
-                        Ir al Pagina Principal 
+                        Ir al Pagina Principal
                     </TextLink>
                 )}
             </form>

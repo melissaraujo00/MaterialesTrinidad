@@ -111,6 +111,8 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
+        $customer->load('district.municipality.department');
+        
         $departments = Department::all();
         $municipalities = Municipality::all();
         $districts = District::all();

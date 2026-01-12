@@ -1,111 +1,80 @@
-import { useState } from "react";
-import { Head, usePage, Link } from "@inertiajs/react";
+import React from "react";
+import { Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Toaster } from "sonner";
-import DeleteCategoryModal from "@/components/DeleteCategoryModal";
-import DataTable from "datatables.net-react";
-import DT from "datatables.net-dt";
-import languageES from "datatables.net-plugins/i18n/es-ES.mjs";
-import "datatables.net-buttons-dt";
-import "datatables.net-responsive-dt";
-import "datatables.net-buttons/js/buttons.html5";
-import "datatables.net-buttons/js/buttons.print";
-import jszip from "jszip";
-import DeleteEntityModal from "../../components/DeleteEntityModal";
-
-window.JSZip = jszip;
-DataTable.use(DT);
-
-interface Category {
-  id: number;
-  name: string;
-  description: string;
-}
+import { Plus, Search } from "lucide-react";
+import { GenericTable } from "@/components/GenericTable";
+import DeleteEntityModal from "@/components/DeleteEntityModal";
+import { useCategoryTable } from "./hooks/useCategoryTable";
 
 export default function Categories() {
-  // Obtener permisos del usuario autenticado
-  const page = usePage();
-  const permissions =
-    page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-      ? page.props.auth.user.permissions
-      : [];
-  const hasPermission = (perm: string) => permissions.includes(perm);
+    // Usamos el hook
+    const {
+        filteredCategories,
+        columns,
+        searchTerm,
+        setSearchTerm,
+        selectedCategory,
+        isDeleteModalOpen,
+        setIsDeleteModalOpen,
+        hasPermission
+    } = useCategoryTable();
 
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    return (
+        <AppLayout>
+            <Head title="Categorías" />
+            <Toaster position="top-right" richColors />
 
-  const openDeleteModal = (category: Category) => {
-    setSelectedCategory(category);
-    setIsDeleteModalOpen(true);
-  };
+            <div className="p-4 md:p-8 space-y-6">
+                {/* Cabecera */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-instrument">
+                            Categorías
+                        </h2>
+                        <p className="text-zinc-500 dark:text-zinc-400">
+                            Clasifica tus productos para una mejor organización.
+                        </p>
+                    </div>
 
-  const columns = [
-    { data: 'name' },
-    { data: 'description' },
-    {
-      data: null,
-      title: "Acciones",
-      orderable: false,
-      searchable: false,
-      createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-        let actions = "";
-        if (hasPermission("editar categoria")) {
-          actions += `<a href="categories/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
-        }
-        if (hasPermission("eliminar categoria")) {
-          actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
-        }
-        td.innerHTML = actions;
+                    {hasPermission("crear categoria") && (
+                        <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
+                            <Link href={route('categories.create')}>
+                                <Plus className="mr-2 h-4 w-4" /> Nueva Categoría
+                            </Link>
+                        </Button>
+                    )}
+                </div>
 
-        if (hasPermission("eliminar categoria")) {
-          td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
-        }
-      }
-    },
-  ];
+                {/* Buscador */}
+                <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Input
+                        placeholder="Buscar categoría..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus:ring-zinc-500"
+                    />
+                </div>
 
-  return (
-    <AppLayout>
-      <Head title="Categorías" />
-      <Toaster position="top-right" richColors />
+                {/* Tabla Genérica */}
+                <GenericTable
+                    data={filteredCategories}
+                    columns={columns}
+                    emptyMessage="No se encontraron categorías."
+                />
 
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <div className="flex justify-end">
-          {hasPermission("crear categoria") && (
-            <Link
-              href="/categories/create"
-              className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
-            >
-              Agregar Categoría
-            </Link>
-          )}
-        </div>
-
-        <DataTable ajax="/api/categories/getCategoryData" options={{
-          language: languageES,
-          responsive: true,
-          layout: {
-            topStart: ["pageLength"],
-          },
-        }}
-          columns={columns} className="display" >
-          <thead>
-            <tr>
-              <th>Nombre de Categoria</th>
-              <th>Descripción</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-        </DataTable>
-      </div>
-
-      <DeleteEntityModal
-        isOpen={isDeleteModalOpen}
-        closeModal={() => setIsDeleteModalOpen(false)}
-        entity={selectedCategory}
-        entityType="Categoria"
-        deleteEndpoint="/categories"
-      />
-    </AppLayout>
-  );
+                {/* Modal de Eliminación */}
+                <DeleteEntityModal
+                    isOpen={isDeleteModalOpen}
+                    closeModal={() => setIsDeleteModalOpen(false)}
+                    entity={selectedCategory}
+                    entityType="Categoría"
+                    deleteEndpoint="/categories"
+                />
+            </div>
+        </AppLayout>
+    );
 }

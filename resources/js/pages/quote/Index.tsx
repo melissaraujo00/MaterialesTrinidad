@@ -59,7 +59,7 @@ export default function Quotes() {
 
     const confirmQuote = (quoteId: number) => {
         setIsConfirming(true);
-        router.put(`/quotes/${quoteId}`, 
+        router.put(`/quotes/${quoteId}`,
             { status: 'confirmada' },
             {
                 onSuccess: () => {

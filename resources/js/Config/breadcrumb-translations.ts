@@ -1,0 +1,20 @@
+export const breadcrumbTranslations: Record<string, string> = {
+    dashboard: "Inicio",
+    brands: "Marcas",
+    categories: "Categorías",
+    products: "Productos",
+    users: "Usuarios",
+    customers: "Clientes",
+    roles: "Roles",
+    permissions: "Permisos",
+    create: "Nuevo",
+    edit: "Editar",
+    inventoryIndex: "Reporte de Inventario",
+    businessData: "Datos de la Empresa",
+    offers: "Ofertas",
+    quotes: "Cotizaciones",
+    movements: "Movimientos",
+    types: "Tipos de Movimiento",
+    "quotes-confirmed": "Ventas Confirmadas",
+    sales: "Ventas"
+};

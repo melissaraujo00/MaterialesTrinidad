@@ -21,73 +21,71 @@ class SaleController extends Controller
      */
 
     public function fromQuote(Request $request)
-{
-    try {
-        $request->validate([
-            'quote_id' => 'required|exists:quotes,id',
-            'products' => 'required|array|min:1',
-            'products.*.id' => 'required|integer|exists:products,id',
-            'products.*.quantity' => 'required|integer|min:1',
-            'products.*.price' => 'required|numeric|min:1',
+    {
+        try {
+            $request->validate([
+                'quote_id' => 'required|exists:quotes,id',
+                'products' => 'required|array|min:1',
+                'products.*.id' => 'required|integer|exists:products,id',
+                'products.*.quantity' => 'required|integer|min:1',
+                'products.*.price' => 'required|numeric|min:1',
 
-        ]);
-        DB::beginTransaction();
+            ]);
+            DB::beginTransaction();
 
-        $quote = Quote::with('customer')->findOrFail($request->quote_id);
-        $totalSale = 0;
-        $saleDetailsData = [];
+            $quote = Quote::with('customer')->findOrFail($request->quote_id);
+            $totalSale = 0;
+            $saleDetailsData = [];
 
-        foreach ($request->products as $productData) {
-            $productModel = Product::findOrFail($productData['id']);
+            foreach ($request->products as $productData) {
+                $productModel = Product::findOrFail($productData['id']);
 
-            if ($productModel->stock < $productData['quantity']) {
-                DB::rollBack();
-                return redirect()->back();
+                if ($productModel->stock < $productData['quantity']) {
+                    DB::rollBack();
+                    return redirect()->back();
+                }
+
+                $subtotal = $productData['price'] * $productData['quantity'];
+                $totalSale += $subtotal;
+
+                $saleDetailsData[] = [
+                    'product_id' => $productModel->id,
+                    'quantity' => $productData['quantity'],
+                    'price' => $productData['price'],
+                    'subtotal' => $subtotal,
+                    'amount' => $productData['quantity']
+                ];
+
+                $productModel->decrement('stock', $productData['quantity']);
+            }
+            $quote->status = 'venta';
+
+            $quote->save();
+
+            $sale = Sale::create([
+                'customer_id' => $quote->customer_id,
+                'user_id' => auth()->id(),
+                'quote_id' => $quote->id,
+                'date' => now(),
+                'subtotal' => $totalSale,
+                'total' => $totalSale
+            ]);
+
+            foreach ($saleDetailsData as $detailData) {
+                $sale->details()->create($detailData);
             }
 
-            $subtotal = $productData['price'] * $productData['quantity'];
-            $totalSale += $subtotal;
 
-            $saleDetailsData[] = [
-                'product_id' => $productModel->id,
-                'quantity' => $productData['quantity'],
-                'price' => $productData['price'],
-                'subtotal' => $subtotal,
-                'amount' => $productData['quantity']
-            ];
+            DB::commit();
 
-            $productModel->decrement('stock', $productData['quantity']);
+            return redirect()->route('sales.index');
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back();
         }
-        $quote->status = 'venta';
-
-        $quote->save();
-
-        $sale = Sale::create([
-            'customer_id' => $quote->customer_id,
-            'user_id' => auth()->id(),
-            'quote_id' => $quote->id,
-            'date' => now(),
-            'subtotal' => $totalSale,
-            'total' => $totalSale
-        ]);
-
-        foreach ($saleDetailsData as $detailData) {
-            $sale->details()->create($detailData);
-        }
-
-
-        DB::commit();
-
-        return redirect()->route('sales.index');
-
-
-    } catch (ValidationException $e) {
-        return redirect()->back()->withErrors($e->errors())->withInput();
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->back();
     }
-}
 
     public function getQuoteWithProducts($id)
     {
@@ -140,21 +138,21 @@ class SaleController extends Controller
     }
 
 
-public function index()
-{
-    $user = Auth::user();
+    public function index()
+    {
+        $user = Auth::user();
 
-    return Inertia::render('sale/Index', [
-        'sales' => Sale::with('customer')->latest()->get(),
-        'auth' => [
-            'user' => [
-                'id' => $user?->id,
-                'name' => $user?->name,
-                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+        return Inertia::render('sale/Index', [
+            'sales' => Sale::with('customer')->latest()->get(),
+            'auth' => [
+                'user' => [
+                    'id' => $user?->id,
+                    'name' => $user?->name,
+                    'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
+                ]
             ]
-        ]
-    ]);
-}
+        ]);
+    }
 
 
     /**
@@ -162,7 +160,9 @@ public function index()
      */
     public function create()
     {
-        //
+        return Inertia::render('sale/Create', [
+            'sales' => Sale::all()
+        ]);
     }
 
     /**
@@ -180,8 +180,12 @@ public function index()
     {
         $sale->load('details.product', 'customer', 'user');
 
-        return response()->json($sale);
+
+        return Inertia::render('sale/Details', [
+            'sale' => $sale->toArray()
+        ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.

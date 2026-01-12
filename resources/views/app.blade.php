@@ -23,19 +23,18 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #f8fafc;
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: #0f172a;
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Materiales Trinidad') }}</title>
+        <title inertia>{{ config('app.name', 'CotizaSis') }}</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         @routes
         @viteReactRefresh

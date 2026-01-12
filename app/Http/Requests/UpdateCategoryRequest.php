@@ -27,6 +27,7 @@ class UpdateCategoryRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
+                'regex:/^[\pL\s\-]+$/u',
                 Rule::unique('categories', 'name')->ignore($this->route('category')) // Permitir mismo nombre al editar
             ],
             'description' => [
@@ -44,7 +45,11 @@ class UpdateCategoryRequest extends FormRequest
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
             'name.min' => 'El nombre debe tener al menos 3 caracteres.',
-            'name.unique' => 'Este nombre de categoria ya está registrado.'
+            'name.unique' => 'Este nombre de categoria ya está registrado.',
+            'name.regex' => 'El nombre solo puede contener letras y guiones.',
+            'description.required' => 'La descripcion es obligatorio.',
+            'description.string' => 'La descripcion debe ser una cadena de texto.',
+            'description.min' => 'La descripcion debe tener al menos 3 caracteres.',
 
         ];
     }

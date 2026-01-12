@@ -1,268 +1,80 @@
-import React, { useEffect } from "react";
-import { Head, useForm } from "@inertiajs/react";  // Importa `useForm`
-import { Toaster, toast } from "sonner";
-import { router } from "@inertiajs/react";
-import * as Yup from "yup";  // Importa Yup
+import React from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
-interface User {
-  id: number;
-  name: string;
-  firstName: string;
-  lastName: string;
-  birthdate: string;
-  email: string;
-  phoneNumber: string;
-  role: string;
-}
+import { Toaster } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Save, Loader2 } from "lucide-react";
 
-interface Role {
-  name: string;
-}
+// Tu hook (la versión de arriba)
+import { useUserEdit } from "./hooks/useUserEdit";
+
+// Componentes Reutilizables (Versión Inertia que definimos antes)
+import { UserHeader } from "@/components/user-form/UserHeader";
+import { UserGeneralInfo } from "@/components/user-form/UserGeneralInfo";
+import { UserSecurity } from "@/components/user-form/UserSecurity";
 
 interface Props {
-  user: User;
-  roles: Role[];
+    user: any;
+    roles: { name: string }[];
 }
 
-const UserEdit: React.FC<Props> = ({ user, roles }) => {
-  const validationSchema = Yup.object({
-    name: Yup.string().min(3, "El nombre debe tener al menos 3 caracteres").required("Campo requerido"),
-    firstName: Yup.string().min(3, "El nombre debe tener al menos 3 caracteres").required("Campo requerido"),
-    lastName: Yup.string().min(3, "El nombre debe tener al menos 3 caracteres").required("Campo requerido"),
-    email: Yup.string().email("Email no válido").required("Campo requerido"),
-    phoneNumber: Yup.string()
-      .matches(/^[0-9]{8}$/, "El número de teléfono debe tener 8 dígitos y solo contener números")
-      .required("Campo requerido"),
-    birthdate: Yup.date().max(new Date(), 'La fecha de nacimiento no puede ser en el futuro').required('Campo requerido'),
-    role: Yup.string().required("Campo requerido")
-  });
+export default function UserEdit({ user, roles }: Props) {
+    // Usamos tu hook
+    const { data, setData, submit, processing, errors } = useUserEdit(user);
 
-  const { data, setData, put, processing, errors } = useForm({
-    name: user.name,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    birthdate: user.birthdate,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    role: user.role,
-  });
+    return (
+        <AppLayout>
+            <Head title={`Editar ${user.name}`} />
+            <Toaster position="top-right" richColors />
 
-  useEffect(() => {
-    setData({
-      name: user.name,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      birthdate: user.birthdate,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
+            <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
 
-    });
-  }, [user]);
+                <UserHeader
+                    title="Editar Usuario"
+                    subtitle={`Actualizando información de ${user.firstName} ${user.lastName}`}
+                />
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+                <form onSubmit={submit}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    setData((prevData) => ({
-      ...prevData,
-      role: value, // Convertir el valor a número
-    }));
-  };
+                        {/* Columna Izquierda (Datos Generales) */}
+                        <div className="md:col-span-2 space-y-6">
+                            <UserGeneralInfo
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                            />
+                        </div>
 
-  const successMessage = "Usuario fue editado Correctamente";
-  const errorMessage = "Fallo al editar Usuario";
+                        {/* Columna Derecha (Seguridad y Roles) */}
+                        <div className="space-y-6">
+                            <UserSecurity
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                                roles={roles}
+                            />
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+                            {/* Botones */}
+                            <div className="flex flex-col gap-3 pt-2">
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900"
+                                >
+                                    {processing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    Guardar Cambios
+                                </Button>
 
-    validationSchema
-      .validate(data, { abortEarly: false })
-      .then(() => {
-        // Si la validación es exitosa
-        put(route('users.update', user.id), {
-          onSuccess: () => {
-            setTimeout(() => {
-                        toast.success(successMessage);
-                    }, 1000);
-                router.reload();
-          },
-          onError: (err) => {
-            console.error("Error al crear usuario:", err);
-            toast.error(errorMessage);
-          },
-        });
-      })
-      .catch((validationErrors) => {
-        // Mostrar errores de validación en los campos
-        validationErrors.inner.forEach((error: any) => {
-            console.error(error.message);
-          toast.error(error.message); // Muestra el mensaje de error de la validación
-        });
-      });
-  };
+                                <Button variant="outline" asChild className="w-full dark:border-zinc-800 dark:text-zinc-300">
+                                    <Link href={route('users.index')}>Cancelar</Link>
+                                </Button>
+                            </div>
+                        </div>
 
-  return (
-    <AppLayout>
-      <Head title="Edit User" />
-      <Toaster position="top-right" richColors />
-
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <h2 className="text-2xl font-semibold mb-4">Edit User</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-2">
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={data.name}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.name && <div className="text-red-500 text-sm">{errors.name}</div>}
-          </div>
-
-          {/* First Name */}
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={data.firstName}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.firstName && <div className="text-red-500 text-sm">{errors.firstName}</div>}
-          </div>
-
-          {/* Last Name */}
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={data.lastName}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.lastName && <div className="text-red-500 text-sm">{errors.lastName}</div>}
-          </div>
-
-          {/* Birthdate */}
-          <div>
-            <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Birthdate
-            </label>
-            <input
-              type="date"
-              id="birthdate"
-              name="birthdate"
-              value={data.birthdate}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.birthdate && <div className="text-red-500 text-sm">{errors.birthdate}</div>}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={data.email}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={data.phoneNumber}
-              onChange={handleInputChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            />
-            {errors.phoneNumber && <div className="text-red-500 text-sm">{errors.phoneNumber}</div>}
-          </div>
-
-          {/* Role */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={data.role}
-              onChange={handleSelectChange}
-              className="mt-1 p-2 w-3/4 max-w-md border rounded-md dark:bg-gray-800 dark:text-white"
-              required
-            >
-              <option value="" disabled>Select Role</option>
-              {roles.map((role) => (
-                <option key={role.name} value={role.name}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
-            {errors.role && <div className="text-red-500 text-sm">{errors.role}</div>}
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-start space-x-5">
-            <button
-              type="button"
-              onClick={() => window.history.back()}  // Volver a la página anterior
-              className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500 transition"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700 transition"
-              disabled={processing}
-            >
-              {processing ? "Actualizando..." : "Actualizar"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </AppLayout>
-  );
-};
-
-export default UserEdit;
+                    </div>
+                </form>
+            </div>
+        </AppLayout>
+    );
+}

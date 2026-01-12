@@ -1,18 +1,19 @@
-import { AppContent } from '@/components/app-content';
-import { AppShell } from '@/components/app-shell';
-import { AppSidebar } from '@/components/app-sidebar';
-import { AppSidebarHeader } from '@/components/app-sidebar-header';
-import { type BreadcrumbItem } from '@/types';
-import { type PropsWithChildren } from 'react';
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { DynamicBreadcrumbs } from "@/components/dynamic-breadcrumbs";
 
-export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
+export default function AppSidebarLayout({ children }: { children: React.ReactNode }) {
     return (
-        <AppShell variant="sidebar">
+        <SidebarProvider>
             <AppSidebar />
-            <AppContent variant="sidebar">
-                <AppSidebarHeader breadcrumbs={breadcrumbs} />
-                {children}
-            </AppContent>
-        </AppShell>
+            <SidebarInset>
+                {/* Esto se renderiza globalmente para todas las rutas */}
+                <DynamicBreadcrumbs />
+
+                <main className="flex-1 p-6">
+                    {children}
+                </main>
+            </SidebarInset>
+        </SidebarProvider>
     );
 }
