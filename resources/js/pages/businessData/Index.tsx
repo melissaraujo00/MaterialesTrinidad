@@ -3,7 +3,7 @@ import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { hasPermission } from "@/globals/permissions";
+import { useHasPermission } from "@/globals/permissions";
 
 interface BusinessData {
     id: number;
@@ -124,7 +124,7 @@ export default function BusinessData() {
                         </div>
 
                         {/* Botones de acción */}
-                        {hasPermission('editar datos empresa') && (
+                        {useHasPermission('editar datos empresa') && (
                             <div className="mt-6 flex justify-center">
                                 <Link
                                     href={`/businessData/${businessData.id}/edit`}

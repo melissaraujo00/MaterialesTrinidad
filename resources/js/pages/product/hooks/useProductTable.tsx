@@ -11,7 +11,7 @@ import { Product } from "@/types/entities/product"; // Asegúrate de que esta ru
 export const useProductTable = () => {
     // 1. Obtener datos y permisos
     const { products } = usePage<{ products: Product[] }>().props;
-    const { hasPermission } = usePermissions();
+    const { useHasPermissionion } = usePermissions();
 
     // 2. Estados Locales
     const [searchTerm, setSearchTerm] = useState("");
@@ -101,7 +101,7 @@ export const useProductTable = () => {
             className: "text-right",
             render: (row) => (
                 <div className="flex justify-end gap-2">
-                    {hasPermission("editar producto") && (
+                    {useHasPermissionion("editar producto") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             <Link href={route('products.edit', row.id)}>
                                 <Pencil className="h-4 w-4" />
@@ -109,7 +109,7 @@ export const useProductTable = () => {
                         </Button>
                     )}
 
-                    {hasPermission("eliminar producto") && (
+                    {useHasPermissionion("eliminar producto") && (
                         <Button
                             variant="ghost" size="icon"
                             onClick={() => openDeleteModal(row)}
@@ -131,6 +131,6 @@ export const useProductTable = () => {
         selectedProduct,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        hasPermission
+        useHasPermissionion
     };
 };

@@ -18,7 +18,7 @@ export interface User {
 export const useUserTable = () => {
     const { users } = usePage<{ users: User[] }>().props;
     // 1. Obtenemos el hook de permisos
-    const { hasPermission } = usePermissions();
+    const { useHasPermissionion } = usePermissions();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -84,7 +84,7 @@ export const useUserTable = () => {
             render: (user) => (
                 <div className="flex justify-end gap-2">
                     {/* Permiso para Editar */}
-                    {hasPermission("editar usuarios") && (
+                    {useHasPermissionion("editar usuarios") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             <Link href={route('users.edit', user.id)}>
                                 <Pencil className="h-4 w-4" />
@@ -92,7 +92,7 @@ export const useUserTable = () => {
                         </Button>
                     )}
                     {/* Permiso para Eliminar */}
-                    {hasPermission("eliminar usuarios") && (
+                    {useHasPermissionion("eliminar usuarios") && (
                         <Button
                             variant="ghost" size="icon"
                             onClick={() => openDeleteModal(user)}
@@ -114,6 +114,6 @@ export const useUserTable = () => {
         selectedUser,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        hasPermission // <--- IMPORTANTE: Exportamos la función aquí
+        useHasPermissionion // <--- IMPORTANTE: Exportamos la función aquí
     };
 };

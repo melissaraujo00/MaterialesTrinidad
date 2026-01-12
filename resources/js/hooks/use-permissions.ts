@@ -5,7 +5,7 @@ export function usePermissions() {
     const { auth } = usePage<PageProps>().props;
     const permissions = auth.user?.permissions ?? [];
 
-    const hasPermission = (perm: string) => permissions.includes(perm);
+    const useHasPermission = (perm: string) => permissions.includes(perm);
 
-    return { hasPermission };
+    return { useHasPermission };
 }

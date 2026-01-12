@@ -18,7 +18,7 @@ export default function CustomerIndex() {
         selectedCustomer,     // Nuevo
         isDeleteModalOpen,    // Nuevo
         setIsDeleteModalOpen, // Nuevo
-        hasPermission         // Nuevo
+        useHasPermission         // Nuevo
     } = useCustomerTable();
 
     return (
@@ -39,7 +39,7 @@ export default function CustomerIndex() {
                     </div>
 
                     {/* Botón Crear Protegido */}
-                    {hasPermission("crear clientes") && (
+                    {useHasPermission("crear clientes") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
                             <Link href={route('customers.create')}>
                                 <Plus className="mr-2 h-4 w-4" /> Nuevo Cliente

@@ -19,7 +19,7 @@ export default function Categories() {
         selectedCategory,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        hasPermission
+        useHasPermission
     } = useCategoryTable();
 
     return (
@@ -39,7 +39,7 @@ export default function Categories() {
                         </p>
                     </div>
 
-                    {hasPermission("crear categoria") && (
+                    {useHasPermission("crear categoria") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
                             <Link href={route('categories.create')}>
                                 <Plus className="mr-2 h-4 w-4" /> Nueva Categoría

@@ -19,7 +19,7 @@ export default function ProductIndex() {
         selectedProduct,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        hasPermission
+        useHasPermissionionion
     } = useProductTable();
 
     return (
@@ -39,7 +39,7 @@ export default function ProductIndex() {
                         </p>
                     </div>
 
-                    {hasPermission("crear producto") && (
+                    {useHasPermissionionion("crear producto") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
                             <Link href={route('products.create')}>
                                 <Plus className="mr-2 h-4 w-4" /> Nuevo Producto

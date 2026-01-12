@@ -25,7 +25,7 @@ export default function Movements() {
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
             ? page.props.auth.user.permissions
             : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
+    const useHasPermission = (perm: string) => permissions.includes(perm);
 
     const [selectedMovement, setSelectedProduct] = useState<Movement | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -47,15 +47,15 @@ export default function Movements() {
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 let actions = "";
-                if (hasPermission("Editar Movimiento")) {
+                if (useHasPermission("Editar Movimiento")) {
                     actions += `<a href="movements/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
                 }
-                if (hasPermission("Eliminar Movimiento")) {
+                if (useHasPermission("Eliminar Movimiento")) {
                     actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
                 }
                 td.innerHTML = actions;
 
-                if (hasPermission("Eliminar Movimiento")) {
+                if (useHasPermission("Eliminar Movimiento")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                 }
             }
@@ -69,7 +69,7 @@ export default function Movements() {
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
-                    {hasPermission("Crear Movimiento") && (
+                    {useHasPermission("Crear Movimiento") && (
                         <Link
                             href="/movements/create"
                             className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"

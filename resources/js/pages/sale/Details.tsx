@@ -10,7 +10,7 @@ export default function SaleShow() {
     
     const page = usePage();
     const permissions = page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions) ? page.props.auth.user.permissions : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
+    const useHasPermissionion = (perm: string) => permissions.includes(perm);
 
     const formatCurrency = (amount: string | number) => {
         return new Intl.NumberFormat('es-SV', {
@@ -61,7 +61,7 @@ export default function SaleShow() {
                     </div>
                     <div className="flex gap-2">
                         <div className="flex items-center gap-4">
-                            {hasPermission('edit_sales') && (
+                            {useHasPermissionion('edit_sales') && (
                                 <Link
                                     href={`/sales/${sale.id}/edit`}
                                     className="flex items-center gap-2 rounded bg-orange-500 px-4 py-2 text-white transition hover:bg-orange-600"

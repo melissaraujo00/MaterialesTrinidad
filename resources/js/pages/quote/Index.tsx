@@ -30,7 +30,7 @@ export default function Quotes() {
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
             ? page.props.auth.user.permissions
             : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
+    const useHasPermissionion = (perm: string) => permissions.includes(perm);
 
     const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -111,7 +111,7 @@ export default function Quotes() {
                 }
 
                 // Eliminar
-                if (hasPermission("realizar cotizaciones")) {
+                if (useHasPermissionion("realizar cotizaciones")) {
                     actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600 ml-2">Eliminar</button>`;
                 }
 
@@ -125,7 +125,7 @@ export default function Quotes() {
                     });
                 }
 
-                if (hasPermission("realizar cotizaciones")) {
+                if (useHasPermissionion("realizar cotizaciones")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                 }
             }
@@ -140,7 +140,7 @@ export default function Quotes() {
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Gestión de Cotizaciones</h1>
-                    {hasPermission("realizar cotizaciones") && (
+                    {useHasPermissionion("realizar cotizaciones") && (
                         <Link
                             href="/quotes/create"
                             className="bg-green-600 text-white rounded px-4 py-2 text-sm hover:bg-green-700 transition"

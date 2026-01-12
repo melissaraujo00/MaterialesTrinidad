@@ -19,7 +19,7 @@ export default function Roles() {
 
   // Lógica de permisos
   const userPermissions = auth?.user?.permissions || [];
-  const hasPermission = (perm: string) => Array.isArray(userPermissions) && userPermissions.includes(perm);
+  const useHasPermissionionionion = (perm: string) => Array.isArray(userPermissions) && userPermissions.includes(perm);
 
   const uniqueRoles: Role[] = roles ?? [];
 
@@ -89,7 +89,7 @@ export default function Roles() {
       header: "Acciones",
       className: "text-right align-top w-[100px]",
       render: (role) => {
-        if (!hasPermission("Editar Rol")) return null;
+        if (!useHasPermissionionionion("Editar Rol")) return null;
 
         return (
           <div className="flex justify-end">
@@ -113,7 +113,7 @@ export default function Roles() {
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
         {/* Cabecera Componentizada */}
-        <RolesHeader canCreate={hasPermission("Crear Rol")} />
+        <RolesHeader canCreate={useHasPermissionionionion("Crear Rol")} />
 
         {/* Tabla Genérica Reutilizable */}
         <GenericTable

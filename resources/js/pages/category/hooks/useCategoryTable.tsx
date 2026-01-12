@@ -17,7 +17,7 @@ export const useCategoryTable = () => {
     // 1. Obtener datos y permisos
     // NOTA: Asegúrate que tu controlador envíe 'categories' como prop
     const { categories } = usePage<{ categories: Category[] }>().props;
-    const { hasPermission } = usePermissions();
+    const { useHasPermissionion } = usePermissions();
 
     // 2. Estados
     const [searchTerm, setSearchTerm] = useState("");
@@ -67,7 +67,7 @@ export const useCategoryTable = () => {
             className: "text-right",
             render: (row) => (
                 <div className="flex justify-end gap-2">
-                    {hasPermission("editar categoria") && (
+                    {useHasPermissionion("editar categoria") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             <Link href={route('categories.edit', row.id)}>
                                 <Pencil className="h-4 w-4" />
@@ -75,7 +75,7 @@ export const useCategoryTable = () => {
                         </Button>
                     )}
 
-                    {hasPermission("eliminar categoria") && (
+                    {useHasPermissionion("eliminar categoria") && (
                         <Button
                             variant="ghost" size="icon"
                             onClick={() => openDeleteModal(row)}
@@ -97,6 +97,6 @@ export const useCategoryTable = () => {
         selectedCategory,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        hasPermission
+        useHasPermissionion
     };
 };

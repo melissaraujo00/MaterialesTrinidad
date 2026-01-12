@@ -26,7 +26,7 @@ export default function ConfirmedQuotes() {
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
             ? page.props.auth.user.permissions
             : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
+    const useHasPermissionion = (perm: string) => permissions.includes(perm);
 
     const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -80,7 +80,7 @@ export default function ConfirmedQuotes() {
                     alert(`Aquí se generaría la factura para la cotización #${rowData.id}`);
                 });
 
-                if (hasPermission("realizar cotizaciones")) {
+                if (useHasPermissionion("realizar cotizaciones")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                 }
             }
@@ -97,7 +97,7 @@ export default function ConfirmedQuotes() {
                     <h1 className="text-2xl font-bold">Ventas</h1>
                 </div>
                  <div className="flex justify-end">
-                    {hasPermission("crear venta")   &&(
+                    {useHasPermissionion("crear venta")   &&(
                         <Link
                             href="/sales/create"
                             className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"

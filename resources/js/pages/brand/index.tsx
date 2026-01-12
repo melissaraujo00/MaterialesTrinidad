@@ -20,7 +20,7 @@ export default function Brands() {
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const hasPermission = (perm: string) => auth.user?.permissions?.includes(perm);
+    const useHasPermission = (perm: string) => auth.user?.permissions?.includes(perm);
 
     // 1. Filtrado simple en cliente
     const filteredBrands = brands.filter(b =>
@@ -56,12 +56,12 @@ export default function Brands() {
             className: "text-right",
             render: (brand) => (
                 <div className="flex justify-end gap-2">
-                    {hasPermission("editar marca") && (
+                    {useHasPermission("editar marca") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600">
                             <Link href={`/brands/${brand.id}/edit`}><Pencil className="h-4 w-4" /></Link>
                         </Button>
                     )}
-                    {hasPermission("eliminar marca") && (
+                    {useHasPermission("eliminar marca") && (
                         <Button
                             variant="ghost" size="icon"
                             className="h-8 w-8 hover:text-red-600"
@@ -87,7 +87,7 @@ export default function Brands() {
                         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Marcas</h1>
                         <p className="text-zinc-500 text-sm">Gestión de fabricantes.</p>
                     </div>
-                    {hasPermission("crear marca") && (
+                    {useHasPermission("crear marca") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900">
                             <Link href="/brands/create"><Plus className="mr-2 h-4 w-4" /> Nueva</Link>
                         </Button>

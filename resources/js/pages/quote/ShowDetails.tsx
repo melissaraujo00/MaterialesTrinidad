@@ -7,7 +7,7 @@ import ProductList from "./ProducList";
 import SaleFromQuoteModal from "@/components/SaleFromQuoteModal"; // Ajusta la ruta si es necesario
 import { QuoteDetail, Quote } from "@/interfaces/quotesInterfaces";
 import { CartItem } from "@/interfaces/shoppingCartInterfaces";
-import { hasPermission } from "@/globals/permissions";
+import { useHasPermissionion } from "@/globals/permissions";
 import { formatCurrency } from "@/formatters/currencyFormatter";
 import { formatDate } from "@/formatters/dateFormatter";
 import { priceCalculator } from "@/services/PriceCalculatorService";
@@ -295,7 +295,7 @@ export default function QuoteShow() {
                     <div className="flex gap-2">
                         {!isEditing ? (
                             <div className="flex items-center gap-4">
-                                {hasPermission('realizar ventas') && (
+                                {useHasPermissionion('realizar ventas') && (
                                     <button
                                         onClick={() => setIsEditing(true)}
                                         className="flex items-center gap-2 rounded bg-orange-500 px-4 py-2 text-white transition hover:bg-orange-600"

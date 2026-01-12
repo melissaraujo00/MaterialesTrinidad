@@ -17,9 +17,9 @@ export interface Customer {
 }
 
 export const useCustomerTable = () => {
-    // 2. Obtenemos datos y la función hasPermission
+    // 2. Obtenemos datos y la función useHasPermission
     const { customers } = usePage<{ customers: Customer[] }>().props;
-    const { hasPermission } = usePermissions();
+    const { useHasPermission } = usePermissions();
 
     // 3. Estados para el Modal y Selección
     const [searchTerm, setSearchTerm] = useState("");
@@ -103,7 +103,7 @@ export const useCustomerTable = () => {
             className: "text-right",
             render: (row) => (
                 <div className="flex justify-end gap-2">
-                    {hasPermission("editar clientes") && (
+                    {useHasPermission("editar clientes") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             <Link href={route('customers.edit', row.id)}>
                                 <Pencil className="h-4 w-4" />
@@ -111,7 +111,7 @@ export const useCustomerTable = () => {
                         </Button>
                     )}
 
-                    {hasPermission("eliminar clientes") && (
+                    {useHasPermission("eliminar clientes") && (
                         <Button
                             variant="ghost" size="icon"
                             onClick={() => openDeleteModal(row)}
@@ -133,6 +133,6 @@ export const useCustomerTable = () => {
         selectedCustomer,    // Exportamos estado
         isDeleteModalOpen,   // Exportamos estado
         setIsDeleteModalOpen, // Exportamos setter
-        hasPermission        // Exportamos permiso para usar en Index
+        useHasPermission        // Exportamos permiso para usar en Index
     };
 };

@@ -51,7 +51,7 @@ export default function ProductList({ isOpen, closeModal, onSelectProduct, items
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
             ? page.props.auth.user.permissions
             : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
+    const useHasPermissionionion = (perm: string) => permissions.includes(perm);
 
     const userId = page.props.auth?.user?.id;
 

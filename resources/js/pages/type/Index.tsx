@@ -29,8 +29,8 @@ export default function Types() {
         page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
             ? page.props.auth.user.permissions
             : [];
-    const hasPermission = (perm: string) => permissions.includes(perm);
-    
+    const useHasPermission = (perm: string) => permissions.includes(perm);
+
     const [selectedType, setSelectedType] = useState<Type | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -48,15 +48,15 @@ export default function Types() {
             searchable: false,
             createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
                 let actions = "";
-                if (hasPermission("Editar Tipo Movimiento")) {
+                if (useHasPermission("Editar Tipo Movimiento")) {
                     actions += `<a href="types/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
                 }
-                if (hasPermission("Eliminar Tipo Movimiento")) {
+                if (useHasPermission("Eliminar Tipo Movimiento")) {
                     actions += `<button class="delete-btn bg-red-500 text-sm text-white px-3 py-1 rounded hover:bg-red-600">Eliminar</button>`;
                 }
                 td.innerHTML = actions;
 
-                if (hasPermission("Eliminar Tipo Movimiento")) {
+                if (useHasPermission("Eliminar Tipo Movimiento")) {
                     td.querySelector('.delete-btn')?.addEventListener('click', () => openDeleteModal(rowData));
                 }
             }
@@ -70,7 +70,7 @@ export default function Types() {
 
             <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
                 <div className="flex justify-end">
-                   {hasPermission("Crear Tipo Movimiento") && (
+                   {useHasPermission("Crear Tipo Movimiento") && (
                         <Link
                             href="/types/create"
                             className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
