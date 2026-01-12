@@ -7,7 +7,7 @@ import ProductList from "./ProducList";
 import SaleFromQuoteModal from "@/components/SaleFromQuoteModal"; // Ajusta la ruta si es necesario
 import { QuoteDetail, Quote } from "@/interfaces/quotesInterfaces";
 import { CartItem } from "@/interfaces/shoppingCartInterfaces";
-import { useHasPermissionion } from "@/globals/permissions";
+import { useHasPermission } from "@/globals/permissions";
 import { formatCurrency } from "@/formatters/currencyFormatter";
 import { formatDate } from "@/formatters/dateFormatter";
 import { priceCalculator } from "@/services/PriceCalculatorService";
