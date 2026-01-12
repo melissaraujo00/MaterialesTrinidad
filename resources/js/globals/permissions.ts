@@ -9,7 +9,7 @@ export const usePermissions = () => {
     return Array.isArray(permissions) ? permissions : [];
 }
 
-export const useuseHasPermission = (permission: string) => {
+export const useHasPermission = (permission: string) => {
     const permissions = usePermissions();
     return permissions.includes(permission);
 }
