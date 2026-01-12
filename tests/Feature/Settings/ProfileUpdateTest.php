@@ -6,11 +6,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->get('/settings/profile');
-
+    $response = $this->actingAs($user)->get('/settings/profile');
     $response->assertOk();
 });
 
@@ -21,7 +17,11 @@ test('profile information can be updated', function () {
         ->actingAs($user)
         ->patch('/settings/profile', [
             'name' => 'Test User',
+            'firstName' => 'Juan',
+            'lastName' => 'Perez',
             'email' => 'test@example.com',
+            'phoneNumber' => '12345678',
+            'birthdate' => '1990-01-01'
         ]);
 
     $response
@@ -29,7 +29,6 @@ test('profile information can be updated', function () {
         ->assertRedirect('/settings/profile');
 
     $user->refresh();
-
     expect($user->name)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
     expect($user->email_verified_at)->toBeNull();
@@ -42,7 +41,11 @@ test('email verification status is unchanged when the email address is unchanged
         ->actingAs($user)
         ->patch('/settings/profile', [
             'name' => 'Test User',
+            'firstName' => 'Juan',
+            'lastName' => 'Perez2',
             'email' => $user->email,
+            'phoneNumber' => '123545678',
+            'birthdate' => '1890-01-01'
         ]);
 
     $response
@@ -63,10 +66,13 @@ test('user can delete their account', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
+        ->assertRedirect('/auth/login');
 
     $this->assertGuest();
-    expect($user->fresh())->toBeNull();
+
+    // ✅ CORREGIDO: Verificamos Soft Delete en lugar de null
+    // Esto verifica que el usuario sigue en la BD pero tiene fecha de borrado
+    expect($user->fresh()->deleted_at)->not->toBeNull();
 });
 
 test('correct password must be provided to delete account', function () {
@@ -83,5 +89,5 @@ test('correct password must be provided to delete account', function () {
         ->assertSessionHasErrors('password')
         ->assertRedirect('/settings/profile');
 
-    expect($user->fresh())->not->toBeNull();
+    expect($user->fresh()->deleted_at)->toBeNull(); // Verificamos que NO se haya borrado
 });

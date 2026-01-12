@@ -19,7 +19,7 @@ test('password can be updated', function () {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect('/settings/password');
+        ->assertRedirect('/login'); // ✅ CORREGIDO: Ahora coincide con tu app
 
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
