@@ -1,15 +1,10 @@
 import { usePage, Head, Link } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Toaster } from "sonner";
-import DataTable from "datatables.net-react";
-import DT from "datatables.net-dt";
-import languageES from "datatables.net-plugins/i18n/es-ES.mjs";
-import "datatables.net-buttons-dt";
-import "datatables.net-responsive-dt";
-import jszip from "jszip";
-
-window.JSZip = jszip;
-DataTable.use(DT);
+import { RolesHeader } from "@/components/roles/RolesHeader";
+import { GenericTable, Column } from "@/components/GenericTable";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 
 interface Role {
   id: number;
@@ -20,47 +15,92 @@ interface Role {
 
 export default function Roles() {
   const page = usePage();
-  const permissions =
-    page.props.auth?.user?.permissions && Array.isArray(page.props.auth.user.permissions)
-      ? page.props.auth.user.permissions
-      : [];
-  const hasPermission = (perm: string) => permissions.includes(perm);
+  const { auth, roles } = page.props as any;
 
-  // Obtén los roles únicos directamente de las props
-  const uniqueRoles: Role[] = page.props.roles ?? [];
+  // Lógica de permisos
+  const userPermissions = auth?.user?.permissions || [];
+  const hasPermission = (perm: string) => Array.isArray(userPermissions) && userPermissions.includes(perm);
 
-  const columns = [
-    { data: "name", title: "Nombre del Rol" },
-    { data: "description", title: "Descripción" },
+  const uniqueRoles: Role[] = roles ?? [];
+
+  // --- DEFINICIÓN DE COLUMNAS ---
+  const columns: Column<Role>[] = [
     {
-      data: "permissions",
-      title: "Permisos",
-      render: function(data: string[]) {
-                if (!data || data.length === 0) return "-";
-
-                return data
-                    .map(
-                        (permission) =>
-                            `<span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded">
-              ${permission}
-            </span>`
-                    )
-                    .join("");
-        },
-      orderable: false,
-      searchable: false,
+      header: "Nombre del Rol",
+      render: (role) => <span className="font-medium text-zinc-900 dark:text-zinc-100">{role.name}</span>,
+      className: "w-[200px] align-top", 
     },
     {
-      data: null,
-      title: "Acciones",
-      orderable: false,
-      searchable: false,
-      createdCell: (td: HTMLTableCellElement, cellData: any, rowData: any) => {
-        let actions = "";
-        if (hasPermission("Editar Rol")) {
-          actions += `<a href="roles/${rowData.id}/edit" class="edit-btn bg-orange-400 text-sm text-white px-3 py-1 rounded hover:bg-orange-500">Editar</a>`;
-        }
-        td.innerHTML = actions;
+      header: "Descripción",
+      render: (role) => (
+        <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            {role.description || "Sin descripción"}
+        </span>
+      ),
+      className: "hidden md:table-cell w-[250px] align-top"
+    },
+    {
+      header: "Permisos",
+      className: "align-top", // Para que empiece arriba si hay muchos
+      render: (role) => {
+        // 1. Caso Especial: Administrador (o si tiene permisos 'all')
+        if (role.name === 'Administrador' || role.permissions.includes('all')) {
+            return (
+               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                   ✨ Acceso Total
+               </span>
+            );
+       }
+
+       // 2. Configuración de Truncado
+       const MAX_VISIBLE = 5;
+       const visiblePermissions = role.permissions.slice(0, MAX_VISIBLE);
+       const remainingCount = role.permissions.length - MAX_VISIBLE;
+
+        return (
+          <div className="flex flex-wrap gap-1 items-center">
+            {visiblePermissions.map((perm, index) => (
+              <span
+                  key={index}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 whitespace-nowrap"
+              >
+                {perm}
+              </span>
+            ))}
+
+            {/* Badge de "+X más" si hay muchos */}
+            {remainingCount > 0 && (
+                <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300 ml-1 cursor-help transition-colors hover:bg-zinc-300 dark:hover:bg-zinc-600"
+                    title={role.permissions.slice(MAX_VISIBLE).join(', ')} // Tooltip nativo al pasar el mouse
+                >
+                  +{remainingCount} más
+                </span>
+            )}
+
+            {role.permissions.length === 0 && (
+                <span className="text-zinc-400 text-xs italic">Sin permisos asignados</span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      header: "Acciones",
+      className: "text-right align-top w-[100px]",
+      render: (role) => {
+        if (!hasPermission("Editar Rol")) return null;
+
+        return (
+          <div className="flex justify-end">
+             <Button variant="outline" size="sm" asChild className="h-8 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                <Link href={`/roles/${role.id}/edit`}>
+                    <Pencil className="mr-2 h-3.5 w-3.5" />
+                    Editar
+                </Link>
+             </Button>
+          </div>
+        );
       },
     },
   ];
@@ -70,40 +110,18 @@ export default function Roles() {
       <Head title="Roles" />
       <Toaster position="top-right" richColors />
 
-      <div className="flex flex-col gap-6 p-6 bg-white text-black shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-        <div className="flex justify-end">
-          {hasPermission("Crear Rol") && (
-            <Link
-              href="/roles/create"
-              className="bg-green-600 text-white rounded px-3 py-1 text-sm hover:bg-green-700 transition"
-            >
-              Agregar Rol
-            </Link>
-          )}
-        </div>
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-        <DataTable
-          data={uniqueRoles}
-          options={{
-            language: languageES,
-            responsive: true,
-            dom: "frtiplB",
-            layout: {
-              topStart: ["pageLength", "search"],
-            },
-          }}
-          columns={columns}
-          className="display"
-        >
-          <thead>
-            <tr>
-              <th>Nombre del Rol</th>
-              <th>Descripción</th>
-              <th>Permisos</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-        </DataTable>
+        {/* Cabecera Componentizada */}
+        <RolesHeader canCreate={hasPermission("Crear Rol")} />
+
+        {/* Tabla Genérica Reutilizable */}
+        <GenericTable
+            data={uniqueRoles}
+            columns={columns}
+            emptyMessage="No hay roles registrados en el sistema."
+        />
+
       </div>
     </AppLayout>
   );

@@ -1,5 +1,6 @@
+// hooks/useCustomerEdit.ts
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { yupResolver } from "@hookform/resolvers/yup"; // <--- CAMBIO: Yup
 import { customerSchema, CustomerFormData } from "@/schemas/customerSchema";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
@@ -13,32 +14,31 @@ interface Props {
 }
 
 export const useCustomerEdit = ({ customer, departments, municipalities, districts }: Props) => {
-    // 1. Configuramos los valores por defecto
-    // Usamos el operador ?. (optional chaining) por si las relaciones no vienen cargadas
+
+    // 1. Configuración del Formulario con Yup
     const form = useForm<CustomerFormData>({
-        resolver: zodResolver(customerSchema),
+        resolver: yupResolver(customerSchema),
         defaultValues: {
             name: customer.name || "",
             email: customer.email || "",
             phoneNumber: customer.phoneNumber || "",
             nit: customer.nit || "",
-            // Aquí obtenemos los IDs de los padres a través de las relaciones
+            // Lógica para recuperar la ubicación anidada
             department_id: String(customer.district?.municipality?.department_id || customer.department_id || ""),
             municipality_id: String(customer.district?.municipality_id || customer.municipality_id || ""),
-            district_id: String(customer.district_id || customer.district?.id || ""), // Intentamos varias formas
+            district_id: String(customer.district_id || customer.district?.id || ""),
             address: customer.address || "",
             description: customer.description || "",
             status: customer.status || "activo",
         },
     });
 
-    const { watch, setValue, formState: { dirtyFields } } = form;
+    const { watch, setValue, formState: { dirtyFields }, setError } = form;
 
-    // Obtenemos valores en tiempo real
+    // --- Lógica de Ubicación (Igual que en Create) ---
     const selectedDepartmentId = watch("department_id");
     const selectedMunicipalityId = watch("municipality_id");
 
-    // 2. Filtrado de listas (Memoizado para rendimiento)
     const filteredMunicipalities = useMemo(() => {
         if (!selectedDepartmentId) return [];
         return municipalities.filter((m) => String(m.department_id) === String(selectedDepartmentId));
@@ -49,11 +49,7 @@ export const useCustomerEdit = ({ customer, departments, municipalities, distric
         return districts.filter((d) => String(d.municipality_id) === String(selectedMunicipalityId));
     }, [selectedMunicipalityId, districts]);
 
-
-    // 3. Reset inteligente de hijos
-    // SOLO si el usuario tocó el campo (dirtyFields), limpiamos los hijos.
-    // Esto evita que se borren los datos al cargar la página por primera vez.
-
+    // Reset inteligente (solo si se toca el campo)
     useEffect(() => {
         if (dirtyFields.department_id) {
             setValue("municipality_id", "");
@@ -67,14 +63,16 @@ export const useCustomerEdit = ({ customer, departments, municipalities, distric
         }
     }, [selectedMunicipalityId, dirtyFields.municipality_id, setValue]);
 
-
-    // 4. Envío del formulario
+    // --- Envío ---
     const submit = (data: CustomerFormData) => {
         router.put(route("customers.update", customer.id), data as any, {
             onSuccess: () => toast.success("Cliente actualizado correctamente"),
             onError: (errors) => {
-                toast.error("Error al actualizar");
-                console.error(errors);
+                toast.error("Error al actualizar, verifique los campos.");
+                // Inyectar errores de Laravel a React Hook Form
+                Object.keys(errors).forEach((field) => {
+                    setError(field as any, { type: "server", message: errors[field] });
+                });
             },
         });
     };

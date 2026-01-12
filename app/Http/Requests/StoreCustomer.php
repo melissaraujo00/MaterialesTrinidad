@@ -39,7 +39,8 @@ class StoreCustomer extends FormRequest
             'nit' => [
                 'nullable',
                 'string',
-                'max:17'
+                'max:17',
+                'unique:customers,nit'
             ],
             'district_id' => [
                 'required',
@@ -59,5 +60,12 @@ class StoreCustomer extends FormRequest
                 'string'
             ]
         ];
+    }
+
+    public function messages(){
+        return [
+            'nit.unique' => 'Este nit ya ha sido registrado anteriormente.'
+        ];
+
     }
 }

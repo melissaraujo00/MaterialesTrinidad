@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+// 1. CAMBIO: Importamos el resolver de YUP en lugar de Zod
+import { yupResolver } from "@hookform/resolvers/yup";
 import { customerSchema, CustomerFormData } from "@/schemas/customerSchema";
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
@@ -12,8 +13,10 @@ interface LocationProps {
 }
 
 export const useCustomerForm = ({ departments, municipalities, districts }: LocationProps) => {
+
+    // 2. CAMBIO: Configuramos useForm con yupResolver
     const form = useForm<CustomerFormData>({
-        resolver: zodResolver(customerSchema),
+        resolver: yupResolver(customerSchema), // <--- Aquí conectamos Yup
         defaultValues: {
             name: "",
             email: "",
@@ -28,23 +31,21 @@ export const useCustomerForm = ({ departments, municipalities, districts }: Loca
         },
     });
 
-    // --- Lógica de Ubicación (Selectores Dependientes) ---
+    // --- Lógica de Ubicación (Se mantiene idéntica) ---
     const selectedDepartmentId = form.watch("department_id");
     const selectedMunicipalityId = form.watch("municipality_id");
 
-    // Filtrar Municipios según Departamento
     const filteredMunicipalities = useMemo(() => {
         if (!selectedDepartmentId) return [];
         return municipalities.filter((m) => String(m.department_id) === String(selectedDepartmentId));
     }, [selectedDepartmentId, municipalities]);
 
-    // Filtrar Distritos según Municipio
     const filteredDistricts = useMemo(() => {
         if (!selectedMunicipalityId) return [];
         return districts.filter((d) => String(d.municipality_id) === String(selectedMunicipalityId));
     }, [selectedMunicipalityId, districts]);
 
-    // Resetear hijos cuando cambia el padre
+    // Resetear selectores hijos
     useEffect(() => {
         form.setValue("municipality_id", "");
         form.setValue("district_id", "");
@@ -54,14 +55,21 @@ export const useCustomerForm = ({ departments, municipalities, districts }: Loca
         form.setValue("district_id", "");
     }, [selectedMunicipalityId, form.setValue]);
 
-
-    // --- Envío del Formulario ---
+    // --- Envío ---
     const submit = (data: CustomerFormData) => {
         router.post(route("customers.store"), data as any, {
-            onSuccess: () => toast.success("Cliente creado correctamente"),
+            onSuccess: () => {
+                toast.success("Cliente creado correctamente");
+                form.reset(); // Opcional: limpiar form al guardar
+            },
             onError: (errors) => {
                 toast.error("Error al crear cliente, verifique los campos.");
-                console.error(errors);
+                Object.keys(errors).forEach((field) => {
+                    form.setError(field as any, {
+                        type: "manual", // O 'server', da igual para efectos visuales
+                        message: errors[field]
+                    });
+                });
             },
         });
     };

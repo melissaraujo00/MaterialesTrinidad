@@ -1,146 +1,104 @@
-import React, { useState } from 'react';
-import { Head, usePage, router } from '@inertiajs/react';
-import { Toaster, toast } from 'sonner';
-import { Formik, Form, Field } from 'formik';
-import AppLayout from '@/layouts/app-layout';
-import { productValidationSchema } from '@/schemas/productSchema'; // Asegúrate de que no importe STATUS_OPTIONS aquí
+import React from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
+import AppLayout from "@/layouts/app-layout";
+import { Button } from "@/components/ui/button";
+import { Loader2, Save } from "lucide-react";
+import { useProductEdit } from "./hooks/useProductEdit";
 
-interface Category { id: number; name: string; }
-interface Brand { id: number; name: string; }
-interface Product {
-    id: number;
-    name: string;
-    description: string | null;
-    priceWithTax: number;
-    discountPrice: number;
-    stock: number;
-    stockMinimun: number;
-    category_id: number | string;
-    brand_id: number | string | null;
-    image: string | null;
+
+// ¡REUTILIZACIÓN TOTAL! Importamos los mismos componentes
+import { ProductHeader } from "@/components/product-form/ProductHeader";
+import { GeneralInfoCard } from "@/components/product-form/GeneralInfoCard";
+import { PricingCard } from "@/components/product-form/PricingCard";
+import { ImageUploadCard } from "@/components/product-form/ImageUploadCard";
+
+// Tipado básico para lo que viene de Inertia
+interface Props {
+    product: any; // O tu interfaz Product completa
+    categories: { id: number; name: string }[];
+    brands: { id: number; name: string }[];
 }
 
 export default function ProductEdit() {
-    const { product, categories, brands } = usePage<{
-        product: Product,
-        categories: Category[],
-        brands: Brand[]
-    }>().props;
+    // 1. Obtener datos de Inertia
+    const { product, categories, brands } = usePage<Props>().props;
 
-    const [preview, setPreview] = useState<string | null>(product.image);
+    // 2. Inicializar Hook de Edición
+    const {
+        form,
+        submit,
+        loading,
+        imagePreview,
+        handleImageChange,
+        setImagePreview
+    } = useProductEdit(product);
 
-    const handleSubmit = (values: any) => {
-        router.post(`/products/${product.id}`, {
-            ...values,
-            _method: 'PUT',
-        }, {
-            forceFormData: true,
-            onSuccess: () => toast.success("Producto actualizado con éxito."),
-            onError: () => toast.error("Error al actualizar el producto."),
-        });
+    // Helper para limpiar imagen (UI Logic)
+    // Nota: Dependiendo de tu backend, esto podría requerir un campo extra "delete_image"
+    // Por ahora mantenemos la lógica visual de limpiar el preview.
+    const handleRemoveImage = () => {
+        form.setValue("image", null, { shouldValidate: true });
+        setImagePreview(null);
+        const el = document.getElementById('image-upload') as HTMLInputElement;
+        if(el) el.value = "";
     };
 
     return (
         <AppLayout>
-            <Head title="Editar Producto" />
-            <Toaster position="top-right" richColors />
+            <Head title={`Editar ${product.name}`} />
 
-            <div className="flex flex-col gap-6 p-6 bg-white shadow-lg rounded-xl dark:bg-black/10 dark:text-white">
-                <h2 className="text-2xl font-semibold mb-4">Editar Producto: {product.name}</h2>
+            <div className="max-w-4xl mx-auto p-6">
 
-                <Formik
-                    initialValues={{
-                        name: product.name || "",
-                        description: product.description || "",
-                        priceWithTax: product.priceWithTax || "",
-                        discountPrice: product.discountPrice || "0",
-                        category_id: product.category_id || "",
-                        brand_id: product.brand_id || "",
-                        stock: product.stock || "",
-                        stockMinimun: product.stockMinimun || "",
-                        image: null, 
-                    }}
-                    validationSchema={productValidationSchema}
-                    onSubmit={handleSubmit}
-                >
-                    {({ values, errors, touched, setFieldValue }) => (
-                        <Form className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium">Nombre</label>
-                                    <Field name="name" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
-                                    {touched.name && errors.name && <small className="text-red-500">{errors.name as string}</small>}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">Descripción</label>
-                                    <Field name="description" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
-                                </div>
-                            </div>
+                {/* Header Dinámico */}
+                <ProductHeader
+                    title={`Editar: ${product.name}`}
+                    subtitle="Actualiza la información del producto existente."
+                />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium">Categoría</label>
-                                    <Field as="select" name="category_id" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800">
-                                        <option value="">Seleccione Categoría</option>
-                                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                    </Field>
-                                    {touched.category_id && errors.category_id && <small className="text-red-500">{errors.category_id as string}</small>}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">Marca</label>
-                                    <Field as="select" name="brand_id" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800">
-                                        <option value="">Seleccione Marca</option>
-                                        {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                                    </Field>
-                                </div>
-                            </div>
+                <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium">Precio $</label>
-                                    <Field name="priceWithTax" type="number" step="0.01" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">Descuento $</label>
-                                    <Field name="discountPrice" type="number" step="0.01" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">Stock</label>
-                                    <Field name="stock" type="number" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium">Stock Mínimo</label>
-                                    <Field name="stockMinimun" type="number" className="mt-1 p-2 w-full border rounded-md dark:bg-gray-800" />
-                                </div>
-                            </div>
+                    {/* COLUMNA IZQUIERDA: Reutilizamos las mismas cards */}
+                    <div className="md:col-span-2 space-y-6">
+                        <GeneralInfoCard
+                            form={form}
+                            categories={categories}
+                            brands={brands}
+                        />
 
-                            <div>
-                                <label className="block text-sm font-medium">Imagen del Producto</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => {
-                                        const file = e.currentTarget.files?.[0] || null;
-                                        setFieldValue("image", file);
-                                        setPreview(file ? URL.createObjectURL(file) : product.image);
-                                    }}
-                                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                />
-                                {preview && (
-                                    <div className="mt-2">
-                                        <p className="text-xs text-gray-500 mb-1">Vista previa:</p>
-                                        <img src={preview} className="w-32 h-32 object-cover rounded shadow-md border" />
-                                    </div>
+                        <PricingCard form={form} />
+                    </div>
+
+                    {/* COLUMNA DERECHA */}
+                    <div className="space-y-6">
+                        <ImageUploadCard
+                            imagePreview={imagePreview}
+                            onImageChange={handleImageChange}
+                            onRemoveImage={handleRemoveImage}
+                            error={form.formState.errors.image?.message as string}
+                        />
+
+                        {/* Botones de Acción */}
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 transition-all"
+                            >
+                                {loading ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Save className="mr-2 h-4 w-4" />
                                 )}
-                            </div>
+                                Actualizar Producto
+                            </Button>
 
-                            <div className="flex justify-end gap-2 pt-4">
-                                <button type="button" onClick={() => window.history.back()} className="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
-                                <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Actualizar Producto</button>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
+                            <Button variant="outline" asChild className="w-full dark:border-zinc-800 dark:text-zinc-300">
+                                <Link href={route('products.index')}>Cancelar</Link>
+                            </Button>
+                        </div>
+                    </div>
+
+                </form>
             </div>
         </AppLayout>
     );

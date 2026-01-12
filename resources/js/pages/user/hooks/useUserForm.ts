@@ -1,46 +1,64 @@
-import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { userSchema } from '@/schemas/userSchema';
-import * as Yup from 'yup';
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { userSchema, UserFormData } from "@/schemas/userSchema";
+import { router } from "@inertiajs/react";
+import { toast } from "sonner";
+
+
+const formatDateToMySQL = (date: Date | string | null | undefined) => {
+    if (!date) return null;
+
+    if (typeof date === 'string' && !date.includes('T')) return date;
+
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
 
 export const useUserForm = () => {
-    const [errors, setErrors] = useState<Record<string, string>>({});
-
-    const form = useForm({
-        name: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        birthdate: '',
-        role: '',
-        password: '',
-        confirmPassword: '',
+    const form = useForm<UserFormData>({
+        resolver: yupResolver(userSchema),
+        defaultValues: {
+            name: "",
+            firstName: "",
+            lastName: "",
+            email: "",
+            phoneNumber: "",
+            birthdate: "",
+            role: "",
+            password: "",
+            confirmPassword: "",
+        },
     });
 
-    const submit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setErrors({});
+    const { handleSubmit, setError, reset } = form;
 
-        try {
-            // Validamos contra el esquema de Yup
-            await userSchema.validate(form.data, { abortEarly: false });
+    const submit = (data: UserFormData) => {
+        const payload = {
+            ...data,
+            birthdate: formatDateToMySQL(data.birthdate),
+        };
 
-            form.post(route('users.store'), {
-                preserveScroll: true,
-                onSuccess: () => toast.success("Usuario creado con éxito"),
-                onError: (serverErrors) => setErrors(serverErrors),
-            });
-        } catch (err) {
-            if (err instanceof Yup.ValidationError) {
-                const validationErrors: Record<string, string> = {};
-                err.inner.forEach((e) => { if (e.path) validationErrors[e.path] = e.message; });
-                setErrors(validationErrors);
-                console.error("Validación fallida:", validationErrors);
-            }
-        }
+        router.post(route("users.store"), payload as any, {
+            onSuccess: () => {
+                toast.success("Usuario creado con éxito");
+                reset();
+            },
+            onError: (errors) => {
+                toast.error("Error al crear usuario.");
+                Object.keys(errors).forEach((field) => {
+                    setError(field as any, { type: "server", message: errors[field] });
+                });
+            },
+        });
     };
 
-    return { ...form, errors, submit };
+    return {
+        form,
+        submit: handleSubmit(submit),
+        loading: form.formState.isSubmitting,
+    };
 };

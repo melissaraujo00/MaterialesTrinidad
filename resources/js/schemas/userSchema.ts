@@ -15,3 +15,5 @@ export const userSchema = Yup.object({
     confirmPassword: Yup.string().oneOf([Yup.ref('password'), undefined], 'Las contraseñas no coinciden').required('Campo requerido'),
     role: Yup.string().required('Campo requerido'),
 });
+
+export type UserFormData = Yup.InferType<typeof userSchema>;
