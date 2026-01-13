@@ -6,6 +6,7 @@ use App\Models\BusinessData;
 use App\Models\District;
 use App\Models\User;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Hash;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Faker\Core\DateTime;
 use Illuminate\Database\Seeder;
