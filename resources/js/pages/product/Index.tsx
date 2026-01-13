@@ -7,10 +7,10 @@ import { Toaster } from "sonner";
 import { Plus, Search } from "lucide-react";
 import { GenericTable } from "@/components/GenericTable";
 import DeleteEntityModal from "@/components/DeleteEntityModal";
-import { useProductTable } from "./hooks/useProductTable";
+// Asegúrate de que la ruta sea correcta según donde guardaste el archivo anterior
+import { useProductTable } from "../../pages/product/hooks/useProductTable";
 
 export default function ProductIndex() {
-    // Usamos el hook
     const {
         filteredProducts,
         columns,
@@ -19,7 +19,7 @@ export default function ProductIndex() {
         selectedProduct,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        useHasPermissionionion
+        hasPermission // <--- 1. CORREGIDO: Usamos el nombre correcto (sin 'use')
     } = useProductTable();
 
     return (
@@ -39,7 +39,8 @@ export default function ProductIndex() {
                         </p>
                     </div>
 
-                    {useHasPermissionionion("crear producto") && (
+                    {/* 2. CORREGIDO: Usamos 'hasPermission' y quitamos el typo */}
+                    {hasPermission("crear producto") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 shadow-lg shadow-zinc-900/20">
                             <Link href={route('products.create')}>
                                 <Plus className="mr-2 h-4 w-4" /> Nuevo Producto

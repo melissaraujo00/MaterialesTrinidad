@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Pencil, Trash2, Tag } from "lucide-react";
 import DeleteEntityModal from "../../components/DeleteEntityModal";
-import { GenericTable, Column } from "@/components/GenericTable"; // Importamos tu nuevo componente
+import { GenericTable, Column } from "@/components/GenericTable";
 
 interface Brand {
     id: number;
@@ -15,19 +15,22 @@ interface Brand {
 }
 
 export default function Brands() {
-    const { brands, auth } = usePage<{ brands: Brand[], auth: any }>().props;
+    // Tipamos auth para evitar errores de TS
+    const { brands, auth } = usePage<{ brands: Brand[], auth: { user: { permissions: string[] } } }>().props;
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const useHasPermission = (perm: string) => auth.user?.permissions?.includes(perm);
+    // 🔴 CAMBIO: Renombramos de 'usePermissions' a 'hasPermission'
+    // Al quitar el "use", React entiende que es una función normal y permite usarla donde quieras.
+    const hasPermission = (perm: string) => auth.user?.permissions?.includes(perm);
 
     // 1. Filtrado simple en cliente
     const filteredBrands = brands.filter(b =>
         b.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // 2. Definición de Columnas (Aquí está la magia del responsive)
+    // 2. Definición de Columnas
     const columns: Column<Brand>[] = [
         {
             header: "Marca",
@@ -38,7 +41,6 @@ export default function Brands() {
                     </div>
                     <div>
                         <span className="font-semibold block">{brand.name}</span>
-                        {/* Se muestra en móvil, se oculta en desktop */}
                         <span className="md:hidden text-xs text-zinc-500 truncate max-w-[150px] block">
                             {brand.description || "Sin descripción"}
                         </span>
@@ -48,7 +50,7 @@ export default function Brands() {
         },
         {
             header: "Descripción",
-            className: "hidden md:table-cell text-zinc-600", // Oculto en móvil
+            className: "hidden md:table-cell text-zinc-600",
             render: (brand) => brand.description || "—"
         },
         {
@@ -56,12 +58,14 @@ export default function Brands() {
             className: "text-right",
             render: (brand) => (
                 <div className="flex justify-end gap-2">
-                    {useHasPermission("editar marca") && (
+                    {/* 🔴 CAMBIO: Usamos 'hasPermission' aquí */}
+                    {hasPermission("editar marca") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600">
                             <Link href={`/brands/${brand.id}/edit`}><Pencil className="h-4 w-4" /></Link>
                         </Button>
                     )}
-                    {useHasPermission("eliminar marca") && (
+                    {/* 🔴 CAMBIO: Usamos 'hasPermission' aquí */}
+                    {hasPermission("eliminar marca") && (
                         <Button
                             variant="ghost" size="icon"
                             className="h-8 w-8 hover:text-red-600"
@@ -87,7 +91,8 @@ export default function Brands() {
                         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Marcas</h1>
                         <p className="text-zinc-500 text-sm">Gestión de fabricantes.</p>
                     </div>
-                    {useHasPermission("crear marca") && (
+                    {/* 🔴 CAMBIO: Usamos 'hasPermission' aquí también */}
+                    {hasPermission("crear marca") && (
                         <Button asChild className="bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900">
                             <Link href="/brands/create"><Plus className="mr-2 h-4 w-4" /> Nueva</Link>
                         </Button>
@@ -105,7 +110,7 @@ export default function Brands() {
                     />
                 </div>
 
-                {/* Tabla Genérica (Código reducido al máximo) */}
+                {/* Tabla Genérica */}
                 <GenericTable data={filteredBrands} columns={columns} />
             </div>
 

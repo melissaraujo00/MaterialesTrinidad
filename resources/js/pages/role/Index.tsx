@@ -5,6 +5,7 @@ import { RolesHeader } from "@/components/roles/RolesHeader";
 import { GenericTable, Column } from "@/components/GenericTable";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
+import { hasPermission } from '@/globals/permissions';
 
 interface Role {
   id: number;
@@ -28,7 +29,7 @@ export default function Roles() {
     {
       header: "Nombre del Rol",
       render: (role) => <span className="font-medium text-zinc-900 dark:text-zinc-100">{role.name}</span>,
-      className: "w-[200px] align-top", 
+      className: "w-[200px] align-top",
     },
     {
       header: "Descripción",
@@ -89,7 +90,7 @@ export default function Roles() {
       header: "Acciones",
       className: "text-right align-top w-[100px]",
       render: (role) => {
-        if (!useHasPermissionionionion("Editar Rol")) return null;
+        if (!hasPermission("Editar Rol")) return null;
 
         return (
           <div className="flex justify-end">
@@ -113,7 +114,7 @@ export default function Roles() {
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
         {/* Cabecera Componentizada */}
-        <RolesHeader canCreate={useHasPermissionionionion("Crear Rol")} />
+        <RolesHeader canCreate={hasPermission("Crear Rol")} />
 
         {/* Tabla Genérica Reutilizable */}
         <GenericTable

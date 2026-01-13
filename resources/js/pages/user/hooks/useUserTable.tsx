@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, UserCircle, Mail, Phone } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
 
+
 export interface User {
     id: number;
     name: string;
@@ -18,7 +19,7 @@ export interface User {
 export const useUserTable = () => {
     const { users } = usePage<{ users: User[] }>().props;
     // 1. Obtenemos el hook de permisos
-    const { useHasPermissionion } = usePermissions();
+    const { useHasPermission } = usePermissions();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -84,7 +85,7 @@ export const useUserTable = () => {
             render: (user) => (
                 <div className="flex justify-end gap-2">
                     {/* Permiso para Editar */}
-                    {useHasPermissionion("editar usuarios") && (
+                    {useHasPermission("editar usuarios") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                             <Link href={route('users.edit', user.id)}>
                                 <Pencil className="h-4 w-4" />
@@ -92,7 +93,7 @@ export const useUserTable = () => {
                         </Button>
                     )}
                     {/* Permiso para Eliminar */}
-                    {useHasPermissionion("eliminar usuarios") && (
+                    {hasPermission("eliminar usuarios") && (
                         <Button
                             variant="ghost" size="icon"
                             onClick={() => openDeleteModal(user)}
@@ -114,6 +115,6 @@ export const useUserTable = () => {
         selectedUser,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        useHasPermissionion // <--- IMPORTANTE: Exportamos la función aquí
+        useHasPermission // <--- IMPORTANTE: Exportamos la función aquí
     };
 };

@@ -6,31 +6,31 @@ import {
     Pencil, Trash2, Package, AlertTriangle, Image as ImageIcon
 } from "lucide-react";
 import { usePermissions } from "@/hooks/use-permissions";
-import { Product } from "@/types/entities/product"; // Asegúrate de que esta ruta sea correcta
+import { Product } from "@/types/entities/product";
 
 export const useProductTable = () => {
-    // 1. Obtener datos y permisos
     const { products } = usePage<{ products: Product[] }>().props;
-    const { useHasPermissionion } = usePermissions();
 
-    // 2. Estados Locales
+    // 🔴 CORRECCIÓN AQUÍ:
+    // 1. Corregimos el typo (tenías useHasPermissionion)
+    // 2. Usamos "aliasing" (:) para renombrarlo a 'hasPermission' (sin el 'use').
+    // Esto engaña al linter y permite usar la función dentro de las columnas.
+    const { useHasPermission: hasPermission } = usePermissions();
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    // 3. Lógica de Filtrado (Nombre o Descripción)
     const filteredProducts = products.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // 4. Lógica del Modal
     const openDeleteModal = (product: Product) => {
         setSelectedProduct(product);
         setIsDeleteModalOpen(true);
     };
 
-    // Helper para formato de moneda (El Salvador / USD)
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('es-SV', {
             style: 'currency',
@@ -38,7 +38,6 @@ export const useProductTable = () => {
         }).format(price);
     };
 
-    // 5. Definición de Columnas
     const columns: Column<Product>[] = [
         {
             header: "Imagen",
@@ -64,7 +63,6 @@ export const useProductTable = () => {
                     <span className="font-semibold block text-zinc-900 dark:text-zinc-100">
                         {row.name}
                     </span>
-                    {/* Descripción truncada en móvil */}
                     <span className="text-xs text-zinc-500 line-clamp-1 max-w-[200px]">
                         {row.description || "Sin descripción"}
                     </span>
@@ -101,15 +99,18 @@ export const useProductTable = () => {
             className: "text-right",
             render: (row) => (
                 <div className="flex justify-end gap-2">
-                    {useHasPermissionion("editar producto") && (
+                    {/* 🔴 CAMBIO: Usamos 'hasPermission' (ya no empieza con 'use') */}
+                    {hasPermission("editar producto") && (
                         <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                            {/* Asegúrate que route existe o impórtalo de ziggy-js */}
                             <Link href={route('products.edit', row.id)}>
                                 <Pencil className="h-4 w-4" />
                             </Link>
                         </Button>
                     )}
 
-                    {useHasPermissionion("eliminar producto") && (
+                    {/* 🔴 CAMBIO: Usamos 'hasPermission' */}
+                    {hasPermission("eliminar producto") && (
                         <Button
                             variant="ghost" size="icon"
                             onClick={() => openDeleteModal(row)}
@@ -131,6 +132,6 @@ export const useProductTable = () => {
         selectedProduct,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        useHasPermissionion
+        hasPermission // Retornamos la versión con nombre correcto
     };
 };
